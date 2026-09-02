@@ -8,3 +8,11 @@ Product specification for an idle tycoon with a bound utility token (BELL) on Ro
 - `docs/research/`: verified research briefs by topic with skeptic verdicts, plus the digest and the 378-entry source list.
 
 Facts about Robinhood, regulation and benchmarks are as of 1 September 2026. This is a product spec, not legal advice; Appendix 2 lists the sixteen questions for counsel.
+
+## Live
+
+- Site: https://bellwether-4o0.pages.dev/ (Cloudflare Pages project `bellwether`)
+- Pending custom domain: https://bellwether.johnnystar.tech/ (needs a CNAME at the Hostinger DNS for johnnystar.tech: `bellwether` -> `bellwether-4o0.pages.dev`)
+- Mirror: https://digitaltitann.github.io/bellwether/
+
+Rebuild the page with `node render.js` against `docs/bellwether-spec.md`, then `wrangler pages deploy dist --project-name=bellwether --branch=main`.
