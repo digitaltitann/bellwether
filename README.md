@@ -11,8 +11,8 @@ Facts about Robinhood, regulation and benchmarks are as of 1 September 2026. Thi
 
 ## Live
 
-- Site: https://bellwether-4o0.pages.dev/ (Cloudflare Pages project `bellwether`)
-- Pending custom domain: https://bellwether.johnnystar.tech/ (needs a CNAME at the Hostinger DNS for johnnystar.tech: `bellwether` -> `bellwether-4o0.pages.dev`)
+- Site: https://johnnystar.tech/bellwether (Caddy, /var/www/johnnystar/bellwether on 187.124.88.161)
+- Mirror: https://bellwether-4o0.pages.dev/ (Cloudflare Pages project `bellwether`)
 - Mirror: https://digitaltitann.github.io/bellwether/
 
-Rebuild the page with `node render.js` against `docs/bellwether-spec.md`, then `wrangler pages deploy dist --project-name=bellwether --branch=main`.
+Rebuild the page with `node render.js` against `docs/bellwether-spec.md`, then scp index.html to root@187.124.88.161:/var/www/johnnystar/bellwether/ (no Caddy or DNS change needed; the johnnystar.tech block already serves that root with try_files).
