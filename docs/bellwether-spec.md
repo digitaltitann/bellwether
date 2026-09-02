@@ -1,0 +1,2185 @@
+# Bellwether
+
+An idle tycoon about patience, with a bound utility token on Robinhood Chain and a revenue-funded path from play to owning stock.
+
+
+**Version 1.0 · 2 September 2026 · Status: complete draft for founder review.** Facts about Robinhood, regulation and market benchmarks are as of 1 September 2026 and are cited inline as brief facts (F1-F24) or research findings (`file#n`); the research pack with 378 sources sits in `docs/research/`. This document is a product specification, not legal advice; Part C lists the sixteen questions that need counsel before real value ships.
+
+## How to read this document
+
+The spec is organised so that each audience can start where it needs to. The executive summary and the fact base (sections 0-2) are for everyone. Part A is the game: a designer or engineer can build the idle tycoon from it with no reference to money. Part B is the economy: the four game currencies, the BELL token, the Stock Credit ledger and the published payout rule. Part C is the rewards program and its legal analysis, jurisdiction by jurisdiction. Part D is the technical architecture. Part E is the business model, roadmap, team and budget. The appendices hold the decision log with rejected alternatives, the open items for counsel, the assumptions that would change the design if false, the adversarial review log, and the source list.
+
+Two labels recur throughout. **PARTNER** marks anything that requires Robinhood to act, agree, or build something it does not offer today. **SOLO** marks the unilateral fallback that ships without Robinhood. Every PARTNER item has a SOLO twin; the product does not depend on a partnership landing.
+
+## 0. Executive summary
+
+**The ask.** An idle clicker with a utility token on Robinhood, where playing leads to holding tokenized stocks. Delivered without hand-waving on what Robinhood actually offers, on law, on economics, or on bots.
+
+**The product.** Bellwether is an eleven-sector idle tycoon about patience. You inherit a corner store, grow it across the eleven GICS sectors, take the company public (prestige one: Float), get included in the index (prestige two: Weight), and start again one rung higher. The only verb is Reinvest. It must stand on its own as a game: the targets are D1 45%, D7 18%, D30 7%, measured in a soft launch with every real-value feature hidden, and no reward layer ships if D1 comes in under 35%.
+
+**Three ledgers, no arithmetic between them.**
+
+1. Game currencies (Cash, Float, Weight, Gems) are closed-loop and never withdrawable.
+2. BELL is a capped, immutable ERC-20 on Robinhood Chain (chain id 4663) in bound-transfer mode: it moves only between wallets registered to the same verified player, including their Robinhood Wallet, and to burn sinks. It is minted only as earned, at fixed per-milestone amounts published a season ahead. Zero team, investor or liquidity allocation; no sale, listing, market maker, buyback or token generation event. Its utility is consumptive: replacing ads with a burn, cosmetics, nameplates, guild charters, event tickets and advisory votes. Peer-to-peer transfer is reviewed no earlier than twelve months after mainnet, behind five published gates, and may never be enabled.
+3. Stock Credit is a promotional loyalty credit in dollar or euro cents, accrued only from monetising events (server-verified rewarded ad views, purchases, escrowed sponsor drops) at fixed, pre-published, geo-tiered ratios. It has no cash value until a licensed party redeems it into a verified, 18+ account.
+
+**How a player ends up holding stock.** In the United States there is no Robinhood tokenized stock today (F2), so the launch rail is fractional shares of index and sector ETFs delivered by a FINRA broker-dealer into a white-label brokerage account the player opens inside the flow ("the Vault"); Robinhood Financial can replace that broker under a flat-fee partnership it would have to build endpoints for. In the EEA and the other 120-plus countries where Robinhood offers its on-chain Stock Tokens (F1), the preferred path is Robinhood Europe running the grant under its own giveaway template (onboarded, appropriateness-tested clients, 180-day hold, F5), delivering the Jersey-issued on-chain token and never the Classic derivative that the CFD inducement ban would catch (F14). The unilateral EEA path, gated on Lithuanian counsel and enabled member state by member state starting with Ireland, disburses EURC to the player's own wallet through a MiCA-authorised e-money institution; the player then swaps inside Robinhood Wallet on their own initiative and the game never names or offers a security. The UK, Canada, Switzerland and the UAE get the full game and Gems at double value, no real-asset reward.
+
+**The money.** The published Bell Rule sizes next month's reward pool from last month's banked revenue: 20% of net rewarded-ad revenue plus 5% of net purchases plus all escrowed sponsor funds. Per-view rates float at 20% of trailing net eCPM per geography, clamped to 0.5x-1.25x month over month, published seven days ahead and never changed retroactively. Caps per verified player are $0.10 a day, $4 a season and $50 a year (half again with the Season Pass), plus a one-time $3 sign-up grant paid by the delivering broker and at most $20 a year of sponsor drops: a hard ceiling of $83 a year, far under every tax and prize-registration threshold that matters. Per 1,000 daily players, with no Robinhood partnership, no broker bounties and a token worth nothing by construction, the model nets about $1,677 a month, pays players about $240 (14.3% of net) and runs the whole reward rail for about $397 (23.7%). Broker acquisition bounties fund verification and margin only; they never pass through to a player, because that pattern is exactly what FINRA's finder rules and the SEC's 2021 digital-engagement concerns target.
+
+**Why the token is not tradeable and there is no TGE.** Every engagement-minted, tradeable game token in the research set collapsed 95-99.9% and shed users at up to a million a day after launch (F18). A priced token would also void the closed-loop exemptions that keep the studio outside money-transmission, BitLicense and MiCA service licensing, and would turn "earn BELL by playing" into an earnings claim on both app stores. BELL still lives on Robinhood Chain and sits in Robinhood Wallet; it simply has no price to crash.
+
+**Identity and bots.** One Verified Seat per human, one account per Seat, issued only at first real-value redemption by the licensed party that will hold the asset (the broker's CIP in the US, Robinhood's attestation under a partnership, the e-money institution's KYC in the EEA). Pending credit before verification is capped at $5 and expires after 180 days. Device integrity, behavioural signals and server-side ad verification are supplementary, never sufficient. A bot farm that beats all of that earns boosts and cosmetics, not a stock claim, and a rented identity that passes liveness and face deduplication is worth at most $83 a year.
+
+**Sequencing.** Phase 0 (September to December 2026): counsel engaged, server-authoritative core built, game-only soft launch in Canada and New Zealand, Robinhood approached at HOOD Summit and through the Arbitrum Open House buildathon. Phase 1 (Q1 2027): global points-only launch. Phase 2 (Q2 2027): US Vault and the published Bell Rule. Phase 3 (Q3 2027): BELL on Robinhood Chain in bound mode with Robinhood Wallet linking. Phase 4 (Q4 2027): EEA, Ireland first. Phase 5 (2028): rest of world and the transferability review. Estimated need to reach Phase 2 is $1.3-1.95M, and $2.2-3.4M net through Phase 4; SOLO breakeven is around 200,000 DAU.
+
+**What the founder must decide now.** Whether to accept a non-tradeable token as the price of a legal, fundable product; whether to fund the counsel programme (roughly $300-450k across phases) before the reward layer; and whether to run the Canada/New Zealand soft launch before any conversation with Robinhood goes beyond the buildathon. Part E lists the rest with a recommendation each.
+
+## 1. What Robinhood offers today, and what this spec assumes
+
+The design rests on a small number of verified facts about Robinhood and the regulatory environment as of 1 September 2026. They are numbered F1-F24 in the research brief and cited throughout; the ones that shape the architecture most are summarised here.
+
+- **Two different Robinhood tokenized-stock products exist, neither for US customers.** Classic Stock Tokens (June 2025) are OTC derivatives issued by Robinhood Europe UAB inside the EU app on Arbitrum One, 24/5, with cash dividends and no self-custody. On-chain Stock Tokens (1 July 2026, with the Robinhood Chain mainnet) are tokenised debt securities issued by Robinhood Assets (Jersey) Ltd under a base prospectus dated 25 June 2026, approved by the FMA Liechtenstein and passported to 29 EEA states, valid to 24 June 2027. They are plain 18-decimal ERC-20s with an ERC-8056 multiplier absorbing dividends and splits, freely transferable to any EVM wallet, traded 24/7 on DEXs, minted and redeemed only by KYB'd authorised participants, offered in 120-plus countries and explicitly not to persons in the US, Canada, the UK, Switzerland or the UAE. (F1, F2)
+- **Robinhood Chain is live and permissionless for developers.** Arbitrum Orbit L2, chain id 4663, ETH gas, roughly $0.001 fees, ERC-4337 and EIP-7702 available, a single Robinhood-operated sequencer with address-list transaction filtering, canonical bridge to Ethereum. (F3)
+- **There is no third-party account API.** Robinhood offers no equities API, no OAuth, and no documented path for a third party to deliver Stock Tokens to a Robinhood customer. A Trading MCP for agentic trading exists for eligible US customers but is not a deposit rail. Robinhood Wallet is self-custody, supports Robinhood Chain and Arbitrum, and connects through WalletConnect. Anything that needs Robinhood's KYC or in-account delivery is a partnership. (F4)
+- **Robinhood's own giveaway template** hands tokens only to onboarded, appropriateness-tested clients with a 180-day hold and is not available to the general public. Its referral programme moved on 1 September 2026 to fixed tiered bonuses paid in stock; the referee reward keeps published odds with a $15,000 annual cap. (F5, F6)
+- **Regulators have already punished gamified brokerage.** Massachusetts settled with Robinhood for $7.5M over confetti, scratch-off stock lotteries and referral rewards; the SEC's 2021 digital-engagement inquiry named games, streaks, prizes and free stock. (F7)
+- **US law on stock rewards is settled in shape.** Free stock for signing up or referring is a sale for value; third-party listed securities bought on the open market and delivered by a registered broker-dealer into a KYC'd account avoid Section 5. Every surviving stock-reward programme works this way. Deterministic, fixed-ratio rewards are the only form Google Play permits for game loyalty programmes and the only form that removes the chance element from state gambling and sweepstakes law. (F8, F9)
+- **US token law now has categories.** The SEC-CFTC joint interpretive release effective 23 March 2026 treats digital tools and in-game collectibles as non-securities unless sold under an investment contract; its airdrop guidance does not cover tokens paid for gameplay. A token redeemable for stock at a fixed rate is a security or a retail-barred security-based swap. Regulation Crypto Assets is proposed (comments close 20 October 2026) and the CLARITY Act faces a Senate cloture vote on 15 September 2026. (F10)
+- **EU law separates the two layers.** The game token is a MiCA utility token; the stock tokens are MiFID II financial instruments. ESMA's February 2026 statement brings cash-settled derivatives inside the national CFD product-intervention measures, which prohibit benefits that incentivise retail trading; that is why Classic tokens are excluded as rewards. Whether a third party may deliver the Jersey on-chain tokens to EU retail wallets is an open question for Lithuanian counsel. (F13, F14)
+- **Economics are cents per player-day.** Rewarded-video eCPMs run about $15 in the US and $5-9 in continental Europe; idle games serve two to six rewarded views per daily player. Reward apps that survive pay out 10-25% of revenue. Broker affiliate bounties of $20-70 per funded account dwarf ad revenue per player but cannot be passed through. (F19, F20, F22)
+- **Every tradeable engagement token in the comparable set collapsed**, with 40-70% of "users" bots and boycotts when allocation rules changed retroactively. Survivors separated soft currency from token, tied payouts to revenue, capped per player, and sold the game first. (F18)
+
+If any of these facts changes, Appendix 3 lists what changes with it.
+
+## 2. Design constraints
+
+These nine constraints bound every decision in the document. They are restated here because most of the "why not" answers in the appendices trace to one of them.
+
+- **C1. No chance anywhere value lives.** Stock rewards and token rewards are deterministic, fixed-ratio, pre-published and never changed retroactively.
+- **C2. The token is never redeemable for stock at a rate and is never marketed as an investment.** It fits the SEC-CFTC digital-tool category and the MiCA utility-token category.
+- **C3. Securities reach players only through a licensed party** into a KYC'd, 18+ account or wallet in an eligible jurisdiction. The game never holds or transfers securities.
+- **C4. Real-value payouts come from realised revenue** under a published rule, capped per account, and gated behind verification at first withdrawal.
+- **C5. Sybil resistance binds to a verified human**, one game account per verified identity; device signals are never sufficient alone.
+- **C6. The game is good with the rewards off**, with retention targets, a prestige loop, live operations, and honest positioning that rewards are cents to a few dollars and the on-ramp is the point.
+- **C7. Both app stores' policies are satisfied by design**, not by hoping review is lenient.
+- **C8. Jurisdiction-aware from day one**: US fractional shares via a broker; EEA on-chain Stock Tokens via Robinhood or a self-directed swap; UK, Canada, Switzerland and the UAE without real-asset rewards; everywhere else only where Robinhood offers Stock Tokens and local law is cleared.
+- **C9. Everything that needs Robinhood is labelled PARTNER** and has a SOLO fallback.
+
+
+# Part A. Game design
+
+
+## Design pillars
+
+Bellwether must be a good idle game with every real-value feature hidden. The retention targets are D1 45% (floor 40%), D7 18% (floor 15%), D30 7%, measured in the Phase 0 Canada/NZ cohort where no Vault, Stock Credit or BELL exists; if D1 < 35% no reward layer ever ships (C6; ADR section 2). Six pillars govern every decision below.
+
+1. **Time × rate is the only lesson.** Wealth in Bellwether comes from owning productive things and reinvesting; nothing is bought low or sold high. There is no sell verb anywhere in the game.
+2. **Bumpy, never smooth.** Exponential unit costs against linear output create walls; milestone doublings create bumps. Every session should contain one bump and end at one wall (idle-design#7).
+3. **Log in, Reinvest, log out.** Sessions are 5-8 minutes; the game is designed to be left. Nothing decays, no streak is lost, no timer punishes absence.
+4. **Complete without money.** A player who never watches an ad or spends is never blocked. Ads are opt-in accelerators; purchases are permanent multipliers, time and cosmetics.
+5. **No chance touches value.** Game currencies may use randomness only for cosmetics and event flavour; Stock Credit, BELL and sponsor drops are deterministic by construction (C1; ADR section 1).
+6. **Respect the player.** Positioning line on every value surface, no confetti, no countdown pressure, no interstitials for three sessions, no dark-pattern offers.
+
+## Fantasy, tone, art and audio
+
+**Player fantasy: the patient compounder.** You inherit a corner store and grow it, sector by sector across the eleven GICS sectors, into a bellwether conglomerate: the company every index has to include. You take it public, get included in the index, and start again one rung higher with more Float behind you. The only verb is Reinvest. The player never trades, never times anything, never picks a winner; they own, wait, and reinvest. The IPO is a bell ringing on an exchange floor, the second layer is Index Inclusion, and the whole game is an argument that boring compounding beats clever activity, which is the opposite of the trading-frequency mechanics that the Massachusetts settlement and the SEC's 2021 digital-engagement list condemned (F7; legal-us#9).
+
+**Tone.** Dry, warm, understated. Copy sounds like a well-run family business, not a brokerage or a casino: "The Quarry paid for itself this morning." Numbers are shown with short-scale names (thousand, million, billion) up to 1e33 and scientific notation after, switchable in Settings. No exclamation marks in system copy; no "congratulations"; milestone toasts state the fact ("25 Corner Stores. Profit doubled.").
+
+**Art direction.** Flat, paper-and-ink ledger aesthetic: cream paper ground, ink-navy line work, one accent colour per sector (eleven accents chosen to be distinguishable under deuteranopia and protanopia). Each sector is a stylised diorama tile that fills in as units are bought (1, 10, 25, 50, 100, 200, 400 owned each add a visible building). The Home screen is a skyline built from the sector tiles. No red/green anywhere in the palette, no candlesticks, no line charts, no ticker tape. Cosmetic Charters recolour tiles and add plaques; they never change numbers.
+
+**Audio.** A soft mechanical tick per completed cycle (rate-limited to 8/s so it becomes texture); a warm hand-bell on milestones; the Opening Bell (three strikes) on Go Public; a low ambient loop per open sector. No coin showers, no slot-machine stings, no rising-pitch "combo" audio. Haptics: a light tap on manual collection and milestones; nothing on purchases.
+
+## Generators: the eleven sectors
+
+`cost_next = base × r^owned`; bulk cost `base × r^owned × (r^n − 1)/(r − 1)`; max affordable `n = floor(log_r(Cash × (r − 1)/(base × r^owned) + 1))` (idle-design#1). `production_per_second = owned × profit_per_cycle / cycle × milestone_mult × speed_mult × report_mult × synergy × global_mult`. All numbers are break_infinity.js / BreakInfinity.cs Decimals in shared client and server code (idle-design#29). Constants are the ADR ladder (AdCap-style for tiers 1-10; tier 11 extrapolated). Manager cost is 10 × base cost (ADR section 2). Unlock condition decided here: a sector's card becomes visible, greyed with its price, once the previous sector has at least one unit; buying the first unit at base cost "opens" the sector. Starting Cash is 4, exactly one Corner Store.
+
+| Tier | Name | GICS sector | Base cost | r | Cycle (s) | Profit/cycle | Profit/s per unit | Manager cost | Unlock condition | First-unit payback |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Corner Store | Consumer Staples | 4 | 1.07 | 0.6 | 1 | 1.67 | 40 | Start (owned) | 2.4 s |
+| 2 | Sneaker Lab | Consumer Discretionary | 60 | 1.15 | 3 | 60 | 20 | 600 | Corner Store ≥ 1 | 3 s |
+| 3 | Machine Shop | Industrials | 720 | 1.14 | 6 | 540 | 90 | 7,200 | Sneaker Lab ≥ 1 | 8 s |
+| 4 | Quarry | Materials | 8,640 | 1.13 | 12 | 4,320 | 360 | 86,400 | Machine Shop ≥ 1 | 24 s |
+| 5 | Wind Farm | Energy | 103,680 | 1.12 | 24 | 51,840 | 2,160 | 1.04e6 | Quarry ≥ 1 | 48 s |
+| 6 | Water Works | Utilities | 1.24e6 | 1.11 | 96 | 622,080 | 6,480 | 1.24e7 | Wind Farm ≥ 1 | 3.2 min |
+| 7 | Credit Union | Financials | 1.49e7 | 1.10 | 384 | 7.46e6 | 19,427 | 1.49e8 | Water Works ≥ 1 | 12.8 min |
+| 8 | Clinic | Health Care | 1.79e8 | 1.09 | 1,536 | 8.96e7 | 58,333 | 1.79e9 | Credit Union ≥ 1 | 51 min |
+| 9 | Apartments | Real Estate | 2.15e9 | 1.08 | 6,144 | 1.07e9 | 174,153 | 2.15e10 | Clinic ≥ 1 | 3.4 h |
+| 10 | Radio Station | Communication Services | 2.58e10 | 1.08 | 36,864 | 2.97e10 | 805,664 | 2.58e11 | Apartments ≥ 1 | 8.9 h |
+| 11 | App Studio | Information Technology | 3.10e11 | 1.07 | 86,400 | 4.0e11 | 4.63e6 | 3.10e12 | Radio Station ≥ 1 | 18.6 h |
+
+The payback jumps at tiers 7, 8 and 10 are the designed walls, "a natural energy system without an energy currency" (idle-design#7): first real wait at the Credit Union (~45 min elapsed), second at the Apartments (day 2), third at the Radio Station (day 4-5). Each wall is where a session ends and where the 4-hour Skip ad and the Gems time warps are surfaced.
+
+### Milestone multipliers
+
+| Milestone | Applies to | Effect |
+|---|---|---|
+| 25, 50, 100, 200, 300, 400 owned, then every 100 | All tiers | ×2 profit per cycle for that sector (cumulative) |
+| 25, 50, 100 owned | Tiers 1-4 only | ×2 cycle speed (halves cycle time) |
+| Every 100 owned in a sector | Its two adjacent tiers (tiers 1 and 11 have one neighbour; no wrap) | +0.5% profit per 100 owned, additive (Sector Synergy) |
+
+The next milestone is always shown on the sector card as a progress bar ("18/25 · profit ×2 at 25"), which is the purchase pull inside every session. Bulk-buy buttons: ×1, ×10, ×100, Next Milestone, Max.
+
+## Analyst Reports and global upgrades
+
+Analyst Reports are per-sector, per-run upgrades (they reset at IPO). Decided here: three per sector, each ×3 sector profit, unlocking at 10, 40 and 160 owned, priced at 50 × the unit cost at the unlock count (so prices are fixed and precomputable; ADR: "×3 per sector at ~50× current cost").
+
+| Report | Unlock (owned) | Price | Effect | Example: Corner Store | Example: Wind Farm | Example: App Studio |
+|---|---|---|---|---|---|---|
+| Initiation | 10 | 50 × base × r^10 | ×3 sector profit | 393 | 1.61e7 | 3.05e13 |
+| Deep Dive | 40 | 50 × base × r^40 | ×3 sector profit | 2,995 | 4.82e8 | 2.32e14 |
+| Long View | 160 | 50 × base × r^160 | ×3 sector profit | 1.0e7 | 3.88e14 | 7.8e17 |
+
+Global upgrades persist across IPOs and Markets:
+
+| Upgrade | Source | Unlock | Cost | Effect |
+|---|---|---|---|---|
+| Bellwether Report I, II, III, … | Cash | Lifetime Cash 1e6, 1e12, 1e18, 1e24, then every 1e6 | 10% of the threshold in Cash | ×2 all profit, permanent |
+| Golden Charter (one per sector, 11 total) | Sprint/Season track or 300 Gems | Sector opened once | Track reward or Gems | ×7.77 that sector's profit, permanent (idle-design#20) |
+| Full Charter Set | Automatic | All 11 Golden Charters | None | Additional ×10 all profit, permanent |
+| Founder's Pack multiplier | IAP ($2.99) | Third sector opened | $2.99 | ×3 all profit, permanent (idle-design#7, #27) |
+
+## Managers and Reinvest
+
+**Managers.** One per sector, cost 10 × base cost, available once the sector has ≥ 1 unit. Before a Manager the player taps the sector card to start a cycle; the cycle runs for its cycle time and pays out; the card must be tapped again. A Manager restarts the cycle automatically forever, online and offline. Managers reset at IPO unless the Instant Managers Float upgrade is owned. Tapping ends at about 1:30 in a first session; from then on the game is about spending, not tapping.
+
+**Reinvest (the only verb).** A per-sector switch, visible once that sector has a Manager. Exact behaviour: at the completion of each production cycle in that sector, if `Cash − reserve ≥ cost_next(sector)`, buy exactly one unit; repeat until the check fails, so several units land in one cycle when cash is abundant. `reserve` is a global slider "Keep for manual purchases" (0-90%, default 0). When several sectors' cycles complete in the same tick, the lowest `cost_next` buys first. The offline simulation applies the same rule at 60-second resolution. "Reinvest All" sets every switch; switches reset at IPO unless Reinvest Memory is owned. The Sectors tab shows units bought by Reinvest since the last visit, the "the business grew while I was away" beat.
+
+## Prestige 1: Go Public
+
+Going Public is the IPO: the run ends, Cash, units, Managers, Analyst Reports and Reinvest switches reset in that Market; Float is claimed. Kept: Float, Weight, Bellwether Reports, Golden Charters, Founder's multiplier, Float-shop and Weight-shop purchases.
+
+**Float formula.** Per Market m:
+
+`Float_available = floor(150 × (L_m / K_m)^p) − Float_claimed_m`
+
+where `L_m` is lifetime Cash earned in Market m across all runs, `K_Home = 1e14`, `p = 0.50 + 0.01 × PrestigeExponentLevel` (max 0.55; see Index Inclusion). With p = 0.5, doubling Float needs 4× lifetime Cash (idle-design#4). Float is claimed on IPO into one shared pool, `Float_held`, and the profit multiplier is:
+
+`global_mult = 1 + 0.02 × Float_held × (1 + 0.10 × Weight_lifetime)`
+
+50 Float held is ×2 (ADR section 2). Spending Float in the Float shop reduces `Float_held` and therefore the multiplier, which is the AdCap tension: buy the permanent convenience now or keep the rate (idle-design#4). The Go Public screen shows current Float, Float on offer, the resulting multiplier and a neutral "+N%" delta; it never recommends an IPO. Minimum first IPO is 50 Float on offer. BELL emission counts at most 2 IPOs/day (ADR section 3); the game allows more, they simply accrue no BELL.
+
+**Pacing targets (ADR constants, K_Home = 1e14, p = 0.50, 80-85% of Float held).**
+
+| Moment | Elapsed | Lifetime Cash (Home) | Float claimed (cumulative) | IPOs to date | Float multiplier | Notes |
+|---|---|---|---|---|---|---|
+| First IPO | 2.5-3.5 h incl. one offline period | 1.1e13 | 50 | 1 | ×2.0 | Vault reveal eligibility begins (18+) |
+| Day 3 | 72 h | 2e15 | ~670 | 3 | ×11 (540 held) | 9 sectors open; Apartments wall behind |
+| Day 7 | 168 h | 1.8e18 | ~20,000 | 5-6 | ×340 (17,000 held) | 11 sectors open, first Sprint done, Season Pass offered |
+| Day 14 | 336 h | 4.4e21 | 1.0e6 | 10-12 | ×22,400 (800,000 held, Weight 4) | Index Inclusion, Europe Market |
+| Day 30 | 720 h | 4.4e25 | 1.0e8 | 20-24 | ~×5e6 (8e7 held, Weight 21) | Asia Market opens at 1e9 Float, ~day 45 |
+
+The Lifetime Cash column is the exact inverse of the Float formula at each Float target; the time column is the design target that Phase 0 tunes K_Home to hit (see Balancing). The harness pre-tune indicates the first-IPO window is the one row the ADR constants do not yet reach; the day-7 and day-14 rows are reached.
+
+### Float shop
+
+All items are one-time, permanent across IPOs and Markets, and spend `Float_held`.
+
+| Item | Cost (Float) | Effect |
+|---|---|---|
+| Warehouse Extension I-IV | 20 / 60 / 200 / 600 | +1 h offline cap each (base 8 h → 12 h) |
+| Seed Capital I-IV | 40 / 250 / 1,500 / 10,000 | Each run starts with Cash equal to 10% / 25% / 50% / 100% of one hour at the previous run's final rate |
+| Listing Discount I-III | 100 / 1,000 / 10,000 | Base cost of sectors 5-11 −25% / −50% / −75% |
+| Instant Managers (sectors 1-6) | 150 | Managers pre-hired at run start |
+| Instant Managers (sectors 7-11) | 15,000 | Managers pre-hired at run start |
+| Reinvest Memory | 100 | Reinvest switches and reserve slider persist across IPOs |
+| Float Booster (Season Pass only) | 0 | +10% Float on every IPO during the Season |
+
+## Prestige 2: Index Inclusion
+
+At lifetime Float claimed (all Markets) ≥ 1e6, expected day 10-14, the Index tab opens. Weight formula:
+
+`Weight_total = floor(cbrt(lifetime_Float / 1e4))`, `Weight_new = Weight_total − Weight_claimed`
+
+(~8× lifetime Float to double, idle-design#3). Decided here: Index Inclusion is a claim, not a reset. Nothing is lost when the company enters the index; the third layer reserved for the 1e308 wall is the only full reset (idle-design#10). Weight has two views: `Weight_lifetime` drives passive bonuses (+10% Float effectiveness and +1 h offline cap each, offline to a 16 h maximum), and unspent Weight buys the following.
+
+| Weight purchase | Cost (Weight) | Requirement | Effect |
+|---|---|---|---|
+| Prestige Exponent +0.01 (five steps) | 3 / 6 / 12 / 24 / 48 | Index tab | p: 0.50 → 0.55 in all Markets (Antimatter Dimensions' upgradable divisor; idle-design missed) |
+| CFO | 1 | Index tab | Auto-IPO whenever Float on offer ≥ a chosen threshold; per Market |
+| Europe Market | 2 | Lifetime Float ≥ 1e6 | Second eleven-generator ladder, K_Europe = 2.5e13 (4× Float per Cash, the AdCap Mars ratio; idle-design#4 skeptic) |
+| Asia Market | 20 | Lifetime Float ≥ 1e9 | Third ladder, K_Asia = 6.25e12 |
+
+Markets run concurrently, each with its own Cash, units, Managers, Reports, Reinvest switches and IPO cadence, sharing one Float pool and one multiplier; the same tier constants apply, with sector skins localised (Kiosk, Tram Works, and so on) as cosmetics. Expected Weight: 4 at day 14, 21 at day 30, 46 at 1e9 Float.
+
+## Offline: the Warehouse
+
+- Offline production is computed server-side from the server clock at 60-second resolution; the client's `elapsedRealtime` is used only to render a provisional figure that the server value replaces silently on sync (idle-design#31).
+- Cap: 8 h base + Warehouse Extensions (to 12 h) + 1 h per lifetime Weight, hard maximum 16 h; 24 h with the ad-removal subscription, whatever the other bonuses (the Idle Clans 12h-base/24h-premium pattern; idle-design missed). Production runs at 100% inside the cap and stops at the cap; there is no half-rate tail and no penalty.
+- Reinvest runs offline for every sector with a Manager and the switch on; Managers keep cycling; active boosts (×2 15 min) run down in real time; Bellwether Reports and milestones do not auto-purchase, but milestones reached by Reinvest purchases apply immediately.
+- All open Markets and any live Sprint ladder accrue offline (Sprint cap 8 h, no extensions).
+- The return screen, the Warehouse Report, shows hours counted against the cap, Cash collected, units Reinvest bought per sector, and one rewarded "×2 Warehouse" offer, shown only if offline ≥ 30 min. Cap copy: "Warehouse full after 8 h. Extensions are in Go Public."
+
+## Session shape
+
+3-4 sessions a day of 5-8 minutes (idle-design#7, #15). A typical mid-game session: collect the Warehouse, take or decline the ×2 offer (0:00-0:30); read what Reinvest bought (0:30-1:00); buy the Manager or Report that just became affordable (1:00-2:30); push one sector to its next milestone (2:30-4:30); complete the day's Compounding Cycle if not done (collect, Reinvest All, buy one Report: grants 30 min of current rate in Cash and 10 BELL accrual; no streak, nothing lost by skipping); check the Go Public delta; leave at the next wall.
+
+## First five minutes
+
+- **0:00** Age screen (see UX flows), then straight into the Home screen with one Corner Store. Copy: "Tap the store." A cycle runs (0.6 s) and pays 1. Three taps in, the cost of the next store (4.28) is highlighted.
+- **0:20** "Buy another store." The player buys 2-5 stores; tapping now pays several Cash per cycle. Tutorial hand disappears after the second purchase.
+- **0:45** Sneaker Lab card appears greyed at 60. When affordable: "A second sector. Different rhythm." Player buys it; both cards need tapping.
+- **1:30** Corner Store Manager (40) is highlighted: "Hire a Manager. Stores run themselves." After hiring, the Reinvest switch appears on the Corner Store card with copy "Reinvest: the store buys the next store whenever it can." Tapping is over.
+- **2:00** 25 Corner Stores: the first milestone bell rings. Toast: "25 Corner Stores. Profit doubled." The Next Milestone button is introduced.
+- **3:00** Machine Shop opens at 720. Third sector; the Founder's Pack card is shown once, dismissible: "Founder's Pack, $2.99: ×3 profit forever and one Golden Charter. Once, ever."
+- **3:30** First Analyst Report (Corner Store Initiation, 393): "Analyst coverage. ×3 Corner Store profit."
+- **4:00** First rewarded offer, opt-in, on the Home boost button: "Watch a short video: ×2 profit for 15 minutes." Declining hides it for 2 minutes.
+- **5:00** The Go Public button appears greyed on Home: "Go Public at 50 Float. Lifetime Cash 1.1e13." No interstitial in sessions 1-3; no wallet, verification, Vault or money language in session one.
+
+## Day 1 and Day 7 beats
+
+**Day 1.** Wind Farm by minute 25; Water Works around minute 35; the Credit Union wall at ~45 min ends session one with the Skip offer visible; Warehouse Report on return with the ×2 offer; Clinic; first IPO at 2.5-3.5 h elapsed (Opening Bell, first Float, Float shop introduced with Warehouse Extension I at 20 Float); second run visibly faster at ×2; Morning Brief introduced in session three; first interstitial in session four, after 90 s; Vault eligibility recorded silently for self-declared 18+ players (the reveal waits for day 7).
+
+**Day 7.** 8-11 sectors open, 4-6 IPOs, Apartments wall crossed, Radio Station wall in view; first Sector Sprint completed (tier 3 = participation); Season Pass offered once the Season track shows the player 3+ levels earned; Bellwether Report II (1e12) bought; Vault tab revealed to self-declared 18+ players in eligible jurisdictions with the positioning line; Charter tab shows accrued BELL as an off-chain balance with the credential copy. **Day 14.** Index Inclusion, Europe Market, first Syndicate.
+
+## LiveOps calendar
+
+Backend from day one (PlayFab/Supabase class; AdCap's post-launch regret, idle-design#20). Weekly sprints with 1/5/20/100% staged rollout (idle-design#17).
+
+| Cadence | Event | Window | Mechanics |
+|---|---|---|---|
+| Daily | Compounding Cycle | Resets 00:00 local | Collect, Reinvest All, buy one Report → 30 min of current rate + 10 BELL accrual. No streak. |
+| Daily | Morning Brief | Resets 00:00 local | Three game-only tasks (e.g. "Buy 25 units in any sector", "Run Reinvest 30 min", "Reach a milestone"); each 5-15 Gems and 10 Season points; one rewarded re-roll/day. |
+| Weekly | Sector Sprint | Fri 12:00 UTC → Mon 12:00 UTC | See below. |
+| Monthly | Season and Season Pass | 30 days | See below. |
+| Quarterly | Earnings Season (the cooperative Index Sprint) | 14 days, first two weeks of Jan/Apr/Jul/Oct | See below. |
+
+**Sector Sprint.** A featured sector (advisory theme vote by T1 accounts, one vote each, balance-independent; otherwise rotation) gets a six-tier event ladder using the tier 1-6 constants under sector-flavoured names, with its own Sprint Cash, Managers and Reinvest, and no Float (event mines doubled Kolibri's weekend revenue, idle-design#17). Tiers are lifetime-Sprint-Cash thresholds 1e6, 1e8, 1e10, 1e12, 1e14, 1e16. Rewards: 10/15/20/30/40/60 Gems, 20 Season points per tier, a Golden Charter shard at tiers 2, 4 and 6 (three shards = the featured sector's Golden Charter), a sector skin at tier 6. Tier 3 is "participation" and grants 100 BELL accrual. A sponsor may buy the Sprint skin and attach a published fixed drop to tier 4 for Seats with ≥ 30 active days (ADR section 7); the game shows that objective as text and nothing else.
+
+**Season and Season Pass ($4.99 / 30 days).** Season points from Sprints, Cycles and Briefs fill a 40-level track. Free track: 150 Gems total, two 4 h time warps, one sector skin, an IPO plaque at level 40. Pass track: 300 Gems total, the Float Booster (+10% Float on every IPO this Season), one 24 h time warp, an exclusive skin set for the Season sector, one Golden Charter at level 40, the Season Ladder ticket waived, and the purchase-tied loyalty benefit of +$0.02/day Stock Credit with reward caps at 1.5× (ADR section 7). The Season Ladder is a cosmetic ranking by Season points in buckets of 50 players; entry is 20 BELL burned or the Pass; prizes are nameplate frames only.
+
+**Earnings Season (quarterly).** Syndicates (founded for 500 BELL, joined for 100 BELL locked per season, 5-20 members, preset stickers only) pool Sprint Cash toward five shared thresholds; everyone in a Syndicate that crosses a threshold gets the same banner, plaque and Gems. Solo players have an Independent track with the same thresholds scaled to one player. Copy for the event never refers to player earnings; "Earnings" is the corporate reporting season being themed. No leaderboard with value, no ranking prizes of value.
+
+## Ad placements
+
+Rewarded video only counts through server-side verification callbacks; the first 6 credited views per day accrue Stock Credit under the Bell Rule, the remaining views to the 8/day hard cap are game-only (ADR sections 2, 6). Global cooldown 2 min between any two rewarded views. Interstitials accrue nothing and are removed by the ad-removal subscription; rewarded offers remain available to subscribers because they are player-initiated.
+
+| Placement | Trigger | Reward | Daily cap | Spacing |
+|---|---|---|---|---|
+| Boost | Home boost button, from 4:00 in session one | ×2 all profit for 15 min | 4 | 2 min global; not while a Boost is running |
+| Skip | Sectors tab, shown only when the cheapest next unit in any open sector has payback > 10 min | Advance all Markets 4 h (Reinvest runs) | 2 | 2 min global; 30 min between Skips |
+| ×2 Warehouse | Warehouse Report after ≥ 30 min offline | Doubles that Warehouse collection | 1 per return, counts toward the 8 | 2 min global |
+| Brief re-roll | Morning Brief | Replaces the three tasks | 1 | 2 min global |
+| Interstitial | Session ≥ 4, 90 s into the session, on a tab change | None | 1 per session | Never within 2 min of a rewarded view; skippable at 5 s |
+
+Targets: 3.0 rewarded views/DAU at ≥ 50% opt-in; > 3 interstitials per session costs 20-30% D7 (idle-design#24), so the cap is one.
+
+## IAP catalogue
+
+| Item | Price | Effect |
+|---|---|---|
+| Founder's Pack (once) | $2.99 | Permanent ×3 all profit + one Golden Charter (player picks the sector). Offered at the third sector opening. |
+| Gems 120 / 350 / 800 / 1,800 / 5,000 | $1.99 / $4.99 / $9.99 / $19.99 / $49.99 | Premium currency; never expires (Apple 3.1.1). No pack above $49.99. |
+| Ad-removal 7 days / 30 days | $0.99 / $3.99 | No interstitials; Warehouse cap 24 h (idle-design#19) |
+| Season Pass | $4.99 / 30 days | Pass track above; +$0.02/day Stock Credit; caps ×1.5 |
+| Golden Charter | 300 Gems | ×7.77 one sector, permanent |
+| Time Warp 4 h / 24 h | 60 / 250 Gems | Advances all Markets; Reinvest runs |
+| Capital Infusion | 40 Gems | Instant Cash equal to 2 h at current rate, one Market |
+| Sprint Time Warp | 30 Gems | 2 h of Sprint rate |
+| Charters (cosmetics): sector skin / IPO plaque / Time Capsule / nameplate | 200 / 100 / 150 / 50-500 Gems | Cosmetic only; the same items are mintable by burning BELL on the Exchange Floor (Apple parity) |
+
+**No-loot-box rule.** Every purchase shows exactly what it contains before payment; no random bundles, no mystery items, no gacha, no paid re-rolls, no "chance to win"; Float and Weight are never sold; no purchase raises any Stock Credit ratio or cap beyond the published Season Pass entitlement; no purchase touches BELL emission (ADR sections 2, 5; legal-eu#25). Expected split ~55% ads / 45% IAP; payer target ≥ 2% (idle-design#26).
+
+## Cosmetics, Charters and the BELL display
+
+Charters are the cosmetic layer: eleven sector skins per Season, IPO plaques (engraved with the IPO number and Float, never a dollar figure), a Time Capsule that freezes a prestige run's skyline as a viewable card, a ticker-style nameplate (letters only, 3-12 characters, profanity-filtered, no `$` prefix allowed), and Syndicate banners. On Android and the Exchange Floor web hub, Charters are minted as ERC-1155s by burning BELL; on iOS the same items are sold for Gems and the Charter tab shows BELL read-only (ADR section 3, D12). The Charter tab shows: BELL balance (off-chain until Phase 3, then on-chain claimable per season), Seat status (T0/T1/T2 as "Playing / Wallet linked / Verified"), the credential copy, and the mint/burn counters published in the Earnings Call. It never shows a price, a chart or a conversion.
+
+## Screens and navigation
+
+Bottom bar: **Home · Sectors · Reports · Events · More**. Go Public is a persistent button on Home. More holds Index (after Index Inclusion), Vault (after first IPO, self-declared 18+, eligible jurisdiction; otherwise absent), Charter, Settings, and a link to the Exchange Floor. Every screen is reachable in ≤ 2 taps from Home; back always returns to Home.
+
+- **Home.** The skyline, Cash and rate, Warehouse state, the Boost button, the Go Public button with its delta, and the Compounding Cycle checklist. The screen a player opens and leaves in 90 seconds.
+- **Sectors.** Eleven sector cards for the current Market: owned count, milestone bar, unit cost, bulk-buy row, Manager and Reinvest controls, the Skip offer when a wall is active. Market switcher once Europe opens.
+- **Reports.** Analyst Reports per sector and Bellwether Reports sorted by affordability, each with price and effect; the Golden Charter set with its 11 slots.
+- **Go Public.** Float held, Float on offer, resulting multiplier, the delta, the confirm button, the Float shop.
+- **Index.** Weight held and lifetime, the Weight shop, Markets, the CFO threshold, Syndicate membership.
+- **Events.** Sector Sprint ladder, Season track, Morning Brief, Earnings Season when live, the theme vote.
+- **Vault.** Stock Credit pending and settled, the day/season/year cap meter, verification status, redemption history, delivered holdings as reported by the licensed partner, the positioning line. No trade link, no prices, no performance.
+- **Charter.** BELL, Seat status, Charters owned, minting (Android/web) or Gem purchase (iOS), the credential copy.
+- **Settings.** Number format, audio, haptics, reduced motion, text size, language, jurisdiction, hide-Vault toggle, data and account controls, the published rules (Bell Rule, emission table, enforcement counts).
+- **Exchange Floor (web hub).** Robinhood Wallet linking (WalletConnect + SIWE), seasonal BELL claims, Charter minting, Syndicate founding, the monthly Earnings Call (pool, accruals, rates, Seats, mint/burn, enforcement counts) and the rules archive. Branded Bellwether, marked "Built on Robinhood Chain" and nothing more.
+
+## UX flows and on-screen copy
+
+Copy rules applied throughout: "Stock Tokens", never "tokenized stocks"; rewards are "promotional, taxable, may fall in value", never "free"; no "earn", "invest", "price", "buy", "sell", "return" or "profit" in any value-layer string (the game's own "profit" appears only on generator cards); no confetti, no animation on value screens beyond a fade; the positioning line appears on the store listing, on the first-run consent screen and on the Vault reveal (ADR section 1). Two locked versions of the positioning line exist:
+
+- US/RoW: "Bellwether is a game about patience. Member rewards are cents to a few dollars a year, paid in real fractional ETF shares or Stock Tokens by a licensed partner. The point is a first, small, boring, diversified holding, not trading."
+- EEA: "Bellwether is a game about patience. Member rewards are cents to a few euros a year, paid by a licensed partner. The point is a first, small, boring, diversified holding, not trading." (No "shares", no named instrument; legal-eu#13; ADR D16.)
+
+### Age self-declaration (first launch, before the game)
+
+Screen title: "Before you start". Body: "Enter your date of birth. Bellwether keeps only your age band, never the date." Date picker; button "Continue". The screen is neutral: it never hints that any age unlocks anything. Under the minimum (13 US, 16 EEA default or the member-state age): "Bellwether is not available for your age. Nothing was saved." Consent screen follows with terms, privacy and the positioning line as plain text.
+
+### Vault reveal (day 7, after ≥ 1 IPO, self-declared 18+, eligible jurisdiction)
+
+A single card in More, no badge, no push notification. Title: "The Vault". Body: positioning line; then "Stock Credit accrues only when you choose a rewarded video or make a purchase, at published ratios. It never changes how the game plays. Rewards are promotional, taxable and may fall in value. No security is recommended; this is a promotional loyalty reward." Buttons: "Open the Vault" / "Hide the Vault" (reversible in Settings). Inside: "Pending: $0.00 · Verified accounts redeem from $5.00 · Daily cap $0.10 · Season cap $4.00 · Year cap $50.00". In UK/CA/CH/UAE and for under-18s the tab is absent; Stock Credit shows in Settings as "Loyalty credit converts to Gems at 2×".
+
+### Verification T1 (wallet link for BELL claims, Exchange Floor or Charter tab on Android)
+
+Title: "Claim BELL on Robinhood Chain". Body: "BELL is a membership credential. It has no price. Transfer to other people is not planned and may never be enabled. No token sale or airdrop will ever be announced as a reward." Steps shown as a list: "1. Device check (a few seconds). 2. Link Robinhood Wallet, or create a Bellwether wallet. 3. Sign a message to prove the wallet is yours." Buttons: "Link Robinhood Wallet" / "Create a Bellwether wallet" / "Not now". Failure copy: "This device did not pass the integrity check. You can keep playing; claims need a device that passes." Success: "Wallet linked. Your BELL claim opens at the end of the season."
+
+### Verification T2 (first redemption)
+
+Title: "Redeem Stock Credit". Body (US): "To redeem, a licensed partner must verify you. You will open a Vault account with [Broker], a FINRA member. Bellwether never sees your documents; it receives only a confirmation that you are verified, 18 or over and eligible. About four minutes." Body (EEA): "To redeem, a licensed partner must verify your identity, age (18+) and residence. Bellwether receives only a confirmation." Requirements list: "Verified account · 14 active days · $5.00 pending · one destination per person". Button: "Start verification with [Partner]". The partner's own flow runs in its hosted surface. Outcomes: "Verified. Your Seat is active." / "Under review by [Partner]; usually within 2 business days." / "Not eligible. Your pending credit converts to Gems at 2×."
+
+### First redemption and settlement
+
+Screen: "Redeem $5.00 → your Vault". Body: "Redemptions sit 7 days pending, then settle on the next Settlement Day (weekly). Credit from purchases vests after 35 days." Button: "Redeem". Settlement notification (in-app only, no push): US: "Vault opened. $5.00 arrived as cash. Choose an ETF inside your broker account whenever you like." EEA SOLO: "EUR 5.00 arrived in your wallet from [Partner]. Hold, withdraw or swap it in your wallet." (No instrument names, no links.) EEA PARTNER: "[Partner] has delivered your reward to your account. See it in the [Partner] app." No confetti, no sound.
+
+### ETF choice (US, rendered inside the broker's hosted surface; our framing screen precedes it)
+
+Framing screen: "Your credit is cash in your Vault until you choose. The S&P 500 ETF is the no default election (AM-1). Eleven sector ETFs are available. No security is recommended; this is a promotional loyalty reward. Holdings are subject to a 3-trading-day sell lock and a 30-day withdrawal lock, and may fall in value." Button: "Choose in your Vault". The broker's list shows twelve names with sector labels only, no prices, no performance, no charts, no ordering by anything but the fixed list; confirm reads "Apply $5.00 to [ETF]". Returning to the game: "Applied. Your Vault shows the holding on Settlement Day."
+
+### Rejected or forfeited credit, and appeal
+
+Card in the Vault: "Pending Stock Credit ($3.40) was forfeited on 2027-06-12. Reason: duplicate Seat (a second account presented the same verification). BELL on this account is frozen." Button: "Appeal (14 days)". Appeal form: free text up to 1,000 characters plus "Which account is yours?" selector. Confirmation: "A person reviews every appeal. Decision within 14 days, in this tab." Outcomes: "Appeal upheld. $3.40 restored to pending." / "Appeal declined. The forfeiture stands; the game remains fully playable." Quarterly enforcement counts link to the Earnings Call.
+
+## Accessibility and localisation
+
+Colour-blind-safe sector accents with pattern fills on progress bars; no meaning carried by colour alone; text contrast ≥ 4.5:1; dynamic type to 200% with layouts that reflow rather than truncate numbers; screen-reader labels that speak scale names ("1.2 trillion"); reduced-motion mode removes skyline animation and cycle bars; every action is a tap or a switch, nothing timed, no drag; primary actions in the lower 60% of the screen; partner-hosted Vault and verification surfaces meet WCAG 2.2 AA by contract. Localisation: ICU message format and plural rules; locale number formatting with a Settings override for short-scale names or scientific notation; Phase 0 ships English and Canadian French; Phase 1 adds German, Dutch, Lithuanian, Spanish, Portuguese and Italian; Japanese and Korean follow in Phase 5. Value-layer strings are locked per jurisdiction, translated by a counsel-reviewed vendor and back-translated, never machine-translated; jurisdiction is set by IP plus KYC country and shown in Settings.
+
+## Balancing methodology
+
+**Simulation harness.** A headless, deterministic simulator built from the shared economy code (BreakInfinity.cs) runs player personas over 60 simulated days: Watcher (4 sessions/day, 6 min, greedy payback-ranked purchases, takes every rewarded offer), Checker (2 sessions/day, 4 min, no ads), Grinder (12 sessions/day, 10 min), Lapser (skips days 2 and 4), Payer (Founder's Pack at minute 3, Season Pass day 7). Outputs per persona: time to each sector, wall lengths, time to first IPO, Float and multiplier curves, IPO count, Index Inclusion day, ad offers seen versus taken, Gems sinks. Assertions: first IPO in 2.5-3.5 h, Wind Farm ≤ 25 min, Credit Union wall 30-60 min, Apartments day 2, Radio Station day 4-5, Index Inclusion day 10-14, no wall longer than 14 h for the Watcher, no session without a purchase for the Checker.
+
+**Pre-tune result.** With the ADR ladder, K_Home = 1e14 and a Watcher persona, the harness lands the first 50-Float IPO around 12-16 h elapsed (the evening of day 1), day-7 Float ≈ 2e4 and day-14 Float ≈ 1.8e6; the day-7 and day-14 targets hold, the first-IPO window does not. The first Phase 0 tuning task is therefore to lower K_Home (expected range 1e12-1e13) and raise the Weight divisor from 1e4 in step so Index Inclusion stays at day 10-14; the alternative, raising tier 1-6 output, changes the ADR ladder and is not preferred.
+
+**Tuned in soft launch (Canada/NZ, Phase 0).** K per Market; the Weight divisor; r for tiers 7-11 (±0.02); Manager cost multiplier (8-12×); Report prices (30-70× unit cost); milestone thresholds for tiers 9-11; base offline cap (6-10 h); first-interstitial timing (60-120 s) and first-interstitial session (3-5); Boost and Skip caps; Founder's Pack timing (third sector versus first Manager); Season Pass offer day. Each parameter is server-configured and changed one at a time per weekly sprint with 1/5/20/100% rollout, measured on D1, D7, session length, rewarded opt-in and gross ad ARPDAU (Kolibri's D1-first prototyping, idle-design#17, #30).
+
+**D1 kill criterion.** Measured on ≥ 2,000 installs per cohort over 14 days in a tier-1 English market with no value feature present. D1 ≥ 40% and D7 ≥ 15% pass Gate 0 (with gross ad ARPDAU ≥ $0.03, opt-in ≥ 45%, crash-free ≥ 99.5%, replay divergence < 0.1%); D1 35-40% means iterate the game only, no value layer; D1 < 35% means no reward layer ships, at all, and the project is a game or nothing (C6; ADR section 9).
+
+## Analytics events
+
+Every event carries `session_id`, `server_ts`, `market`, `run_number`, `elapsed_since_install`, jurisdiction band and platform; value-layer events never carry identity documents or wallet private data.
+
+| Event | When | Key properties |
+|---|---|---|
+| `session_start` / `session_end` | Foreground/background | `session_index`, `duration_s`, `offline_hours_counted` |
+| `age_declared` | First launch | `age_band` (under-min / min-17 / 18+) |
+| `generator_buy` / `sector_opened` | Unit purchase / first unit of a tier | `tier`, `qty`, `source` (manual / reinvest / seed), `owned_after`, `elapsed_s` |
+| `manager_hired` / `reinvest_toggle` | Automation change | `tier`, `state`, `reserve_pct` |
+| `report_buy` | Analyst or Bellwether Report | `type`, `tier`, `level`, `price` |
+| `milestone_hit` | Any milestone | `tier`, `threshold`, `kind` |
+| `wall_enter` / `wall_exit` | Cheapest payback crosses 10 min | `tier`, `wall_duration_s` |
+| `ipo_preview` / `ipo_confirm` | Go Public screen / IPO | `float_offered`, `float_held_after`, `lifetime_cash`, `run_duration_s` |
+| `float_spend` / `weight_spend` / `index_inclusion` / `market_opened` | Prestige layers | `item`, `cost`, `weight_total`, `market` |
+| `warehouse_return` | Warehouse Report | `hours`, `cap`, `cash`, `x2_offered`, `x2_taken` |
+| `ad_offer_shown` / `ad_opt_in` / `ad_ssv_credited` / `ad_declined` / `interstitial_shown` | Ad funnel | `placement`, `network`, `credited_index_today`, `seconds_into_session`, `skipped_at_s` |
+| `iap_offer_shown` / `iap_purchase` / `iap_refund` | Store | `sku`, `price_usd`, `trigger` |
+| `cycle_complete` / `brief_task_complete` / `brief_reroll` | Daily loops | `task_id` |
+| `sprint_join` / `sprint_tier` / `season_level` / `syndicate_join` | LiveOps | `event_id`, `tier`, `level` |
+| `vault_reveal_seen` / `vault_opened` / `vault_hidden` | Vault | `jurisdiction_band` |
+| `t1_start` / `t1_linked` / `t1_failed` / `t2_start` / `t2_result` | Verification | `wallet_kind`, `integrity_result`, `partner`, `result` |
+| `redemption_request` / `redemption_settled` / `etf_choice_made` | Redemption | `amount_cents`, `pending_days`, `choice_index` (0-11, no ticker) |
+| `credit_forfeited` / `appeal_opened` / `appeal_result` | Enforcement | `reason_code`, `result` |
+| `checkpoint_divergence` | Server replay mismatch | `divergence_pct`, `action` |
+
+Dashboards: D1/D7/D30 by cohort, time-to-first-IPO distribution against the 2.5-3.5 h target, wall-length histograms per tier, rewarded opt-in by placement, Vault reveal-to-open rate (expected to be a minority), and verification pass rates feeding Gate 2.
+
+
+# Part B. Economy, token and reward ledger
+
+
+## B.1 Currency map
+
+Bellwether runs three ledgers with zero arithmetic between them (C2; ADR section 5): the closed-loop game currencies, the BELL credential token, and the Stock Credit loyalty ledger. Play earns Cash, Float, Weight and BELL; only money events earn Stock Credit; neither BELL nor Stock Credit ever changes a generator, a cost curve, a prestige formula, an accrual ratio or a cap. The only element shared across ledgers is the Verified Seat: a banned sybil loses all three.
+
+| Currency | Kind | How earned | How spent | Transferable? | Legal category | Cap |
+|---|---|---|---|---|---|---|
+| Cash | Run currency | Generator production; offline yield (8 h base, 16 h with Weight, 24 h with ad-removal); rewarded x2 boosts; milestones | Generators, Managers, Analyst Reports, sector unlocks | No; resets at IPO | Closed-loop game value, no cash value | None (break_infinity.js; 1e308 layer wall reserved, F23) |
+| Float | Prestige-1 currency | Go Public: `floor(150 * sqrt(L / K_world)) - Float_claimed`, K_1 = 1e14 | Warehouse hours, starting cash, unlock discounts, instant Managers; +2% all profit per Float held | No | Closed-loop; never purchasable | None |
+| Weight | Prestige-2 currency | Index Inclusion at lifetime Float >= 1e6: `floor(cbrt(lifetime_Float / 1e4))` | Prestige Exponent steps, Market unlocks; passive +10% Float effectiveness and +1 h offline per lifetime Weight | No | Closed-loop; never purchasable | None |
+| Sprint Scrip | Weekly event currency | Event-sector production during a Sector Sprint | Event track: Golden Charter, cosmetics | No; expires at Sprint end | Closed-loop | Per event |
+| Gems | Hard currency | IAP packs; Stock Credit conversion at 2x (UK/CA/CH/UAE and under-18); Season Pass track | Golden Charters, time warps, cash infusions, Charter cosmetics (iOS parity) | No | Closed-loop virtual currency; non-convertible, outside money transmission (F11); never expires (Apple 3.1.1) | Purchases $200/day/account; no balance cap |
+| Stock Credit | Promotional loyalty credit in USD or EUR cents | Only monetizing events: SSV-verified rewarded views, 5% of net IAP/subscriptions, Season Pass daily bonus, escrowed sponsor drops, one Sign-up Grant | Redeemed at >= $5 / EUR 5 by a licensed party into the Vault (US) or the player's own wallet (EEA, RoW); Gems at 2x elsewhere | No; one destination per Seat | "No cash value until redeemed"; prize/award income at FMV on delivery (US, F12); recipient-assessed (EU) | $0.10/day, $4/season, $50/year; with Season Pass $0.15/$6/$60; annual ceiling $83 including Grant and drops |
+| BELL | ERC-20 on Robinhood Chain (4663), bound-transfer | Fixed per-milestone accrual (Cycle, IPO, Sprint, Index Inclusion); minted at the season Merkle claim for T1+ accounts | Burn sinks only | Only between wallets registered to the same Seat (<= 3) and to sinks; never P2P | SEC-CFTC digital tool (F10); MiCA Art 4(3) utility token never admitted to trading (F13); UK limited-use, non-transferable (legal-eu#33) | 150/day, 8,000/season per Seat; season ceiling 20,000,000 x 0.95^n; hard cap 1,000,000,000 |
+| Charters | ERC-1155 cosmetics | Burn BELL; or Gems (iOS parity) | Equipped; never unlock features | Same bound rule as BELL | Digital collectible (F10) | Per design |
+
+## B.2 Faucets and sinks
+
+### Cash
+
+| Faucet | Rule |
+|---|---|
+| Production | `production = base_profit * owned * multipliers`; constants per the ADR tier table; milestones x2 profit at 25/50/100/200/300/400 then every 100, x2 speed at 25/50/100 on tiers 1-4; Sector Synergy +0.5% per 100 owned; +2% per Float held; Golden Charter x7.77 (full set x10) |
+| Offline | 8 h at 100%, +1 h per lifetime Weight to 16 h, 24 h with ad-removal; server clock only |
+| Rewarded video | x2 profit 15 min (4/day); 4 h skip (2/day); x2 offline (1/session); Report re-roll (1/day); hard cap 8/day, first 6 count for Stock Credit, 2-min cooldown, SSV-only |
+| Gem cash infusion | 2 h of current rate for 60 Gems, max 3/day |
+
+| Sink | Price |
+|---|---|
+| Generator unit | `cost_next = base * r^owned`, bulk-buy closed form; sector unlock = the tier's first unit |
+| Manager | 10x the sector's base cost; enables Reinvest |
+| Analyst Report (x3, 3 per sector) | ~50x current unit cost |
+| Bellwether Report (x2 global) | At lifetime Cash 1e6, 1e12, 1e18 ...; 10% of lifetime Cash at unlock |
+| IPO | Resets Cash to zero (or the starting-cash % bought with Float) |
+
+### Float
+
+| Faucet | Rule |
+|---|---|
+| Go Public | `floor(150 * sqrt(L / K_world)) - Float_claimed`; first IPO ~50 Float at L ~1.1e13, 2.5-3.5 h elapsed; K tuned per Market |
+| CFO | Auto-IPO at a chosen Float target; unlocks with Index Inclusion; no bonus |
+
+| Sink | Price |
+|---|---|
+| Warehouse hours | 10 Float per +1 h offline, max +4 h per run (total offline never exceeds 24 h) |
+| Starting cash | 5 Float per 1% of the previous run's final Cash, max 20% |
+| Unlock discount | 25 Float per -5% on sector unlock costs, max -30%, persistent per Market |
+| Instant Managers | 5 Float each, tiers 1-4, at run start |
+
+Spending Float lowers the +2% profit bonus, so every purchase is a real trade-off. Float is never sold and never granted by BELL, Stock Credit or a sponsor drop.
+
+### Weight
+
+| Faucet | Rule |
+|---|---|
+| Index Inclusion | `floor(cbrt(lifetime_Float / 1e4))` at lifetime Float >= 1e6 (day 10-14); ~8x Float to double |
+
+| Sink | Price |
+|---|---|
+| Prestige Exponent 0.50 -> 0.55 in 0.01 steps | 5, 10, 20, 40, 80 Weight (155 total) |
+| Europe Market | Lifetime Float 1e6 plus 10 Weight |
+| Asia Market | Lifetime Float 1e9 plus 50 Weight |
+
+Passive Weight bonuses (+10% Float effectiveness, +1 h offline) key off lifetime Weight, so spending Weight on the Exponent never reduces them.
+
+### Gems
+
+Pack ladder (Apple tiers, matching the Part A catalogue): $1.99 = 120 Gems; $4.99 = 350; $9.99 = 800; $19.99 = 1,800; $49.99 = 5,000. The reference value is $0.01 per Gem (the largest pack). Stock Credit converts to Gems at 2x reference value: $1.00 of credit = 200 Gems.
+
+| Faucet | Amount |
+|---|---|
+| IAP packs | Ladder above; $200/day purchase limit per account |
+| Stock Credit conversion (UK/CA/CH/UAE, under-18, EEA fallback) | 200 Gems per $1.00 / EUR 1.00 of credit, granted in whole Gems as the fractional balance crosses 1 |
+| Season Pass track | Up to 150 Gems per 30-day Pass, at published track steps |
+
+| Sink | Price |
+|---|---|
+| Golden Charter (x7.77 one sector) | 300 Gems |
+| Time warp 4 h / 24 h | 60 / 250 Gems |
+| Cash infusion (2 h of current rate) | 40 Gems, max 3/day |
+| Charter cosmetics, iOS parity | Sector skin 200; IPO plaque 120; Time Capsule 400 |
+
+Non-Gem IAP: Starter pack $2.99 (permanent x3 plus one Golden Charter, offered once at the third sector unlock); ad-removal $3.99/30 d or $0.99/7 d with 24 h offline; Season Pass $4.99/30 d. No loot boxes, gacha, paid random items, Float packs or Weight packs (C1; legal-eu#25).
+
+## B.3 BELL specification
+
+### Purpose and legal category
+
+BELL is a membership credential earned by playing. It buys ad replacement, cosmetics, nameplates and Syndicate charters; it is never sold, never priced, never redeemable for Stock Credit, stock, cash or Gems, and never raises any accrual ratio (ADR section 5). Its reason to exist on Robinhood Chain is that it can sit in the player's Robinhood Wallet as a verifiable record of play without being tradeable.
+
+US: a digital tool under the SEC interpretive release the CFTC joined (F10; p2e#30): practical function, no yield, never sold, never marketed with appreciation. The airdrop interpretation does not cover an earned token (legal-us#20), so status rests on the digital-tool category plus the absence of any investment-contract promise, which the comms policy below enforces. A closed loop with no outside market keeps it outside FinCEN administration (F11) and inside the NY BitLicense and California DFAL gaming exclusions, with NY on-chain claims off until counsel confirms. EU: a MiCA utility token for a service already in operation (Art 4(3); F13); it is not "offered for free" because sign-up data is collected (economics missed), so the existing-utility hook is the exemption relied on, Art 4(5) covers our own claim and sink contracts, and it is never admitted to trading (Art 4(4)): transferability is the one feature that would void the analysis. UK: non-transferable and limited-use, outside "qualifying cryptoasset"; never marketed as crypto there.
+
+### Contract design
+
+**Token constants.** Name "Bellwether", symbol BELL, 18 decimals (matches Stock Tokens and wallet tooling; emission amounts are whole BELL and the UI shows integers), EIP-712 domain "Bellwether" version "1" (fits OpenZeppelin 5.7.0's 31-byte ShortString, tech missed). Hard cap 1,000,000,000 BELL enforced by `ERC20Capped._update`. OpenZeppelin 5.7.0 `ERC20Capped + ERC20Permit`; no proxy, admin role, pause or blacklist. Three immutable constructor addresses: `EMISSION` (the only minter), `SEATS` (SeatRegistry proxy) and `SINKS` (SinkRegistry proxy). MINTER_ROLE is not a role but the immutable `EMISSION` address, so nobody can ever grant a second minter.
+
+**Bound-transfer hook.** The `_update` override consults the two registries and nothing else:
+
+| Path | Condition | Effect if false |
+|---|---|---|
+| Mint (`from == 0`) | `msg.sender == EMISSION` and `SEATS.seatOf(to) != 0` | Revert `BELL: mint` / `BELL: unregistered` |
+| Burn (`to == 0`) | `SINKS.isSink(from)` (a sink burning its own balance) | Revert `BELL: burn` |
+| Transfer | `seatOf(from) != 0` and (`SINKS.isSink(to)` or `seatOf(to) == seatOf(from)`) | Revert `BELL: frozen` / `BELL: bound` |
+
+`approve`, `permit` and `transferFrom` work unchanged, but because the hook checks the destination, an allowance can only ever move BELL to a sink or to the same Seat's other wallets. A Seat whose registration is revoked (duplicate, fraud ladder) has `seatOf == 0` on every address, so its minted BELL cannot move even to a sink: that is the on-chain meaning of "BELL frozen", achieved without any freeze function on the token.
+
+**SeatRegistry (opaque).** Stores only `seatId (bytes32, random) -> address[<=3]` and `address -> seatId`. Writes come from a `REGISTRAR` backend key after T1 checks, limited to one registration per address per 7 days (the ADR's cooldown) and withheld for NY-jurisdiction Seats until counsel clears; jurisdiction is checked off-chain and the registry never sees it. `rotate(seatId, oldAddr, newAddr)` supports GDPR erasure once the old address holds zero BELL. No hash of any identity attribute ever touches the chain (F17; EDPB v2.0).
+
+**Emission and Merkle claim.** Balances accrue off-chain for every account (bots cost no gas). At season end the operator key (2-of-5) posts `SeasonRootPosted(season, root, total, ceiling)`; claims open 7 days later, after the Earnings Call publishes the root. `claim(season, index, account, amount, proof)` follows the Uniswap merkle-distributor pattern with a claimed bitmap (tech#35). On-chain checks: `total <= ceiling[season]` at posting and `mintedInSeason[season] + amount <= ceiling[season]` at claim. `ceiling[n]` is a 40-season table deployed at construction as `20,000,000 x 0.95^n` in whole BELL; `reduceCeiling(n, v)` through the timelock can only lower a future season. Roots stay claimable for two further seasons; the underlying accrual expires 180 days after last login and is never re-minted.
+
+**Sinks.** Each sink is a small contract registered in `SinkRegistry` (proxy behind the timelock). It receives BELL via `transferFrom` (or `permit` for gasless spends), emits `Sunk(seatId, sinkId, amount, ref)` and burns in the same transaction; `ref` is the game-side receipt (boost id, Charter token id, nameplate hash) consumed idempotently by the backend. Sinks never hold a balance across blocks.
+
+**SponsorEscrow and PayoutLedger.** `PayoutLedger.postMonth(month, root, poolCents, accrualCents, settledCents)` records the Bell Rule inputs and a Merkle root over `{seatId, month, accrued, settled}`; `SponsorEscrow.commit(dropId, termsHash, escrowCents, objectiveHash)` is posted before a drop is announced and `allocate(dropId, root, seats)` after. Neither holds value (escrow cash sits with Bellwether Rewards LLC, or as USDG/EURC in a multisig for on-chain sponsors); they exist so anyone can audit that payouts matched the published rule.
+
+**Events.** `Minted(seatId, to, season, amount)`, `Sunk(seatId, sinkId, amount, ref)`, `SeatRegistered(seatId, addr)`, `SeatAddressRemoved(seatId, addr)`, `SeatRevoked(seatId)`, `SeasonRootPosted(season, root, total, ceiling)`, `SeasonCeilingReduced(season, old, new)`, `MonthPosted(month, root, pool, accrual, settled)`, `DropCommitted(dropId, termsHash, escrow)`, `DropAllocated(dropId, root, seats)`, `MigrationDeclared(chainId, snapshotBlock)`.
+
+**Immutability and upgrade stance.** The token is immutable; a mistake in it is fixed by a new token, never by an admin. Periphery (SeatRegistry, Emission, SinkRegistry and sinks, SponsorEscrow, PayoutLedger) is UUPS behind a 3-of-5 Safe and a 7-day `TimelockController` (tech#37); every queued upgrade is announced in-app, on the web hub and in the Earnings Call at queue time. Operational writes (season and month roots, registrations) use a separate 2-of-5 operator key with no upgrade power. No function can mint outside a season root, raise a ceiling, move BELL between Seats or pause the token.
+
+**Gas.** Claims and sink spends are ERC-4337 UserOperations sponsored through Alchemy Gas Manager (8% overhead, tech#23) or ZeroDev against EntryPoint v0.7 `0x0000000071727De22E5E9d8BAf0edAc6f37da032`, which Robinhood's account-abstraction docs publish alongside Alchemy, ZeroDev, Privy and Dynamic as paymaster providers (tech missed). Target: a claim under $0.01 all-in at ~$0.001 median fees. Embedded EIP-7702 wallets are provisioned only for claimers; Robinhood Wallet links via WalletConnect plus SIWE (tech#21).
+
+**Chain-filter contingency and Arbitrum One migration rule (published before Phase 3).** Robinhood's sequencer can hash-list addresses and the ArbOS 61 `ArbFilteredTransactionsManager` precompile can force-fail any transaction (tech#5). The rule: (1) the off-chain ledger is authoritative at all times; (2) if any Bellwether contract on 4663 is rejected by chain policy or force-failed for more than 72 consecutive hours, or Robinhood notifies us of a filter, `MigrationDeclared` is posted where possible and announced everywhere with 30 days' notice unless the filter is total; (3) the pre-audited mirror (identical bytecode) is deployed on Arbitrum One (~$0.004 fees, BoLD permissionless validation, tech#8); (4) the mirror's Emission contract performs a one-time migration mint from a published snapshot root of 4663 balances at the last finalized block before the filter, to the same registered addresses, outside the season ceiling and inside the hard cap; (5) the 4663 contracts are abandoned, never bridged. Robinhood Wallet supports Arbitrum, so the player's wallet keeps working (tech#21). An assurance from Robinhood is a PARTNER-only ask we never wait on (ADR D13).
+
+**Audit plan and cost.** Scope ~1,500 nSLOC: token (~150), SeatRegistry, Emission with Merkle claim, SinkRegistry plus five sinks, SponsorEscrow, PayoutLedger, and the Arbitrum One mirror as the same bytecode. Boutique tier, $10,000-25,000 (F24; tech#36): one full pass (~$15,000), fix cycle, one re-audit (~$5,000), public report; 8-14 weeks end to end, so booking happens in Phase 1 for a Phase 3 deployment. Each later periphery upgrade takes a $5,000-20,000 re-audit before it leaves the timelock. Testnet 46630 runs two full season cycles before mainnet.
+
+### Emission
+
+Amounts are fixed per milestone, published 30 days before each 90-day season, immutable within it, and identical for every account (C1). Nothing for referrals, installs, posts, purchases, streaks or score (legal-us#31-32; F22). No genesis, no retroactive grant, no airdrop.
+
+| Milestone | BELL | Frequency limit | Max per Seat per 90-day season |
+|---|---|---|---|
+| Compounding Cycle (collect, reinvest all, one Report) | 10 | 1/day | 900 |
+| IPO (Go Public) | 25 | max 2/day counted | 4,500 |
+| Sector Sprint participation | 100 | 1/week | 1,300 |
+| Index Inclusion | 250 | once per Market (3 Markets) | 750 |
+| Per-Seat caps | | 150/day | 8,000/season |
+
+| Global limit | Rule |
+|---|---|
+| Season ceiling | 20,000,000 x 0.95^n for season n (n = 0 at Phase 3): 20.0M, 19.0M, 18.05M, 17.1M ... 10.8M in season 13, 2.6M in season 40 |
+| Lifetime via ceilings | Sum of the series = 400,000,000 (40% of the hard cap); the ceiling table is downward-only, so 400M is the effective lifetime maximum |
+| Split of whatever is minted | 90% player emission (milestones above); 10% LiveOps/sponsor reserve minted only through published events (Index Sprint cooperative rewards, PARTNER Robinhood Wallet quests), capped at 10% of each season's ceiling and counted inside it |
+| Season Emission Meter | Counts T1 accruals in real time; at the ceiling, accrual halts for every account for the rest of the season (in-app meter). Accounts reaching T1 after the halt carry pre-halt accruals into the next season's claim against that ceiling; nothing earned is reduced |
+| Sizing rule | Season n+1 amounts are set so projected T1 accrual is 60-80% of ceiling[n+1]; at launch the table above stands, since 100 T1 accounts x ~3,500 BELL is under 2% of the ceiling |
+| Mint/burn trigger | Evaluated on day 60 of each season on season n-1 actuals and season n to date: if minted BELL exceeded sunk BELL by more than 2:1 in both, season n+1 amounts are published at half (ADR D15; Axie's 4x signal, p2e#3) |
+| Expiry | Unclaimed accruals expire 180 days after last login; claimable roots stay open two seasons |
+
+### Utility and sinks
+
+All consumptive, deterministic, and none touching Stock Credit. On iOS the app shows BELL read-only; spending happens on the web hub (Exchange Floor) or in Robinhood Wallet (Apple 3.1.1). Android files the Financial Features declaration. No cross-app composability.
+
+| Sink | Price (BELL, burned) | Notes |
+|---|---|---|
+| Ad replacement | 200 per x2-profit 15 min or 4 h skip | Android and web only; earns zero Stock Credit; the floor utility, priced at roughly one rewarded view |
+| Charters (ERC-1155 cosmetics) | Sector skin 500; IPO plaque 300; Time Capsule of a prestige run 1,000 | Never unlock features; also Gems for iOS parity |
+| Ticker nameplate | 5,000 (1-2 characters); 2,000 (3); 500 (4); 50 (5+) | Preset character set; profanity filter |
+| Syndicate charter | 500 to found; 100 locked per season to join (returned on leaving) | Preset stickers only, keeping the app outside DSA "online platform" scope (legal-eu#20) |
+| Season Ladder ticket | 20 | Cosmetic prizes only, deterministic ladder |
+| Sector Sprint theme vote | 0 | One per T1 account, balance-independent, advisory |
+| PARTNER: Robinhood Wallet quests | 0 | BELL tiers as quest credentials; Robinhood would have to build (robinhood#15) |
+
+A committed player accrues roughly 3,000-4,000 BELL per season and can sink all of it: 15-20 ad replacements, or a full Charter set plus a nameplate. The 2:1 mint/burn trigger exists because sinks alone did not save SLP (p2e missed).
+
+### Transferability review: the five gates and the disclosure
+
+P2P transfer is reviewed no earlier than 12 months after mainnet (Phase 5, 2028), only if all five gates hold, and may never be enabled:
+
+| Gate | Test |
+|---|---|
+| (a) Data | 12 months of published emission and sink data in the Earnings Call |
+| (b) Opinions | Written US and Lithuanian opinions that transferability does not change the digital-tool and Art 4(3) classifications |
+| (c) Scale and sybil | >= 100,000 Verified Seats and an external sybil audit with a published fake-Seat rate |
+| (d) Demand | >= 50% of trailing-90-day emission consumed by sinks |
+| (e) Law | Regulation Crypto Assets (comments closed 2026-10-20) and CLARITY (cloture 2026-09-15) outcomes known (F10; legal-us#21, #24) |
+
+Even if every gate passes, the studio never lists BELL, seeds liquidity, pays a market maker, quotes a price, buys back, or announces a TGE. Player-facing copy at first claim, in the Vault tab and on the web hub, verbatim: "BELL is a membership credential. It has no price. Transfer to other people is not planned and may never be enabled. No token sale or airdrop will ever be announced as a reward." Any employee, partner or influencer statement implying appreciation is a breach of the comms policy filed with the FTC substantiation file (legal-us#29).
+
+### Why this cannot become Hamster Kombat
+
+Every engagement-minted tradeable token in the record fell 95-99.9% because supply scaled with headcount, demand was the next player's belief, and a TGE was the reason to play (F18; p2e#1, #12, #14, #16). BELL removes each input: no price to promote and no venue to sell on; emission fixed per milestone, capped per human through the Seat, capped per season by a decaying ceiling that halts rather than dilutes, and halved when sinks fall behind; nothing unearned ever minted, so no allocation to dump and no eligibility rule to change late (p2e#11); rules published a season ahead and never altered retroactively (precedents#31); minting only to attested T1 accounts, so bots earn boosts, not a stock claim; and every cent of real value flowing through Stock Credit from banked revenue, indifferent to BELL. A farm that beats every control ends up with cosmetics.
+
+## B.4 Stock Credit ledger
+
+### Accrual events and geo tiers
+
+Stock Credit accrues only from the allowlisted deterministic event types below; RNG-dependent code paths are compile-time excluded from the Stock Credit and sponsor-drop services (C1). Nothing for logins, streaks, tasks, referrals or posts (F7; F9).
+
+| Event | Ratio | Tier US | Tier EEA (per enabled member state) | Tier RoW (2028) | Tier X: UK, CA, CH, UAE, under-18 |
+|---|---|---|---|---|---|
+| SSV-verified rewarded view (first 6/day, >= 2 min apart) | 20% of trailing-30-day net rewarded eCPM / 1,000 | $0.00264 at $13.20 net | EUR 0.00123 at EUR 6.16 net (blended); Ireland higher at ~$12 gross | 20% of local net eCPM, capped at 0.5x the EEA rate (~$0.00053 at $2.64 net) | Same formula, paid as Gems at 2x |
+| IAP and subscription (net of store fee) | 5% of net spend; vests 35 days | 5% | 5% | 2.5% | Gems at 2x |
+| Season Pass | Fixed daily bonus while the Pass is active | $0.02/day | EUR 0.02/day | EUR 0.01/day | Gems at 2x |
+| Sign-up Grant | Once per Seat at first redemption >= $5 | $3, paid by the delivering broker | EUR 3, paid by RHEU (PARTNER) or the CASP (SOLO) | $3 equivalent in EURC | None |
+| Sponsor drop | Fixed $0.25-1.00 per qualifying Seat, escrowed first, delivered 60 days later | Yes | ETF credit via PARTNER or EURC | 2028 | None |
+
+Per-country rates apply where a country logs >= 10,000 credited views in the trailing 30 days; below that the regional blend applies. Interstitials earn nothing and are excluded from the pool.
+
+### State machine
+
+| State | Meaning | Enters from | Leaves to |
+|---|---|---|---|
+| PENDING_UNVERIFIED | No Seat yet. Balance capped at $5 ($10 with optional World ID); accruals above the cap are not credited; the meter says "verify to continue" | Any accrual event on a T0/T1 account | AVAILABLE (Seat created); EXPIRED (180 days after last login); FORFEITED (fraud ladder, duplicate merge); GEMS (Tier X, or player chooses Gems) |
+| VESTING | IAP- or subscription-derived credit inside the 35-day refund window | IAP or subscription receipt | AVAILABLE or PENDING_UNVERIFIED at day 35; VOID on refund or chargeback |
+| ESCROWED | Sponsor-drop credit allocated but inside the 60-day delivery window | `DropAllocated` | AVAILABLE at day 60; VOID if the Seat is revoked before delivery |
+| AVAILABLE | Seat exists; credit counts toward the $5 minimum and the caps | PENDING_UNVERIFIED, VESTING, ESCROWED | REQUESTED (player request or auto-sweep at >= $5 on Settlement Day); GEMS (player choice, or account closure below $5); FORFEITED |
+| REQUESTED | Redemption of >= $5 submitted; 7-day pending; fraud review; the Grant is created directly in this state at the first request | AVAILABLE | SETTLED (next Settlement Day after day 7); AVAILABLE (review hold cleared without payment, max 14 days); FORFEITED (fraud confirmed) |
+| SETTLED | Delivered by the licensed party: JNLC cash in the Vault (US), EURC to the player's wallet (EEA SOLO, RoW), RHEU credit (EEA PARTNER) | REQUESTED | Terminal; no clawback except fraud proven inside the broker's 30-day hold |
+| GEMS | Converted at 2x | PENDING_UNVERIFIED, AVAILABLE | Terminal |
+| EXPIRED | Pre-Seat credit 180 days after last login | PENDING_UNVERIFIED | Terminal; never re-credited |
+| FORFEITED | Duplicate merge or fraud ladder; appealable 14 days | Any non-terminal state | Terminal after appeal window; reversal on successful appeal restores the prior state |
+| VOID | Refunded IAP or revoked drop | VESTING, ESCROWED | Terminal |
+
+Post-Seat AVAILABLE credit never expires while the account exists. On closure or 12 months without login after a Seat: 30-day notice, then redemption if >= $5, otherwise Gems at 2x. Regulation E and escheat status is counsel item 16; notice-then-Gems is the interim answer.
+
+### Caps
+
+| Cap | Base | With Season Pass | RoW (0.5x) | Applies to |
+|---|---|---|---|---|
+| Daily | $0.10 | $0.15 | $0.05 | Ad credits plus Pass bonus. A circuit breaker: 6 US views plus the Pass bonus reach $0.036, 24% of it |
+| Season (30 days) | $4 | $6 | $2 | All accrual lines including IAP stock-back |
+| Year | $50 | $60 | $25 | All accrual lines |
+| Sign-up Grant | $3 / EUR 3, once per Seat | Same | $3 equivalent | Outside the pool; operating margin |
+| Sponsor drops | <= $20/year | Same | 2028 | Escrow-funded |
+| Annual ceiling | $83 = $60 + $3 + $20 | | | Under the $2,000 1099-MISC threshold (F12), Ireland's EUR 3,000 gift exemption and Lithuania's EUR 200-per-prize exemption (legal-eu#43-44) |
+
+The with-Pass uplift is +50% on the daily and season caps and $10 on the annual cap ($60, not $75, because the $83 ceiling is fixed). Cap tiers follow the Season Pass entitlement only, never BELL balance (ADR Q3; Google "supplementary and subordinate", legal-us#32). A heavy US watcher (6 credited views/day all year) earns $5.78 from ads, the $3 Grant and ~$2 stock-back on $40 of IAP: ~$11; the EEA equivalent is ~EUR 2.70 plus EUR 3: ~$5-6. That is the positioning line (C6).
+
+### Minimum redemption, tenure allowance, settlement cadence
+
+Minimum $5 / EUR 5 per redemption. The first redemption requires the Seat and 14 active days and is limited to $10 (pre-verification credit plus the Grant); Seat months 1-3 are limited to $15/month; thereafter the caps only (the ZBD tenure pattern). One destination per Seat; every redemption sits 7 days in REQUESTED. Settlement Day is weekly (Thursday, 14:00 UTC; accrual cut-off Monday, three business days of fraud review); requests past their 7 days are batched: US, one JNLC journal file to the broker, cash credited, the player self-directs into the 12-ETF list, 3-trading-day sell lock and 30-day withdrawal lock; EEA PARTNER, an eligibility file to RHEU under its giveaway template (180-day hold); EEA SOLO and RoW, one EURC batch by the EMI/CASP to WalletConnect-proven wallets, on 4663 if EURC is deployed there, else Arbitrum One. Sponsor drops settle on the first Settlement Day after their 60-day window. Geo checks (IP plus KYC country against the RHJ Restricted Jurisdictions list, which includes Ukraine and Venezuela, tech missed) run at request time; VPN, proxy or emulator blocks the request, never play.
+
+### Forfeiture, expiry and appeal
+
+| Trigger | Consequence | Published |
+|---|---|---|
+| Second account with the same attestation | Merged into the oldest; the newer account's pending credit FORFEITED, BELL accrual dropped, Seat registration revoked (BELL frozen) | Yes |
+| Fraud ladder step 1 (replay divergence, SSV mismatch, progression-sequence failure, fleet-pattern device) | Pending credit FORFEITED, unminted BELL cleared; the game stays playable | Yes |
+| Step 2 (repeat) | Reward-program ban; Stock Credit and BELL accrual stop | Yes |
+| Step 3 | Device and identity ban | Yes |
+| IAP refund or chargeback | VESTING credit VOID; three chargebacks in 12 months = step 2 | Yes |
+| Pre-Seat inactivity 180 days | EXPIRED | Yes |
+| Appeal | Human review within 14 days; reversal restores the prior state plus interval accrual; quarterly counts and reversal rates published (p2e#33) | Yes |
+
+Delivered assets are never clawed back except fraud proven inside the broker's own 30-day hold.
+
+## B.5 The Bell Rule
+
+Published in-app, on the web hub and in every Earnings Call (C4):
+
+`Pool(M+1) = 0.20 x NetAds(M) + 0.05 x NetIAP(M) + Sponsor(M+1)`
+
+**Definitions.** NetAds(M): rewarded-video cash received in month M after the mediation take (12% modelled), invalid-traffic deductions, scrubs and clawbacks, net of VAT; interstitials excluded. NetIAP(M): IAP plus subscription cash received from the stores in M after store fees (25% modelled), refunds and chargebacks, net of VAT. Sponsor(M+1): escrow already received and earmarked for drops settling in M+1 (80% of a sponsor's payment; the 20% platform fee is not in the pool). "Banked" means cash received, never accrued or invoiced; ad networks pay 30-60 days in arrears, so a month's pool is built from impressions roughly two months earlier, the lag in which invalid traffic gets scrubbed. "Net" means after every platform, network and store deduction and after refunds. Broker bounties, reserve interest, BELL and any Robinhood fee are not terms and never will be (ADR section 7; FINRA 2040, legal-us#6).
+
+**Two sub-pools.** The rule is computed separately per settlement currency: a USD pool from US-store and US-geo revenue, and a EUR pool from EEA revenue (RoW revenue joins the EUR pool at the month-end ECB rate because RoW settles in EURC). A EUR obligation is never funded with a USD stablecoin (ADR Q2, rejected alternatives).
+
+**Per-view rates.** Per tier and month, `rate_tier(M+1) = 0.20 x netECPM_tier(trailing 30 days ending 8 days before month start) / 1,000`, rounded down to $0.00001, then clamped to [0.5x, 1.25x] of `rate_tier(M)`; the first month has no clamp. If coverage fell below 1.0 for 14 consecutive days in month M, the pre-clamp rate is first multiplied by coverage(M), downward only. Rates are published on the 24th (7 days ahead), fixed for the month, never retroactive (JustPlay floating rate, precedents#27). A 40% eCPM collapse reaches players over two months; a 70% collapse makes ad credits sub-cent and IAP stock-back becomes the primary accrual (ADR assumption 9).
+
+**Coverage.** `coverage(M) = Pool(M) / ExpectedPayout(M)`, where `ExpectedPayout = Seat accrual + pre-Seat accrual x trailing-6-month verification conversion` (50% at launch, published, revised quarterly from realized data). Weighting pre-Seat accrual by conversion means bot accrual cannot drive coverage down and suppress real players' rates; the $5 pre-Seat cap bounds it anyway. Coverage is published daily in-app and monthly in the Earnings Call.
+
+**Reserve.** Bellwether Rewards LLC holds a segregated reserve (a USD bank account and a EUR balance at the EMI) equal to at least 3 months of trailing settled payouts before any ratio or cap increase (p2e#4). Seed at Phase 2 is 3x the projected first-month payout ($720 per 1,000 DAU; $72,000 at 100,000 DAU). Each month the full Pool(M+1) is transferred into the reserve; settlements draw from it. The reserve is not revenue and is disclosed monthly.
+
+**Pool short.** Coverage < 1.0 for 14 days: accrued cents are honoured in full from the reserve; next month's rates fall by the coverage factor (floored at the 0.5x clamp); IAP stock-back and the Pass bonus are fixed by published terms and never cut mid-season. If the reserve would fall below 1 month of payouts, the Sign-up Grant pauses the following month (published as contingent), the tenure gate rises from 14 to 21 days, and sponsor drops proceed because they are escrowed. Pass terms disclose that the daily bonus for the next Pass period can be reduced with 7 days' notice.
+
+**Pool long.** Coverage > 1.25 for two consecutive months and reserve >= 3 months: rates follow the formula upward, limited by the 1.25x clamp; no other release. Reserve above 6 months of trailing payouts is released to operating margin at quarter end and disclosed. The pool never accumulates a "jackpot"; a bigger balance never raises a cap.
+
+**Breakage.** Expired, forfeited and voided credit leaves ExpectedPayout the day it happens; it is never booked as revenue, counted as a player payout or re-distributed as a bonus. Its cash stays in the reserve and leaves only through the 6-month release rule, disclosed as "breakage released". The model's 50% pre-verification breakage is a forecast, not a target: the meter, the $5 cap and the 180-day rule tell every player what expires and when.
+
+## B.6 Earnings Call transparency spec
+
+Monthly, published by the 10th for the prior month in three places at once: the Earnings Call tab under the Vault (all players, including T0), the web hub at `/earnings`, and a signed machine-readable bundle (JSON schema `earnings-call/v1` plus CSV) whose SHA-256 accompanies the `MonthPosted` root on chain 4663. Copy naming a licensed party goes through the FINRA 2210 / MiFID II Art 24 partner review.
+
+| Section | Metrics |
+|---|---|
+| Revenue inputs | NetAds, NetIAP, sponsor escrow earmarked, per currency; mediation take and store fee actually paid |
+| Pool | Pool(M) and Pool(M+1); share of net revenue |
+| Rates | Current and next-month per-tier rates, clamp and coverage adjustment applied; stock-back ratio; Pass bonus |
+| Accrual | By state; ExpectedPayout; coverage (monthly and worst 14-day window) |
+| Payouts | Redemptions count and value by rail (Vault, RHEU, EURC, SEPA, Gems); median request-to-settlement days; Grants paid and by whom |
+| Reserve | Months of cover; transfers in; settlements out; breakage released |
+| Seats | New and total by jurisdiction; KYC pass rate; fake-Seat rate from merges and reversals |
+| BELL | Accrued, minted, sunk by sink; mint/burn ratio; Season Emission Meter; next season's ceiling and amounts once published |
+| Enforcement | Forfeits, bans by ladder step, appeals, reversal rate, sequencer-filter events, incidents |
+| Changes | Every rate, cap, term or upgrade queued, with effective dates never earlier than 7 days out |
+
+Nothing in the Earnings Call is a forecast of BELL value, and no metric expresses BELL in a currency.
+
+## B.7 Worked example and stress tests
+
+### 1,000 DAU, 30 days, SOLO, token price zero, no Robinhood (ADR section 7)
+
+Assumptions, all stated: geo mix US 50% / EEA 25% / UK-CA-CH-UAE 10% / RoW 15%; 3.0 SSV-verified rewarded views per DAU (60% opt-in x 5 offers); gross rewarded eCPM US $15, EEA $7, UK-group $10, RoW $3 (F20; economics#1-3); mediation take 12%; interstitials 1.0 per DAU at 55% of the blended rewarded eCPM, less 12%; IAP plus subscriptions gross ARPDAU $0.030 at 2.5% payers, store fee 25%; MAU = 4 x DAU; 1.0% of MAU verify per month, concentrated where the Vault rail is live (24 US, 10 EEA, 6 RoW); 50% pre-verification breakage on ad credits; Season Pass held by 1.5% of DAU at $0.02/day; broker fee $3 per new account (unpublished, economics#24); KYC $1.85 (Sumsub Compliance, tech#33); journals $1 each; 200 sponsored claims at $0.05; the ADR's $55 line is journals $40 plus gas $10 plus paymaster overhead, RPC and root posting ~$5.
+
+| Line | Per day | Per month |
+|---|---|---|
+| Rewarded gross: US 1,500 x $0.015 + EEA 750 x $0.007 + UK 300 x $0.010 + RoW 450 x $0.003 | $32.10 | $963 |
+| Rewarded net of 12% mediation | $28.25 | $847 |
+| Interstitials net (1,000/day at 55% of blended rewarded eCPM, less 12%) | $5.18 | $155 |
+| IAP + subs gross $30.00, net of 25% store fee | $22.50 | $675 |
+| **Net revenue (net ARPDAU $0.056; ad ARPDAU $0.033 net / $0.038 gross)** | **$55.93** | **$1,677** |
+| Pool = 20% x $847 + 5% x $675 | | **$203 (12.1% of net)** |
+| Per-view rates (20% x net eCPM / 1,000): US $0.00264, EEA $0.00123, RoW $0.00053; UK-group accrues Gems | | |
+| Ad accrual: 1,500 x 0.00264 + 750 x 0.00123 + 450 x 0.00053 | $5.12 | $154 |
+| IAP stock-back 5% x $675 | | $34 |
+| Season Pass bonus (1.5% of DAU x $0.02 x 30) | | $9 |
+| **Accrual at 100% vesting** | | **$197 (coverage 1.03)** |
+| New Verified Seats: 1.0% x 4,000 MAU = 40 (24 US, 10 EEA, 6 RoW) | | |
+| Sign-up Grants 40 x $3 (operating margin, outside the pool) | | $120 |
+| Cash-out after 50% pre-verification breakage on ad credits: $77 + $34 + $9 + $120 | | **$240 (14.3% of net)** |
+| Verification: US 24 x $3 broker fee + EU/RoW 16 x $1.85 | | $102 |
+| Journals ~40 x $1; sponsored gas and claimer wallets (~200 x $0.05); overhead | | $55 |
+| **Reward rail total** | | **$397 (23.7% of net)** |
+
+The pool is 20% of ad revenue (ZBD's 10-20% guidance, F19; p2e#31) and the rail sits under Mode's audited ~25-33% bound (economics#19 and skeptic). Contribution after the rail is $1,280 per 1,000 DAU per month before backend, UA and fixed costs. Coverage sits above 1.0 only because UK-group views fund the pool while accruing Gems: 20% of UK net rewarded is $15.84, which pays the $9 Pass bonus with $6.84 spare.
+
+### Scaled to 100,000 DAU
+
+Every revenue and payout line scales linearly at the same mix; the non-linear items are listed beneath.
+
+| Line | Per month at 100,000 DAU |
+|---|---|
+| Net revenue | $167,700 |
+| Pool | $20,300 |
+| Accrual at 100% vesting | $19,700 (coverage 1.03) |
+| New Verified Seats | 4,000 (2,400 US, 1,000 EEA, 600 RoW) |
+| Sign-up Grants | $12,000 |
+| Player cash-out | $24,000 (14.3%) |
+| Verification | $10,200 |
+| Journals, gas, overhead | $5,500 |
+| Reward rail | $39,700 (23.7%) |
+| Reserve requirement (3 months) | $72,000 |
+| Contribution after rail | $128,000 |
+
+Non-linear effects: (1) Play Integrity's 10,000/day default quota covers ~4,000 T2 and ~10,000 T1 checks a month; the increase is requested in Phase 2 anyway (tech#29); (2) KYC and wallet-vendor minimums become negligible; the audit is fixed cost; (3) the per-Seat caps stop binding: 48,000 cumulative Seats could claim $4.0M a year at the $83 ceiling against a $244,000 pool, so the pool and coverage rule bind and the caps bound per-human liability only; (4) BELL: ~10,000 T1 accounts accruing ~3,500 per season would reach 35M against a 20M ceiling, so the sizing rule publishes season amounts at ~0.45x (Cycle 4, IPO 11, Sprint 45, Index Inclusion 110), and the Meter halts only if T1 growth beats the projection by more than 25%.
+
+### Stress tests
+
+**1. Token price zero.** Nothing changes; BELL has no price by construction. Removing BELL entirely (ADR cut #3) removes only the $10 of sponsored gas per 1,000 DAU: rail $387 (23.1%). No revenue line, rate, cap or payout references BELL.
+
+**2. No Robinhood and no bounties.** This is the base case: the table above contains zero PARTNER revenue and zero bounty revenue, because bounties never enter the pool and affiliate terms bar incentivized traffic (F22; ADR Q5). The model closes at $1,280 contribution per 1,000 DAU per month. PARTNER upside (a flat fee benchmarked at $30-50 per funded account, F6; Robinhood's own sign-up reward replacing our Grant) is margin, never a change to the rule.
+
+**3. EU-only geo mix at EUR 7 eCPM.** Assumptions: 1,000 DAU all EEA, 3.0 views/DAU, EUR 7 gross, 12% mediation, IAP gross ARPDAU $0.020, 1.5% Pass holders. Net rewarded 3,000 x $0.00616 x 30 = $554/month (ADR figure); ad pool $111; ad accrual 3,000 x $0.00123 x 30 = $111 (coverage 1.0 on the ad line by construction); IAP net $450, pool +$22.50, stock-back $22.50; Pass bonus $9. Pool $133.50, accrual $142.50, coverage 0.94. The 14-day rule fires: next month's EEA rate is EUR 0.00116 (0.94x), the reserve covers the $9 gap, coverage returns to ~1.0. Cash-out after 50% breakage on ad credits is ~$87 plus Grants. This is the honest number and why the positioning line exists: without a Gems geo funding the pool, the Pass bonus is pool-negative and the rate mechanism absorbs it.
+
+**4. 40% bot share of installs.** Assumptions: reported 1,000 DAU of which 400 are farm devices opting into ads at the same rate. Networks scrub invalid traffic before paying and the pool is built from banked cash 30-60 days later, so bot impressions never enter NetAds; real economics are those of 600 DAU: net revenue ~$1,006, pool ~$122, real accrual ~$118, rail ~$238 (23.7%). Bot accrual (~400 x 3 views x $0.00264 x 30 = ~$95/month at US rates) sits in PENDING_UNVERIFIED clipped at $5 per account, adds ~$47 to ExpectedPayout at the launch 50% weighting (measured coverage ~0.74 for one quarter, after which realized farm conversion of ~0 removes the drift), never reaches a Seat (a real ID, liveness and a unique face per $83/year), and expires at 180 days. KYC vendors bill only successful verifications (tech#33), so bot attempts cost nothing. Headline DAU is discounted in every Earnings Call by the behavioural bot estimate (target < 5% of DAU, Gate 1).
+
+Also maintained: eCPM -40% (rates float down over two months, one sub-1.0 coverage month covered by the reserve); verified funnel 2x (Grants $240 and verification $204 per 1,000 DAU, rail 33.6%, Grant paused and tenure 21 days next month, published as contingent).
+
+## B.8 Tax reporting logic
+
+**United States.** Delivered Stock Credit (Vault cash, the Grant, sponsor ETF credits) is prize or award income at fair market value on the delivery date, which the broker records as cost basis. Form 1099-MISC applies only at >= $2,000 per payee per year from tax year 2026 (F12; economics#25); the $83 ceiling, enforced per Seat across every line, makes the threshold unreachable, so none is filed. The broker collects the W-9 (TIN) inside its CIP at Vault opening, so backup withholding never triggers and the studio never holds a TIN; the broker files 1099-B on sales, with fractional sales under $20 gross proceeds exempt. Prize (1099-MISC) versus services (1099-NEC) is counsel item 5; the $2,000 threshold applies either way. No state withholding below $2,000. BELL has no market and no determinable FMV (Rev. Rul. 2023-14 question, counsel item 5); the annual statement says so.
+
+**EU/EEA and RoW.** The recipient self-assesses (Robinhood's own terms push tax to recipients, F17). The CASP or RHEU handles DAC8 reporting for EURC transfers. Bellwether provides, by 31 January, an in-app and downloadable annual statement per Seat listing each delivery: date, EUR value at delivery, delivering party, rail, and a per-member-state note (Ireland: prize versus gift, EUR 3,000 gift exemption; Netherlands: no gaming tax because no chance, legal-eu#41; Germany: likely Sec 22 No 3, legal-eu#40; Lithuania: EUR 200-per-prize exemption; France: with counsel, legal-eu#42). The EUR ~80 ceiling keeps every player under every named exemption.
+
+**Tier X and under-18.** Gems only; no tax event; no statement.
+
+## B.9 Economy risk table
+
+| Risk | Likelihood | Impact | Mitigation | Trigger metric |
+|---|---|---|---|---|
+| Rewarded eCPM falls 40-70% | Medium | Ad credits sub-cent; player disappointment | Floating rate with 0.5x floor; IAP stock-back becomes primary; positioning line | Trailing-30-day net eCPM below 60% of launch |
+| Verified funnel runs 2-5x model | Medium | Grants and KYC exceed margin (rail 33.6% at 2x) | Grant paused with notice; tenure 21 then 30 days; Grant only at >= $5 redemption | New Seats > 2% of MAU/month |
+| Gray-market KYC identities under ~$20 with face-dedup pass | Low-medium | Sybil Seats farm $83/year | Caps drop to $30/year, tenure 30 days (ADR assumption 12); vendor face dedup; merges published | Fake-Seat rate > 2% (Gate 2) |
+| Broker per-account fee 2-3x the assumed $3 | Medium | US verification cost doubles | Minimum rises to $10; monthly batching; IAP stock-back plus Grant as the floor rail | Signed broker pricing |
+| Season Pass bonus pool-negative in Gems-free mixes | Certain at EU-only | Coverage 0.94 | Coverage rule cuts rates; Pass terms allow bonus reduction on 7 days' notice | Coverage < 1.0 for 14 days |
+| Store policy: Google reads "subordinate" strictly; Apple treats ETF rewards as 3.1.5(v) | Medium | Ad credits move to web on Android; iOS ships game-only | Season-Pass-linked accrual as primary framing; web hub ready at Phase 2 | Store review outcome |
+| Sponsor default or own-stock request | Medium | Drop unfunded or Reg M exposure | Escrow before announcement; third-party ETFs only; 20% fee | Escrow not received 14 days before announcement |
+| BELL Season Emission Meter halts mid-season, or mint/burn > 2:1 | Medium at scale | Player backlash; hoarding | Sizing rule at 60-80% of ceiling; carry-over for late T1 accounts; automatic halving; new cosmetic sinks per season | Meter > 80% before day 70; ratio at day 60 |
+| Sequencer filter of a game contract | Low | On-chain BELL frozen on 4663 | Pre-published Arbitrum One migration; off-chain ledger authoritative | Any `chain policy` rejection > 72 h |
+| IAP refund fraud | Medium | Stock-back paid on refunded spend | 35-day vest; three chargebacks = ladder step 2 (p2e#36) | Refund fraud > 0.3% of IAP (Gate 2) |
+| Reclassification of BELL (US or EU), or Regulation E / escheat on the credit ledger | Low | BELL becomes off-chain points; prepaid-account duties | Immutable token abandoned, ledger unchanged (ADR assumption 7); counsel item 16; notice-then-Gems closure rule | Adverse opinion, supervisor letter or counsel memo |
+
+
+# Part C. Stock rewards programme and compliance
+
+
+## C.1 Program overview and the player promise
+
+Stock Credit is the only ledger in Bellwether that touches real value: a promotional loyalty credit in USD or EUR cents, accrued only from monetizing events at fixed, pre-published, geo-tiered ratios, with no cash value until a licensed party redeems it into a KYC'd, 18+ account or wallet in an eligible jurisdiction (C3, C4). BELL and the game currencies never convert into it or out of it (ADR section 5), and nothing here changes a generator, cost curve or prestige formula.
+
+The player promise is the positioning line, verbatim on the store listing, at first run and in the FTC substantiation file: "Bellwether is a game about patience. Member rewards are cents to a few dollars a year, paid in real fractional ETF shares or Stock Tokens by a licensed partner. The point is a first, small, boring, diversified holding, not trading." Every number below is calibrated to keep that sentence true.
+
+| Accrual source | Ratio (published 7 days before each month, fixed for the month, never retroactive) | Who can earn |
+|---|---|---|
+| SSV-verified rewarded video (first 6 of 8 daily views, >= 2 min apart) | 20% of trailing-30-day net rewarded eCPM per geo tier / 1,000 per view, clamped 0.5x-1.25x of the prior month (US ~$0.0026, EEA ~EUR 0.0012 at base-case eCPMs) | All T0+ accounts in a real-value geo; pending until T2 |
+| IAP and subscriptions | 5% of net spend, vesting 35 days | Same |
+| Season Pass | +$0.02/day while active | Season Pass holders |
+| Sign-up Grant | $3 / EUR 3 once, at first redemption, paid by the delivering broker or CASP as its own approved welcome credit, reimbursed from operating margin, never from bounties | New Verified Seats |
+| Sponsor drops | $0.25-$1.00 fixed per eligible Seat per drop, <= $20/year | Seats with >= 30 active days completing the published objective |
+| Nothing | Logins, streaks, referrals, installs, posts, reviews, score, BELL balance | (F7; F9; legal-us#31; legal-us#32) |
+
+Caps per Seat: $0.10/day, $4 per 30-day season, $50/year; with Season Pass $0.15/$6/$60; plus the Grant and drops; hard ceiling $83/year, below the $2,000 1099-MISC threshold (legal-us#34), Ireland's EUR 3,000 small-gift exemption (legal-eu#43) and Lithuania's EUR 200 x 6 prize exemption (legal-eu#44). Pre-verification pending credit is capped at $5 ($10 with an optional World ID check, tech#34), expires 180 days after last login and creates no liability. Minimum redemption $5 / EUR 5; first redemption needs the Verified Seat and 14 active days; every redemption sits 7 days pending; payouts run on weekly Settlement Days (Thursdays, decided here: a Monday cut-off leaves three business days for fraud review).
+
+The funding rule is the Bell Rule, published in-app, on the web hub and in the monthly Earnings Call: `Pool(M+1) = 0.20 x NetAds(M) + 0.05 x NetIAP(M) + Sponsor(M+1)`, banked revenue only, a segregated reserve of >= 3 months of trailing payouts, downward-only corrections (ADR section 7). Broker bounties fund verification and margin; they never enter the pool or reach a player (legal-us#6, #9).
+
+## C.2 United States: the SOLO Vault path
+
+The Vault is a white-label individual taxable brokerage account at an Alpaca-class FINRA member broker-dealer (Apex white-label is the alternate; legal-us#4, economics#24). Bellwether Rewards LLC, a separate marketing affiliate, sponsors the promotion and pre-funds the broker (the Stash Cash Management / Stash Capital pattern, precedents skeptic 2 missed facts). The broker holds every security; the game never does (C3, F8).
+
+### Eligibility
+
+US resident, 18+, valid SSN or ITIN, not sanctioned, passes the broker's CIP (name, DOB, address, TIN; 31 CFR 1023.220, legal-us#33); one Vault per TIN, one Seat per Vault. Self-declared 18+ unlocks only the Day 7 Vault tab reveal; nothing of value moves until CIP passes. Under-18s and accounts that fail or abandon CIP keep playing and redeem to Gems at 2x.
+
+### Step by step
+
+| Step | Player sees | Game backend | Broker API |
+|---|---|---|---|
+| 1. Reveal (Day 7, self-declared 18+) | Vault tab: "Your member rewards will be paid as real fractional ETF shares by [Broker], a licensed broker-dealer. No security is recommended. This is a promotional loyalty reward." | Flags account `vault_eligible`; still T0 | none |
+| 2. Threshold | Pending balance reaches $5.00 and 14 active days: "Open your Vault" | Tenure and plausibility replay pass; Play Integrity / App Attest at T2 (tech#29-30) | none |
+| 3. Account opening | Web hub (iOS deep-links out under 3.1.1(a); Android WebView) hosts the broker's CIP: identity, W-9, disclosures, customer agreement, fractional-share disclosure, program rules | Creates Seat on `approved` webhook; stores `{attestation ref, jurisdiction, is_18plus, verified_at, seatId}` only | Create account; CIP status webhook; restriction flags: trading limited to the 12-ETF list, outbound transfers blocked 30 days |
+| 4. Funding | "Vault opened. $5.00 arrived as cash. Choose an ETF inside your broker account whenever you like." | Moves credit from pending to redeemed; writes PayoutLedger leaf | Cash journal (JNLC) from the Bellwether Rewards LLC funding account to the player account, tagged promotional credit (economics#24) |
+| 5. Self-direction | Sector wheel showing eleven sector names plus "Whole market (default)"; no tickers, prices or charts in the game | Records the choice; never places the order itself | Player-authorised notional fractional market order inside the broker's UI (9-decimal fractional support); default order to the S&P 500 ETF placed on day 30 if no choice |
+| 6. Locks | "Held 3 trading days before sale; cash stays in the Vault 30 days" | Mirrors lock dates | Sell restriction lifts T+3 trading days after each grant, withdrawal restriction 30 days after (robinhood#23; legal-us#5) |
+| 7. Ongoing | Weekly Settlement Day deposits; holdings view read-only; "Manage your Vault" link to the broker portal | Merkle root of the week's payouts published on chain 4663 | Trade confirms, monthly statements, 1099-B (sales), 1099-DIV (distributions), all issued by the broker |
+| 8. Sign-up Grant | "[Broker] added a $3.00 welcome credit" | Records Grant; outside the pool | Broker's own principal-approved promotion (Rule 2210), JNLC from its promotional account, reimbursed as a marketing cost under the broker agreement |
+
+### The twelve-ETF menu and default
+
+The menu is one S&P 500 ETF plus one ETF per GICS sector (eleven), chosen inside the licensed account (ADR D9). Selection criteria, published in the Reward Program Rules and re-run every January: NMS-listed, fractional-eligible at the broker, >= $1B AUM, lowest expense ratio among ETFs tracking the S&P 500 or the relevant S&P sector index, no leverage. The Select Sector SPDR family plus a broad S&P 500 ETF satisfies those criteria today; tickers appear in the Rules and the broker's UI, never in the game. The default is the S&P 500 ETF, applied 30 days after any uninvested credit and changeable in the broker portal. No single-name stock exists anywhere in the program (F7; robinhood#28).
+
+### Locks, fees, dormancy and closure
+
+Locks: 3 trading days before any reward position can be sold, 30 days before cash can leave the Vault, both enforced by broker account flags, mirrored in the game and disclosed before CIP. Fees: none to the player; the broker's per-account fee (assumed $3 all-in, unpublished, economics#24) and ~$1 per journal are paid by Bellwether Rewards LLC; at 2-3x that fee the minimum rises to $10 and redemptions batch monthly (ADR assumption 1).
+
+Dormancy and closure (decided here): the Vault is the player's own brokerage account and outlives the game account. Deleting the game account or a ban leaves delivered assets untouched (clawback only for fraud proven inside the 30-day hold) with broker-portal access intact. Dormancy and state unclaimed-property duties fall on the broker as custodian; pre-redemption Stock Credit is "no cash value" and expires 180 days after last login, subject to the Reg E / escheat memo (ADR open item 16). After the locks the player may sell and withdraw to a linked bank or keep the account; fractional positions cannot ACATS out and are liquidated on transfer (legal-us#11), disclosed at opening. Program shutdown: 90 days' notice (the Gold Card rules use 45 days, 90 for NY), one final Settlement Day with the minimum lowered to $1 so every accrued cent is honoured, then the account continues as an ordinary self-directed account with a documented migration path (the Stockpile wind-down, legal-us skeptic 1 missed facts).
+
+## C.3 United States: the PARTNER path (Robinhood Financial)
+
+Robinhood has no public equities API, no third-party OAuth and no published rail for an outside app to deposit anything into a customer's brokerage account (F4; robinhood#21). The Trading MCP launched in May 2026 is customer-initiated agentic access to a dedicated, unsupervised account (robinhood skeptic 1); it is not a partner rail, and Bellwether will never instruct a player's agent to buy anything. Everything below is something Robinhood Financial LLC would have to build or agree to.
+
+Term sheet:
+
+1. **Attestation endpoint (build).** Customer-consented, signed `{verified: true, age18: true, jurisdiction: US, hash(customer_id)}`; no name, address or TIN; one Seat per hash.
+2. **Promotional credit endpoint (build).** Accepts a restricted promotional cash credit funded by Bellwether Rewards LLC into the customer's individual taxable brokerage account, labelled "Bellwether Loyalty Reward", with the 3-trading-day sell and 30-day withdrawal restrictions Robinhood applies to its own stock rewards (robinhood#23) and a day-30 default into the S&P 500 ETF unless the customer picks from the 12-ETF list.
+3. **Separate sign-up stock reward (agree).** Robinhood pays its own "separate sign up stock reward" under its own terms (F6); the Grant becomes $5-$10 paid by Robinhood, not us, and is Robinhood's promotion for Rule 2210 and Massachusetts purposes.
+4. **Compensation (agree).** A flat periodic marketing fee set annually in advance, with no per-account, per-trade or asset-based component, benchmarked against Robinhood's disclosed $15-$53 historical CAC and $50 first-referral tier (robinhood#30, #23), supported by a Rule 2040(a) determination in Robinhood's files (legal-us#6). A bounty-style payment would make Bellwether a finder under Exchange Act 15(a) and is refused even if offered.
+5. **Communications (agree).** All co-branded copy, the Vault tab and any store-listing sentence naming Robinhood are retail communications approved by a Robinhood registered principal under Rule 2210(b)(1)(A) (legal-us#8); Robinhood confirms consistency with its January 2024 Massachusetts undertakings (robinhood#28).
+6. **Data (agree).** No KYC data flows either way (F17).
+7. **Tax (agree).** Robinhood issues any 1099 for the reward it pays; Bellwether Rewards LLC is payer of record for Stock Credit; the $83 ceiling keeps everyone under $2,000.
+8. **Term (agree).** 12 months, 90-day termination for convenience, immediate for regulatory cause; wind-down moves new redemptions to the SOLO Vault while delivered assets stay at Robinhood.
+9. **Brand (agree).** "Delivered by Robinhood Financial LLC, member FINRA/SIPC" is the only permitted mark; no implied endorsement (Chain brand guidelines, robinhood skeptic 1 missed facts).
+
+If any of items 1, 2 or 4 is refused, US stays SOLO; the model closes without Robinhood (ADR section 7).
+
+## C.4 EEA: the PARTNER path via Robinhood Europe UAB
+
+Robinhood Europe UAB holds Category A brokerage, CASP and payment-institution licences from the Bank of Lithuania and passports across the EEA (legal-eu#8). Its "RHEU Share Token Giveaway Terms" (24 June 2026) are the template: tokens only to onboarded, appropriateness-tested clients, a 180-day hold, tax on the recipient, "not available to the general public" (F5; legal-eu#10). The Bellwether Stock Token Grant is that promotion, run by RHEU, with Bellwether as marketing partner.
+
+Term sheet:
+
+1. **Instrument.** The on-chain Stock Token issued by Robinhood Assets (Jersey) Limited under its base prospectus dated 25 June 2026, approved by the FMA Liechtenstein, passported to 29 EEA states and valid to 24 June 2027 (legal-eu skeptic 1 missed facts). Default a broad-market ETF token; never a single-name nudge; never a Classic Stock Token (an OTC derivative, non-transferable to external wallets, a prohibited benefit under the CFD measures; F14; legal-eu#9); never a private-company token (robinhood#9).
+2. **Eligibility.** 18+ (RHEU Client Agreement s.4.2), EEA resident (s.4.3), not sanctioned (s.4.4), Stock Token onboarding and appropriateness test passed, one Seat per client hash.
+3. **Attestation (build).** RHEU returns `{verified, age18, member_state, hash(client_id)}` at Seat creation and a per-Settlement-Day delivery confirmation (count, EUR value, per hash) for the PayoutLedger root.
+4. **Hold.** 180 days, enforced by RHEU; Bellwether shows the hold date read-only.
+5. **Funding.** Bellwether Rewards Europe Ltd (an Irish affiliate formed in Phase 4, decided here as the EU contracting party and GDPR establishment) pre-funds RHEU in EUR; RHEU acquires tokens as Authorised Participant (the prospectus anticipates appointing it, robinhood skeptic 2) or on secondary venues; the game holds none.
+6. **Offering responsibility.** RHEU is the Authorised Offeror; its materials present the token and its terms; Bellwether's creative never names a Stock Token and is approved by RHEU under MiFID II Art 24 (legal-eu#16; ADR D16).
+7. **Compensation.** Flat periodic marketing fee, nothing per client or token, inducement-tested under Art 24(9) and, from ~2029, the Retail Investment Strategy test (legal-eu#17).
+8. **Regulatory relations.** RHEU owns any Bank of Lithuania notification; Bellwether supplies the no-chance invariant documentation and quarterly enforcement counts.
+9. **Tax.** Recipient responsibility per the RHEU template (legal-eu#45); Lithuanian withholding on prizes paid by a Lithuanian entity is an open memo item.
+10. **Term and fallback.** 12 months, 90-day termination; EEA redemptions then move to the SOLO EURC rail or Gems 2x.
+
+## C.5 EEA: the SOLO path (EURC to the player's own wallet)
+
+The SOLO rail delivers EUR value, not a security. A MiCA-authorised EMI/CASP (ZBD holds NL EMI and MiCAR licences, precedents#18; counterparty selected in Phase 4) performs KYC, screens sanctions, disburses EURC to the player's self-custody wallet and handles travel-rule and DAC8 reporting. EURC is the euro e-money token Robinhood Europe uses for its own Dividend Match (robinhood missed facts); its MiCA EMT status, issuer and presence on chain 4663 are counsel item 10; if absent from 4663, disbursement is on Arbitrum One, which Robinhood Wallet supports (tech#21). A USD stablecoin is never used for a EUR obligation.
+
+Step by step: (1) at EUR 5 pending plus 14 active days the player enters the EMI/CASP's hosted KYC (ID document, liveness, face dedup, ~EUR 1.85, tech#33) on the web hub; (2) the EMI returns the attestation and the Seat is created; (3) the player proves control of a wallet by a WalletConnect session and SIWE signature, with Robinhood Wallet as the promoted option because it supports Robinhood Chain, Arbitrum and WalletConnect and labels our domain Verified once registered (robinhood#19; robinhood skeptic 1 missed facts); the address becomes the Seat's single destination, changeable with a 7-day cooldown; (4) on Settlement Day the EMI/CASP sends EURC; (5) the player sees: "Your EUR 5.00 reward was sent to your wallet as EURC by [EMI]. It is yours to hold, withdraw or use inside your wallet."
+
+Copy rules that keep the game from naming or offering any security: no token name, ticker, price or logo; no "swap", "buy" or "invest" verb; no prefilled link, deep link or embedded swap widget; no description of a Stock Token or its terms; no mention of DEX venues; the only outbound link is to the wallet the player already connected. The RHJ prospectus consents to non-exempt offers only by Authorised Offerors, "offer to the public" is any communication with sufficient information (ADR D16), and a non-EU studio may not provide reception/transmission or any crypto-asset service to EU clients (legal-eu#6). Whether the neutral screen itself is an offer, RTO or marketing is the open F14 question and a per-member-state Phase 4 gate.
+
+| Member state | Order | Why | Gate items |
+|---|---|---|---|
+| Ireland | 1 | English, ~$12 eCPM (economics#2), EUR 3,000 small-gift exemption dwarfs the EUR ~80 ceiling (legal-eu#43), home of the Irish affiliate | Lithuanian F14 opinion; prize-vs-gift note; UCPD copy review |
+| Netherlands | 2 | Deterministic credit sits outside the chance-only promotional-games code and the 37.8% chance-only gaming tax; gift exemption EUR 2,769 (legal-eu#29, #41) | Promo-code memo; gift/income note |
+| Germany | 3 | Largest market; no stake means outside GlüStV (legal-eu#27); rewards likely Sec 22 No 3 income, tax-free below EUR 256/year, which the ceiling respects; Sec 37b is unavailable to a non-German giver, so recipients self-assess (legal-eu#40) | Characterisation note; USK rating note |
+| Lithuania | 4 | RHEU's home state; EUR 200 x 6 prize exemption; 2026 progressive PIT scale otherwise (legal-eu#44 and skeptic) | Withholding note |
+| France | 5 | 60% gift rate if characterised as a gift; promotional-winnings doctrine unverified (legal-eu#42) | Characterisation memo before enablement |
+| Belgium | fenced | Gaming Commission's strict reading and criminal penalties; free (no-stake) random-reward exemption unverified (legal-eu#25) | Real value off until a Belgian memo; play and Gems unaffected |
+| Italy | fenced | DPR 430/2001 prize regime needs MIMIT notice, bond and fiscal representative; whether a fixed-ratio loyalty credit is an "operazione a premio" is unresolved (legal-eu#30) | Memo; enable only if outside the regime |
+
+Fallbacks, in order: SEPA EUR to the player's own IBAN via the EMI's PSP rail (the player may then self-fund a Robinhood Europe account; we never link the two), then Gems at 2x.
+
+## C.6 UK, Canada, Switzerland, UAE and sanctioned jurisdictions
+
+UK, Canada, Switzerland and the UAE: full game, BELL earn and bound on-chain claim (never marketed as crypto in the UK), Stock Credit redeems to Gems at 2x, no real-asset reward. Robinhood's on-chain Stock Tokens are restricted in all four (robinhood#3, #7; the UAE appears in the press release rather than the RHJ restricted page and is treated as excluded), the UK promotions regime bans "free crypto" incentives and CFD inducements (F16; legal-eu#33, #35), and Canada is the pure-game soft-launch cohort (ADR Phase 0). Sanctioned jurisdictions and RHJ Prohibited Investors (the eleven-country list at robinhood#7 plus OFAC comprehensive programs): no accounts, enforced by IP geo-block at install, KYC country at T2 and screening at every Settlement Day; VPN, proxy or emulator signals block rewards, never play (ADR section 6).
+
+## C.7 Rest-of-world template
+
+Default off. From 2028, country by country, on the EEA SOLO template: a local promotion-law, tax and e-money memo; a licensed disburser (the EMI/CASP where its licence reaches, else a local money transmitter); EMI/CASP KYC plus the RHJ restricted list; ratios at 0.5x EEA (tier-3 eCPMs, idle-design#23). Decided here: RoW Stock Credit is USD-denominated and disbursed as USDG on chain 4663 (6-decimal, live at 0x5fc5360D...d168, robinhood skeptic 2) where the country memo permits, else Gems 2x; the C.5 copy rules apply unchanged because the RHJ offer is Reg S and any communication naming the token is a distribution.
+
+## C.8 Sponsor drops
+
+What a sponsor buys: the weekly Sector Sprint's theme (sector art, event name, a sticker) and a funded ETF drop for every eligible Seat that completes the published objective. Sponsors get reach and a sector association; never player data, never a trade, never their own stock in anyone's hands.
+
+Mechanics (ADR D10): the sponsor escrows the full drop plus a 20% platform fee at least 14 days before the Sprint is announced (Bumped died when brands stopped paying, precedents#3); escrow and per-Seat value are published in the Sprint rules and as a SponsorEscrow Merkle root on chain 4663; every Seat with >= 30 active days that completes the objective receives the same fixed $0.25-$1.00 of the sector ETF matching the Sprint sector; if escrow is short, allocation runs by Seat seniority (earliest `verified_at`), fully determined before the event; first-N races are refused because they reward latency and scripts, draws because chance is banned (C1). Delivery is 60 days after the Sprint through the Vault (US), an RHEU grant (EEA PARTNER) or EURC (EEA SOLO), never a derivative; unspent escrow is refunded 30 days after delivery. Minimum escrow $10,000 plus fee, decided here; at most $20 per Seat per year across all drops.
+
+Eligible instruments are the eleven sector ETFs and the S&P 500 ETF from the menu, all third-party. Own-stock drops are refused by default: an issuer giving away its own shares for gameplay makes a "sale for value" under Securities Act 2(a)(3) requiring registration (legal-us#1); market purchases of its own stock to fund grants must stay inside Rule 10b-18's volume, timing and price conditions and outside Reg M restricted periods, and SEC staff challenged exactly such a free-share incentive in 2023 until it ended (economics summary; F21). Counsel may clear a broker-executed 10b-18 program with blackout monitoring for a specific sponsor, or PARTNER may use Robinhood's Partner Stock Program; neither is assumed.
+
+Reporting to sponsors: eligible Seats, completions, delivered count and value, geo split by country, all as aggregates of >= 100 Seats; no identifiers, no wallet addresses, no holdings.
+
+## C.9 Jurisdiction matrix
+
+| Region | Play age | Real value age | Reward instrument | Delivery party | Rail | Verification | Caps | Tax handling | Promo-law filings | Phase |
+|---|---|---|---|---|---|---|---|---|---|---|
+| US (all states; NY on-chain BELL claims off pending BitLicense memo) | 13+ | 18+ | Restricted cash credit self-directed into 12 ETFs; $3 Grant; ETF drops | SOLO: Alpaca-class BD (Vault); PARTNER: Robinhood Financial | JNLC journal; broker order | Broker CIP (TIN); Play Integrity / App Attest at T1/T2 | $83/yr ceiling | Prize income at FMV; 1099-MISC only >= $2,000 (moot); broker 1099-B/DIV; W-9 in CIP | None (no chance, so NY GBL 369-e / Fla. 849.094 do not apply) | 2 |
+| EEA tier 1: IE, NL, DE, LT, FR | 16+ (or member-state 13-15) | 18+ | PARTNER: on-chain Stock Token (ETF token default, 180-day hold); SOLO: EURC to own wallet | RHEU / MiCA EMI-CASP | RHEU grant / EURC on 4663 or Arbitrum One | RHEU attestation or EMI KYC + face dedup + WalletConnect signature | EUR ~80/yr | Recipient self-assesses; DAC8 by CASP; in-app annual statement | None where deterministic (NL, DE); IE/FR notes | 4 |
+| EEA fenced: BE, IT | as above | Gems 2x only | None until memo | n/a | n/a | Age gate | n/a | n/a | BE Gaming Act; IT DPR 430/2001 | 4+ |
+| Other EEA states | as above | Gems 2x until enabled | EEA SOLO template after per-state memo | as above | as above | as above | as above | as above | per state | 4-5 |
+| UK, CA, CH, UAE | 13+/16+ | none | Gems 2x | n/a | n/a | Age gate | n/a | None | None | 1 |
+| RoW (RHJ-eligible) | local | 18+ | USDG to own wallet at 0.5x ratios | EMI/CASP or local MT | USDG on 4663 | EMI KYC + RHJ list | 0.5x | Recipient; country memo | per country | 5 |
+| Sanctioned / Prohibited Investors | none | none | none | none | none | Geo-block + KYC + screening | none | none | none | never |
+
+## C.10 Compliance analysis
+
+### US securities
+
+Rules: Securities Act Section 5 and the 1999 free-stock orders (giving an issuer's own securities for registration, data or referrals is a sale for value, legal-us#1); every live stock-reward program delivers through a registered BD into a CIP'd account (F8; legal-us#2-5); FINRA Rule 2040 and Exchange Act 15(a) on transaction-based compensation to unregistered persons (legal-us#6); FINRA Rule 2210 principal-approved retail communications (legal-us#8); the SEC's 2021 DEP request naming "games, streaks and other contests with prizes... free stock" (legal-us#9); and the Massachusetts consent order of 18 January 2024 that removed scratch-off free-stock reveals, confetti, tap-to-climb games and referral-reward ads (robinhood#28). Design: the player receives a cash credit and self-directs it into third-party ETFs bought on the open market by the BD, so no issuer distributes its own securities and the studio never holds one (C3); BELL is never redeemable for stock, so it is neither a custodial receipt nor a security-based swap (legal-us#23); broker compensation is a flat fee and bounties never reach players; every stock-related communication is broker-approved; the reward is deterministic, index-only, free of trade verbs, celebrations, value leaderboards and single names, and the Grant is tied to verification, not funding or trading. Residual risk: no no-action letter covers a stock-as-reward finder, so a flat fee plus a referral funnel could still be read as brokerage activity (counsel item 1); the DEP proposal was withdrawn in June 2025 but state fiduciary enforcement remains live (legal-us skeptic 2 missed facts).
+
+### US gambling and sweepstakes
+
+Rules: prize + chance + consideration, with several states counting "considerable time or effort" as consideration (legal-us#12); NY GBL 369-e and Fla. Stat. 849.094 registration and bonding for chance promotions above $5,000 (legal-us#13); Washington's "thing of value" line (Kater v. Churchill Downs; Big Fish $155M) reaching non-cashable chips; a dozen state bans on dual-currency sweepstakes with cash-equivalent awards, with vendor liability under California AB 831 (legal-us#15, #16). Design: nothing with cash value involves chance, enforced as a compile-time invariant (ADR section 1); rewards are fixed-ratio per verified view or purchase, so allocation is fully determined by the published rule and the chance element is absent however a state treats time as consideration; no paid random items exist; Gems are never wagered; there is no dual-currency loop convertible to cash. With no game of chance, NY/FL registration does not apply; the $5,000 thresholds are tracked so that any future marketing sweepstakes is registered 30 days (NY) / 7 days (FL) ahead with a bond. Residual risk: a strict state could still treat idle time as consideration for a valuable "contest" prize; the per-state real-value fence is the response (ADR assumption 3).
+
+### US token
+
+Rules: the SEC-CFTC interpretive release (Rel. 33-11412, effective 23 March 2026) treats digital commodities, digital collectibles (expressly "in-game items", "badges, video game skins, and rewards points") and digital tools (memberships, tickets, credentials) as non-securities unless sold under an investment contract; its airdrop relief covers only distributions with no consideration, and footnote 141 excludes task-conditioned distributions (legal-us#19, #20; legal-us skeptic missed facts). Why BELL is a digital tool: it performs practical functions (ad replacement, cosmetics, nameplates, Syndicate charters, a theme vote), carries no yield or income rights, is never sold, listed, quoted or bought back, and is minted only as earned in bound mode (ADR section 3). Why the airdrop guidance is irrelevant: BELL is earned for play, so it sits outside Section VII; its status rests on the digital-tool category plus the absence of any investment-contract promise, and the communications policy never implies appreciation. A token redeemable for stock at a rate would be a custodial receipt or a retail-barred security-based swap (legal-us#23), which is why the token-to-stock relationship is none. Watch: Regulation Crypto Assets (comments close 20 October 2026) would supply a $5M/4-year startup exemption on any recharacterisation, and CLARITY's "end user distribution" would cover incentive rewards if enacted (legal-us#21, #25); neither is relied on. Residual risk: Dapper-style private suits where a developer controls chain and marketplace (legal-us#35); mitigated by no price, no marketplace and public emission data.
+
+### US money transmission
+
+Rules: FinCEN treats an administrator that issues and redeems convertible value as a money transmitter; closed-loop game currency is not (legal-us#27); NY BitLicense excludes units used solely within a game with no outside market and non-convertible affinity-program units (legal-us#28); California DFAL (1 July 2026) exempts only assets used solely within a game (legal-us skeptic 1 missed facts). Design: BELL is never redeemable for fiat, crypto or stock, has no outside market and moves only within one Seat's wallets or to burn sinks; Stock Credit is redeemed only by a licensed BD, EMI or CASP; the studio never transmits value. Residual risk: same-Seat wallet transfers could be read as "transfer"; NY on-chain claims stay off until the memo lands.
+
+### EU MiCA
+
+Rules: Art 3(1)(9) utility token; Art 4(3) disapplies Title II for a utility token giving access to a service that "exists or is in operation", while "offered for free" fails where the offeror receives personal data or any benefit (legal-eu#2); Art 4(4) ends the exemption on any move toward admission to trading; Art 4(5) needs no CASP authorisation for custody or transfer of an Art 4(3)-exempt token by its offeror unless it is listed or otherwise offered (legal-eu skeptic 1 missed facts); anyone else providing exchange, custody or transfer as a service needs CASP status, grandfathering having ended 1 July 2026 (legal-eu#6). Design: BELL is off-chain points in Phase 1 and goes on chain in Phase 3 once the game is in operation, so "existing utility" is the hook; it is never admitted to trading and no voluntary white paper is drawn up (Art 4(8) would restore Title II); claim and sink contracts run under Art 4(5); EURC disbursement by an authorised EMI/CASP is the only crypto-asset service touching EU players. Residual risk: a supervisor could read the SeatRegistry or Merkle claim as custody or transfer services (counsel item 9); Art 7 marketing discipline is applied to BELL copy regardless.
+
+### EU MiFID II and the CFD inducement ban
+
+Rules: Classic Stock Tokens are OTC derivatives with RHEU as counterparty, risk class 7/7, contractually non-transferable to external wallets (legal-eu#9; robinhood skeptic 1 missed facts); ESMA's 24 February 2026 statement puts cash-settled derivatives inside the national CFD product-intervention measures regardless of name, which prohibit any monetary or non-monetary benefit in relation to marketing, distribution or sale and prohibit acting as a substitute for the CFD provider (legal-eu#14; Decision 2018/796 Art 2(d), Art 3). The on-chain Stock Tokens are tokenised debt securities and Swiss ledger-based securities, MiFID transferable securities outside MiCA, offered under an FMA-approved prospectus passported to 29 EEA states and valid to 24 June 2027, which consents to non-exempt offers only by Authorised Offerors (legal-eu skeptic 1 missed facts). Design: Classic tokens are excluded everywhere; the game never distributes any Jersey token itself, since that would make it an unlicensed "Distributor" and, if the neutral screen were an offer, an unauthorised offeror; RHEU distributes under its own template in PARTNER; SOLO delivers EUR value only, with copy that presents no security. The passported prospectus permits retail offers in 29 EEA states by Authorised Offerors; it permits no delivery to US, Canada, UK, Switzerland or Prohibited Investors and no offers by anyone else. Residual risk: F14 is open per member state; an adverse Lithuanian opinion collapses EEA to PARTNER-or-Gems (ADR assumption 4); PARTNER continuity needs RHJ to renew the prospectus by 24 June 2027.
+
+### EU gambling and promotion law by state
+
+Belgium treats paid random rewards with valuable prizes as gambling with criminal penalties (legal-eu#25); Austria and the Netherlands exempt loot boxes inside skill games only because there is no cash-out, reasoning that fails once rewards have cash value (legal-eu#24, #26); Germany requires a stake and a monetary prize (legal-eu#27); the Dutch promotional-games code and Italy's DPR 430/2001 regulate chance-based promotions (free entry, EUR 100k, once a year, 20 draws; MIMIT notice, 100% bond, fiscal representative) (legal-eu#29, #30). Design: no stake and no chance near cash value removes the gambling element in every state and keeps the program outside the NL code; Belgium and Italy are fenced until memos; UCPD Annex I items 20 and 31 drive the copy rules; no DSA "online platform" features exist (legal-eu#20, #21). Residual risk: Italy's prize-operation regime may catch deterministic loyalty credits; the Digital Fairness Act (Q4 2026) may regulate reward loops directly (legal-eu#23).
+
+### UK financial promotions
+
+Rules: the cryptoasset promotions regime makes fungible, transferable cryptoassets controlled investments, exempting tokens transferable only by redemption with the issuer and usable in a limited way; PS23/6 bans "free crypto" incentives (legal-eu#33); COBS 22.5 bans CFD inducements; the full regime applies from 25 October 2027 (legal-eu#34); Stock Tokens are not offered to UK persons (legal-eu#35). Design: no real-asset reward in the UK; BELL is limited-use, bound and never marketed as crypto there. Residual risk: same-Seat wallet transfers could be argued to be "transfer"; the Phase 3 UK memo decides whether UK accounts keep on-chain claims or stay on off-chain points.
+
+### App stores
+
+Apple: 3.1.1 requires IAP for in-game currency and bars unlocking content via cryptocurrencies or wallets; 3.1.1(a) permits external links and calls to action in US storefront apps without an entitlement; 3.1.5(iii) allows exchanges only where licensed; 3.1.5(iv) requires crypto-securities trading to come from securities firms; 3.1.5(v) bars crypto apps from paying currency for downloads or posting, while 3.2.2(x) permits incentives for in-app actions (legal-us#31 and skeptic). Google Play: game loyalty rewards must be "clearly supplementary and subordinate to any qualifying monetary transaction" and never "wagered, awarded or exponentiated by game performance or chance-based outcomes"; the Blockchain-based Content policy requires the Financial Features declaration and bars paying for a chance at an NFT of unknown value (legal-us#32 and skeptic). Design: on iOS BELL is read-only, all BELL spend and all redemption run on the web hub reached by an external link on the US storefront, the Vault tab shows holdings with no trade link, and the CIP runs on the broker's web flow, so no crypto-securities trading is in the app; BELL is never paid for installs, referrals or posts; on Android the Financial Features declaration is filed, Season-Pass-linked accrual is the primary loyalty framing, and ad-view credit moves to the web hub if Google reads "subordinate" strictly (ADR D12). Listings never mention earning (p2e#34). Residual risk: Apple has no text on securities rewards for gameplay and could analogise to 3.1.5(v); then iOS ships game-only (ADR assumption 2).
+
+### FTC endorsement and earnings claims
+
+Rules: Endorsement Guides 16 CFR 255 require disclosure of material connections including prizes and rewards (Example 9 covers points-for-posts); the Consumer Reviews Rule (16 CFR 465) bans incentivised reviews conditioned on sentiment; earnings claims need typical-results substantiation (legal-us#29 and skeptic). Design: no rewards for posts, reviews or referrals; the positioning line states typical results and the Earnings Call publishes the actual payout distribution, which is the substantiation file; any influencer work carries the disclosure and the same line. Residual risk: the Earnings Claim Rule remains at ANPR stage; the file is kept as if it were final.
+
+### Tax
+
+US: Stock Credit is a prize or award not for services (1099-MISC box 3), pending counsel item 5; the $83 ceiling sits far below the $2,000 threshold for tax years after 2025 (legal-us#34); income is still taxable at FMV on receipt, stated plainly in the Vault disclosures; the broker collects the W-9 in CIP and issues 1099-B (fractional sales under $20 gross proceeds exempt) and 1099-DIV; BELL has no market and no determinable FMV, to be confirmed under Rev. Rul. 2023-14. EU: no member state exempts rewards; recipients self-assess (legal-eu#45); the CASP reports under DAC8 from calendar 2026; the in-app annual statement lists every payout with EUR value and date; the ceiling is designed under Ireland's EUR 3,000, Germany's EUR 256, Lithuania's EUR 200 x 6 and the Dutch gift exemption; no Dutch gaming tax applies because there is no chance; France waits for the characterisation memo.
+
+### GDPR, DPIA, AML and sanctions
+
+Rules: EDPB blockchain guidelines v2.0 (7 July 2026): keep personal data off-chain, public keys can be personal data, salted hashes remain personal data, a DPIA is expected (legal-eu#38); AMLR from 10 July 2027 fixes CDD retention and deletion, so brokerage KYC cannot be repurposed (legal-eu#39); OFAC expects geolocation, IP blocking and KYC across the virtual-currency industry (legal-us#33); BIPA/CUBI govern biometrics (counsel item 15). Design: the game stores `{attestation ref, jurisdiction, is_18plus, verified_at, seatId}` only; documents and selfies stay at the broker or KYC vendor; on-chain is a random 32-byte seatId mapped to addresses, rotated for erasure; DPIA filed before Phase 3; sanctions screening at KYC and every Settlement Day; the EMI/CASP owns travel-rule duties. Residual risk: a supervisor treating the seatId-to-address map as erasable personal data pushes BELL back to off-chain points (ADR assumption 6).
+
+## C.11 Document set to draft
+
+| Document | Owner | Contents that matter |
+|---|---|---|
+| Terms of Service | Studio | Age gates (13+/16+/18+), closed-loop currencies, BELL as a priceless membership credential with no planned transferability, cheating ladder and appeal, 90-day program-change notice |
+| Reward Program Rules | Bellwether Rewards LLC / Europe Ltd | The Bell Rule verbatim, per-geo ratios and clamps, caps, tenure, pending and vesting windows, Settlement Day schedule, 12-ETF criteria and tickers, locks, expiry, duplicate-Seat merger, "promotional, taxable, may fall in value", no-chance statement, drop rules |
+| Privacy Notice and DPIA | Studio | Attestation-only data model, off-chain linkage, seatId design, erasure by rotation, COPPA/GDPR Art 8 handling, vendor list, DAC8/travel-rule disclosures |
+| Vault disclosures | Broker, principal-approved | Account agreement, CIP notices, fractional-share disclosure (5-decimal rounding, no ACATS, liquidation on transfer), lock periods, "no security is recommended", tax statement, welcome-credit promotion terms |
+| Sponsor agreement | Studio | Escrow-first, deterministic allocation, third-party ETF only, own-stock refusal, aggregate-only reporting, refund of unspent escrow, no data rights |
+| Broker agreement | Studio and BD | Flat marketing fee schedule, Rule 2040(a) determination, journal SLAs, restriction-flag warranties, 2210 approval workflow, wind-down and migration, fee caps that trigger the $10 minimum |
+| EMI/CASP agreement | Bellwether Rewards Europe Ltd | KYC scope and dedup, attestation schema, EURC or SEPA disbursement SLAs, chain selection (4663 or Arbitrum One), travel rule and DAC8, per-check pricing (<= EUR 3 per Seat gate), sanctions screening |
+
+## C.12 Counsel work plan
+
+| Memo | Jurisdiction | Question | Gate it unblocks | Rough cost |
+|---|---|---|---|---|
+| BD structure, 2040/15(a), Grant characterisation | US | Flat fee is not finder compensation; broker-paid Grant is not compensation to us; Rewards LLC structure | Gate 1 | $40-60k |
+| 50-state deterministic-reward survey | US | Time as consideration; ETF prizes and blue-sky; per-state fence list | Gate 1 | $30-50k |
+| Digital-tool token memo | US | BELL under Rel. 33-11412; DoubleZero/Fuse letters; comms policy | Gate 3 | $30-40k |
+| FinCEN, NY BitLicense, CA DFAL | US | Bound-transfer token stays exempt; NY claims on or off | Gate 3 | $20-30k |
+| Tax | US | Prize vs services; state withholding; 1099-B basis; BELL FMV | Gate 2 | $15-25k |
+| App-store strategy | US | Apple 3.1.1/3.1.5 read of ETF rewards and Vault UI; Google "subordinate" | Gate 1 | $5-10k |
+| Reg E / escheat / CFPB | US | Stock Credit and Gems as prepaid or stored value | Gate 2 | $10-15k |
+| BIPA/CUBI | US | Vendor and broker biometric compliance and liability allocation | Gate 2 | $5-10k |
+| Sponsor own-stock conditions | US | 10b-18 and Reg M program terms (only if a sponsor asks) | per sponsor | $10-15k |
+| Robinhood Chain ToS and brand | US | Marks, "token issuance" authorisation, Wallet surface consent | Gate 3 | $5k |
+| MiFID II, Prospectus, F14 | Lithuania | Neutral EURC screen as offer/RTO/marketing; tied-agent need under PARTNER | Gate 4 | $30-50k |
+| MiCA Art 4(3)/(5) | Lithuania | Existing-utility hook; claim/sink contracts; SeatRegistry as custody | Gate 3 | $15-25k |
+| EMT and rails | EU | EURC status and chain; EMI/CASP travel rule and DAC8 | Gate 4 | $10-15k |
+| Member-state notes (IE, NL, DE, LT, FR, BE, IT) | each | Promo law, prize vs gift vs income, withholding | per state, Phase 4 | $8-15k each |
+| GDPR DPIA | EU | seatId map, erasure, lawful basis separate from AML | Gate 3 | $15-25k |
+| UK promotions | UK | Bound BELL outside "qualifying cryptoasset" | Gate 3 | $8-12k |
+
+Total across phases roughly $300-450k, front-loaded to Phase 0-1.
+
+## C.13 Kill switches and incident playbook
+
+| Switch | Scope | Effect | Owner | Restore condition |
+|---|---|---|---|---|
+| Accrual pause | per geo tier or state | Stock Credit stops accruing; Gems accrue at 2x instead; play unchanged | Compliance lead | Written counsel clearance |
+| Redemption pause | per rail (Vault, RHEU, EURC, SEPA) | Pending stays pending; nothing forfeited; Settlement Day skipped with notice | Compliance lead | Rail partner confirms |
+| Vault-opening pause | US | New CIP blocked; existing Vaults untouched | Compliance lead | Broker confirms |
+| EURC disbursement pause | EEA or member state | Falls to SEPA, then Gems 2x | Compliance lead | EMI/CASP or counsel |
+| BELL claim pause | global or per geo | Seasonal Merkle claim disabled; accruals continue off-chain | CTO | Audit or memo |
+| Arbitrum One redeploy | global | Pre-published redeploy triggers if any game contract is sequencer-filtered (ADR D13) | CTO | Not reversed |
+| Sponsor drop cancel | per Sprint | Escrow refunded in full; Sprint runs cosmetics-only | Product | n/a |
+
+Incident playbook. (1) Regulator inquiry (SEC, FINRA, a state securities or gaming regulator, Bank of Lithuania, a DPA): acknowledge within 2 business days; change nothing player-facing unless counsel says so; assemble the standing file (Bell Rule, invariant tests, Earnings Call history, enforcement counts, DPIA); pause accrual in the inquiring jurisdiction only if the inquiry concerns the reward layer; respond through counsel by the deadline; notify players if any rail pauses. (2) Store rejection or strike: no cosmetic resubmission; move the disputed surface to the web hub within 72 hours; if the rejection targets securities rewards on iOS, ship game-only on iOS and keep Android and web live. (3) Broker termination: 90-day wind-down; existing Vaults stay the players' accounts; Vault-opening pause; execute the alternate white-label (Apex) agreement pre-negotiated in Phase 2; if none is live within 90 days, accrued credit above $5 converts to Gems 2x at the player's election or waits. (4) Chain filtering or sequencer failure: the off-chain ledger is authoritative, so no payout is affected; a filtered game contract triggers the Arbitrum One redeploy with the seasonal Merkle root republished there; Robinhood Wallet still holds BELL via Arbitrum (tech#21). Every incident gets a dated line in the Earnings Call.
+
+## C.14 Regulatory watch list
+
+| Date | Item | Effect on design |
+|---|---|---|
+| 2026-09-15 | CLARITY Act cloture vote on the motion to proceed (60 votes needed) | If enacted, "end user distribution" could cover BELL; transferability review input |
+| 2026-09-17 | SEC 24-hour-trading roundtable | Erodes the 24/7 differentiator; no design change |
+| 2026-09-29/30 | HOOD Summit, Houston | PARTNER pitch; watch for Chain, Wallet or US tokenization announcements |
+| 2026-10-19 | GENIUS Act Treasury NPRM comments close | Stablecoin rails for RoW USDG payouts |
+| 2026-10-20 | Regulation Crypto Assets comments close | Startup exemption as fallback classification; transferability gate (e) |
+| Q4 2026 | EU Digital Fairness Act proposal | Reward loops, virtual currencies, addictive design; copy and LiveOps review |
+| Oct 2026 (reported, unverified) | DTCC tokenization service launch under its December 2025 no-action letter | Future US tokenized-equity rail; no dependency |
+| Pending, indefinite | SEC tokenized-equity innovation exemption (delayed May and August 2026) | If adopted, US delivery could move to a tokenized rail under the same Bell Rule (ADR assumption 11) |
+| 2027-01-18 | GENIUS Act effective (unless earlier) | Permitted-issuer stablecoins only |
+| 2027-06-24 | RHJ base prospectus expiry | PARTNER continuity depends on renewal |
+| 2027-07-10 | AMLR applies | CDD retention and deletion; attestation model already compliant |
+| 2027-10-25 | UK cryptoasset regime applies (applications 2026-09-30 to 2027-02-28) | UK memo; bound BELL classification |
+| 2028-07-18 | GENIUS Sec 3(b)(1) service-provider restrictions | RoW stablecoin rail must use permitted issuers |
+| ~2029 | Retail Investment Strategy application (EP plenary Nov 2026, OJ late 2026/early 2027) | Inducement test on any PARTNER fee; finfluencer rules |
+| Rolling | Google Play loyalty-policy text; Apple guideline updates; ESMA CFD statements; Bank of Lithuania outcome of the 2025 OpenAI/SpaceX review | Store strategy and PARTNER template |
+
+
+# Part D. Technical architecture
+
+
+## D.1 Architecture overview
+
+Bellwether is three planes that share exactly one thing, the Verified Seat. The **game plane** runs the idle simulation on the client, checkpoints it to the server and replays it before any write that matters. The **value plane** holds the Stock Credit ledger, verification, the Bell Rule and the redemption rails (the Vault broker, the EMI/CASP, Gems). The **chain plane** is BELL, the SeatRegistry, the seasonal Merkle claim and the PayoutLedger and SponsorEscrow roots on Robinhood Chain (chain 4663). The off-chain ledger is authoritative for all three (ADR D13); the chain is a publication and custody surface, never a source of truth. Everything below is SOLO unless marked PARTNER.
+
+Two invariants are enforced in the build: (1) the value plane never links the simulation's RNG package and its event-type enum contains only deterministic types (ADR section 1; C1); (2) no code path converts between game currencies, BELL and Stock Credit (ADR section 5; C2). A Roslyn analyzer fails CI on either dependency.
+
+### Component list
+
+| # | Component | Plane | Runtime |
+|---|---|---|---|
+| 1 | Mobile client (iOS, Android) | Game | Unity 6 LTS, C#, IL2CPP |
+| 2 | BellSim, the deterministic simulation kernel | Game | C# netstandard2.1 library compiled into client and server |
+| 3 | Exchange Floor web hub | Game, Chain | TypeScript, React, viem, WalletConnect |
+| 4 | Auth and Accounts | Game | .NET 8 |
+| 5 | Checkpoint and Replay Validator | Game | .NET 8 API plus worker pool |
+| 6 | Economy and LiveOps Config | Game | .NET 8 |
+| 7 | Stock Credit Ledger and Settlement | Value | .NET 8 |
+| 8 | Verification and Attestation | Value | .NET 8 |
+| 9 | Ad SSV Ingestor, one adapter per network | Value | .NET 8, public HTTPS |
+| 10 | Fraud and Device Intelligence | Value | .NET 8 plus Fingerprint or Sardine |
+| 11 | Broker Integration (the Vault) | Value | .NET 8, isolated segment |
+| 12 | EMI/CASP Disbursement | Value | .NET 8, isolated segment |
+| 13 | Chain Service, Relayer and Indexer | Chain | TypeScript, Node 22, viem |
+| 14 | Analytics pipeline | All | Event bus to ClickHouse |
+| 15 | Admin and Fraud Console | All | React plus .NET 8 admin API |
+
+.NET 8 is the game and value runtime because BellSim is C#; TypeScript is confined to the chain plane and the hub. Hosting: managed containers (Cloud Run or ECS Fargate class), managed Postgres, Redis, S3-class object storage, ClickHouse. Cloudflare Durable Objects (tech#26) were rejected because the kernel cannot run there without a second implementation. A PlayFab-class BaaS is off the critical path: LiveOps config must be content-hashed into the simulation, so it lives in our own config service (idle-design#20; Unity Cloud Code is not server-authoritative, idle-design missed).
+
+### Main data flows
+
+**Play.** (1) Auth issues a session token bound to the device key and a server time anchor. (2) The Checkpoint service returns the last accepted checkpoint `C_n` (state, seq, server_ts, seed, config_hash) and the server-computed offline grant. (3) The client runs BellSim from `C_n` at 10 ticks/s, appending every input to a log with tick offsets. (4) Ads, IAP and the Vault tab talk to the value plane directly; they touch simulation state only through server-signed grant inputs (boost, offline x2) appended to the log like any input.
+
+**Checkpoint.** (5) Every 60 s of play and on every purchase the client uploads `{from_seq, input_log, claimed_state_hash, client_elapsed_ticks}`. (6) The server replays the log from `C_n` (D.5), compares hashes, and writes `C_{n+1}` or tells the client to reload `C_n`. (7) Logs under 10,000 events replay synchronously; larger ones queue, and the checkpoint is PROVISIONAL until VERIFIED.
+
+**Ad SSV.** (8) The client requests a placement; the server issues a `placement_nonce` (player, placement, seq, 10-min expiry) passed as the network's custom-data field. (9) The network's server calls our SSV endpoint; the adapter verifies the signature and idempotency key, records an `AdView`, and returns the network's required 200 body. (10) The client's own "ad completed" call is a claim only. A claim with no SSV within 15 min, or an SSV with no claim, increments the account's mismatch counter (ADR section 6).
+
+**Accrual.** (11) On `AdView` insert the Ledger checks: within the first 6 credited views of the UTC day, at least 2 min after the previous, surrounding checkpoints VERIFIED, progression check passed, no hold, daily cap not reached. (12) If eligible, `CreditEvent{AD_VIEW, rate(geo_tier, month)}` is appended; balances are a materialized view. Ineligible views credit nothing, ever. (13) IAP stock-back appends on receipt validation with `vest_at = now + 35 d`; Season Pass credit once per entitled UTC day; sponsor drops on objective completion with `vest_at = announce + 60 d`.
+
+**Verification.** (14) At first redemption request (>= $5 / EUR 5 vested, 14 active days) the client is routed to the delivering party's onboarding: Vault CIP (US), the CASP's KYC (EEA SOLO), or a Robinhood attestation (PARTNER). (15) The party returns `{ref, jurisdiction, is_18plus, verified_at}`; Verification creates the Seat or merges into the oldest Seat with the same `ref`. (16) Play Integrity or App Attest plus device intelligence run here (T2) and at every BELL claim (T1), nowhere else.
+
+**Redemption.** (17) A Redemption sits PENDING 7 days, then on Settlement Day (Thursday 14:00 UTC) the batch runs per rail: JNLC journal to the Vault, EURC via the CASP, or Gems at 2x. (18) The rail returns a journal id or tx hash; the Ledger appends `REDEMPTION`; nightly reconciliation matches ledger, rail statement and sponsor account.
+
+**Mint.** (19) At BELL season close the Ledger snapshots accrued-unminted BELL per T1 Seat, builds a Merkle tree, records a `MintBatch`. (20) The 3-of-5 multisig publishes the root to Emission; the on-chain season ceiling caps the total. (21) Claims are executed by our relayer to the Seat's registered address, or by the player from the hub or Robinhood Wallet; the Indexer marks the `BellClaim` MINTED.
+
+## D.2 Client
+
+### Engine choice
+
+| Need | Unity 6 (C#) | Godot 4 | Web/PWA (TypeScript, PixiJS, Capacitor shell) |
+|---|---|---|---|
+| iOS and Android stores | Mature IL2CPP builds | Export exists, weaker store tooling | Webview shell; review risk on Apple 3.1.1 handling of BELL |
+| Exchange Floor web hub | Separate web app either way | Same | Native fit |
+| Big-number math | BreakInfinity.cs port (idle-design#29; tech#27) | No verified port (idle-design#29 skeptic) | break_infinity.js native |
+| Deterministic sim shared with server | One C# kernel in client and .NET server | GDScript/C# split; C# on Godot mobile less proven | One TypeScript kernel in client and Node |
+| Ad SDKs with SSV (AdMob, Unity Ads, MAX, LevelPlay) | First-party Unity plugins for all four | Community plugins; SSV path unverified | Capacitor plugins uneven; mediation weakest |
+| LiveOps config | Our config service | Same | Same |
+| Licensing | Personal free under $200K trailing revenue; Pro $2,310/seat/yr above (tech#27) | Free | Free |
+
+**Decision: Unity 6 LTS for iOS and Android, BellSim as a C# library shared with the .NET 8 validator, and the Exchange Floor as a TypeScript web app that never runs the simulation.** Rewarded video is the largest funding line (F20), so ad-SDK maturity with server-side verification is load-bearing, and one shared kernel removes the two-implementation determinism problem. Godot fails on ad SDKs and big numbers. **Fallback:** the web/PWA stack (TypeScript kernel on break_infinity.js, Node validator, Capacitor shells) if Unity licensing or a native-client store rejection forces it; all service interfaces are JSON over HTTPS, so the swap touches components 1, 2 and 5 only. A playable WebGL hub build is out of scope before Phase 5.
+
+### Big-number handling
+
+The representation is break_infinity's mantissa x 10^exponent (idle-design#29); the kernel implementation is integer-backed for cross-platform determinism: `BellDecimal { long mantissa in [1e14, 1e15); int exponent }`, multiplication and division through a 128-bit intermediate built from two 64-bit halves, rounding half-even to 15 significant digits after every operation. Doubles never enter the kernel; `System.Math` is banned there by analyzer. `pow(r, n)` is binary exponentiation; bulk-buy uses the closed form `base * r^owned * (r^k - 1) / (r - 1)`; `sqrt` (Float), `cbrt` (Weight) and the fractional Prestige Exponent use integer Newton iteration and fixed-iteration integer `ln`/`exp`. The exponent range clears the 1e308 wall reserved for a third layer (ADR section 2). Serialization is the integer pair; break_infinity.js and BreakInfinity.cs are display-only.
+
+### Deterministic simulation module
+
+BellSim exposes `Step(State, Input, Config)` and `Advance(State, ticks, Config)`: pure functions, no I/O, no wall clock, no floating point. Inputs are the checkpoint state, integer ticks, the content-hashed config (the ADR generator table, milestones, K per Market, emission amounts) and a seed. The seed drives xoshiro128** for cosmetic and game-only outcomes (Analyst Report re-roll, event flavour) in a separate package the value plane cannot reference. The state hash is BLAKE3 over the canonical binary state; client and server both compute it.
+
+### Offline calculation
+
+Offline yield is computed only on the server from the server clock: `elapsed = min(now_server - C_n.server_ts, cap)`, `cap = 8 h + 1 h per Weight (max 16 h)`, or 24 h with the ad-removal subscription (ADR section 2). The server runs `Advance(C_n.state, elapsed_ticks)` with Reinvest auto-buys honoured exactly as in play, and writes the grant as a signed server input so every later replay reproduces it. The "x2 offline" is a second server input applied only after that view's SSV arrives. Tideward's ~30,000 actions per 24 h (idle-design#32) bounds the cost; a 16 h advance completes in under 5 ms.
+
+### Clock handling
+
+The client never reports wall-clock time. It counts ticks from the session anchor with the monotonic clock (`SystemClock.elapsedRealtime` on Android, `mach_continuous_time` on iOS; idle-design#31) and uploads tick offsets. A log is accepted only if `client_elapsed_ticks <= 1.02 x server_elapsed_ticks + 20`; a faster client is a modified client. Sessions with no checkpoint for 15 min close; the next upload starts from the last accepted checkpoint plus a fresh offline grant. Caps, cooldowns and expiry use UTC on the server; hosts run NTP with a 50 ms alarm.
+
+## D.3 Backend services
+
+| Service | Responsibilities | Interfaces | Storage |
+|---|---|---|---|
+| Auth and Accounts | Anonymous device accounts; optional Apple, Google, email sign-in; age self-declaration; geo (IP plus store country); ES256 JWT sessions (24 h); device key registration; merges | `POST /v1/session`, `POST /v1/link`, `GET /v1/me` | `players`, `devices`, `sessions` |
+| Checkpoint and Replay Validator | Accept logs; replay with BellSim; hash compare; plausibility bounds; write checkpoints; offline grants; expose verified state to the Ledger | `POST /v1/checkpoint`, `GET /v1/checkpoint/latest`; internal `ReplayStatus(player, seq)` | `checkpoints`; blobs and logs in object storage; Redis per-player locks |
+| Economy and LiveOps Config | Versioned, content-hashed config; generator constants; event schedules; 1/5/20/100% rollouts; per-geo rate tables published 7 days ahead; emission tables published 30 days before each season; Bell Rule outputs | `GET /v1/config/{hash}`; admin `POST /admin/config`, `/admin/config/rollout` | `config_versions`, `rollouts` |
+| Stock Credit Ledger and Settlement | Append-only events; materialized balances; caps; vesting; 180-day forfeiture sweep; redemption state machine; Settlement Day batches; reconciliation; Earnings Call export | `GET /v1/credit`, `POST /v1/redemption`; internal `Append(event)` via transactional outbox | `credit_events`, `credit_balances`, `redemptions`, `settlement_runs` |
+| Verification and Attestation | Seat creation from the delivering party's attestation; duplicate merge; T0/T1/T2 state; integrity verdicts; pre-verification expiry | `POST /v1/verify/start`, `POST /v1/verify/callback/{issuer}`, `POST /v1/integrity` | `seats`, `attestations`, `integrity_checks` |
+| Ad SSV Ingestor | Per-network signature verification; idempotency; nonce correlation; network-specific 200 bodies | `GET /ssv/admob`, `/ssv/unity`, `/ssv/max`, `/ssv/levelplay` | `ad_views`, unique on `(network, network_txn_id)` |
+| Fraud and Device Intelligence | Risk scoring from vendor signals, behaviour, mismatch counters, velocity; holds and bans on the published ladder | internal `Score(player, context)`; admin actions | `risk_signals`, `enforcement_actions`; Redis counters |
+| Broker Integration | Account open (CIP transit only); KYC status; JNLC journals; fractional notional orders; lock enforcement; statements; tax links; reconciliation | internal `OpenAccount`, `Journal`, `Order`; broker webhooks | `vault_accounts`, `journals`, `orders`; no persisted PII |
+| EMI/CASP Disbursement | Weekly EURC payout files; wallet-ownership proofs; travel-rule data hand-off; reconciliation | internal `Disburse(batch)`; CASP webhooks | `payouts` |
+| Chain Service, Relayer, Indexer | SeatRegistry writes; Merkle trees; root proposals; sponsored claims; permit-based sink relays; event indexing; chain-policy error detection | `POST /v1/wallet/link`, `/v1/bell/claim`, `/v1/bell/sink` | `bell_claims`, `mint_batches`, `chain_events`, `registry_addresses` |
+| Analytics | Pseudonymous event stream; retention, ARPDAU, opt-in, divergence, coverage | bus consumer | ClickHouse |
+| Admin and Fraud Console | Config edits with two-person approval; enforcement queue; 14-day appeals; reconciliation breaks; Earnings Call figures | admin API, SSO with hardware keys | `audit_log`, append-only |
+
+All writes are Postgres transactions with an outbox; consumers are idempotent on event id. Services share one cluster with per-service schemas and roles; the broker and CASP services run in an isolated segment with egress allow-listed to the vendor.
+
+## D.4 Data model
+
+IDs are UUIDv7 unless stated; money is integer cents with an ISO currency; big numbers are `(mantissa int64, exponent int32)`.
+
+| Entity | Key fields |
+|---|---|
+| **Player** | `player_id`, `created_at`, `store_country`, `ip_country_last`, `age_declared` (13+, 16+, 18+), `tier`, `seat_id?`, `status` (ACTIVE, REWARD_HOLD, REWARD_BANNED, DEVICE_BANNED), `season_pass_until?`, `ad_removal_until?`, `last_login_at`, `active_days` (UTC days with a VERIFIED checkpoint) |
+| **Seat** | `seat_id` (random 32 bytes), `issuer` (BROKER_CIP, RH_FIN, RHEU, EMI_CASP), `attestation_id`, `jurisdiction` (country plus US state), `is_18plus`, `verified_at`, `status`, `merged_from[]`, `destination` (one per Seat), `seniority` (order of `verified_at`) |
+| **Attestation** | `attestation_id`, `issuer`, `ref` (broker account id, KYC applicant id, or PARTNER `hash(customer_id)`), `jurisdiction`, `is_18plus`, `issued_at`, `revoked_at?`; unique on `(issuer, ref)`; never names, documents or biometrics |
+| **Device** | `device_id`, `platform`, `device_pubkey`, `install_id`, `attest_key_id?`, `last_integrity` (verdicts, at), `risk_score`, `first_seen`, `players[]` |
+| **Session** | `session_id`, `player_id`, `device_id`, `anchor_server_ts`, `ip_country`, `vpn_flag`, `started_at`, `ended_at`, `checkpoint_count` |
+| **Checkpoint** | `checkpoint_id`, `player_id`, `seq`, `server_ts`, `state_hash`, `state_uri`, `seed`, `config_hash`, `status` (PROVISIONAL, VERIFIED, REJECTED), `divergence_code?`, `replay_ms` |
+| **InputLog** | `log_id`, `player_id`, `from_seq`, `to_seq`, `event_count`, `client_elapsed_ticks`, `server_elapsed_ticks`, `uri`, `hash` |
+| **AdView** | `ad_view_id`, `network`, `network_txn_id`, `player_id`, `placement`, `placement_nonce`, `ssv_received_at`, `signature_ok`, `source_ip_ok`, `client_claim_at?`, `credited`, `credit_event_id?`, `geo_tier`, `rate_version`, `reject_reason?` |
+| **CreditEvent** | `event_id`, `player_id`, `seat_id?`, `type` (AD_VIEW, IAP_STOCKBACK, SEASON_PASS_DAILY, SIGNUP_GRANT, SPONSOR_DROP, REDEMPTION, REVERSAL, EXPIRY, FORFEIT), signed `amount_cents`, `currency`, `rate_version`, `source_ref`, `vest_at`, `created_at`; append-only; the enum is the allowlist |
+| **CreditBalance** | `player_id`, `currency`, `pending_cents`, `vested_cents`, `redeemed_cents`, `day_cents`, `month_cents`, `year_cents`, `lifetime_value_cents` (tax FMV), `as_of_event_id` |
+| **Redemption** | `redemption_id`, `seat_id`, `amount_cents`, `currency`, `rail` (VAULT_JNLC, RH_FIN, RHEU_GRANT, EURC, SEPA, GEMS), `status` (REQUESTED, PENDING, QUEUED, SENT, SETTLED, FAILED, REVERSED), `pending_until`, `settlement_run_id?`, `rail_ref?`, `created_at` |
+| **VaultAccount** | `seat_id`, `broker`, `broker_account_id`, `cip_status`, `opened_at`, `default_etf` (S&P 500 ETF), `chosen_etf?`, `sell_lock_until`, `withdraw_lock_until`, `last_statement_at` |
+| **SponsorDrop** | `drop_id`, `sponsor_id`, `escrow_ref`, `escrow_cents`, `objective_id`, `fixed_amount_cents` (25 to 100), `etf_symbol` (third-party sector ETF), `min_active_days` = 30, `allocation_rule` = SENIORITY, `eligible_count`, `announced_at`, `deliver_at` (announce + 60 d), `allocation_root`, `status` |
+| **BellClaim** | `claim_id`, `season`, `seat_id`, `address`, `amount` (wei), `merkle_index`, `proof[]`, `tx_hash?`, `status` (ELIGIBLE, SUBMITTED, MINTED, EXPIRED) |
+| **MintBatch** | `season`, `root`, `total_amount`, `leaf_count`, `tree_uri`, `ceiling` (20,000,000 x 0.95^n BELL), `published_tx?`, `published_at?`, `emission_version` |
+
+Off-chain BELL accrual is a `bell_ledger` table of the same append-only shape (CYCLE, IPO, SPRINT, INDEX_INCLUSION, SINK_BURN, EXPIRY) with 150/day and 8,000/season enforced at append (ADR section 3).
+
+## D.5 Server-authoritative simulation
+
+### Tick model
+
+Time is an int64 count of 100 ms ticks; every cycle in the ADR table is integer ticks (0.6 s = 6; 86,400 s = 864,000). Each tier has one cycle timer (the AdCap model); production per completed cycle is `owned x profit x multipliers`. Between inputs, `Advance` steps to the next structural event: a cycle completion on a Reinvest-enabled tier (which may buy a unit and cross a milestone) or the next input. Tiers without Reinvest advance in closed form, so the worst case is bounded by Reinvest cycle completions: 144,000/day for tier 1, about 250,000 events per player-day at full automation.
+
+### Checkpoint cadence and input-log format
+
+Uploads every 60 s of play, on every purchase, and on background or quit. A log is a binary stream of `tick_delta` (varint), `type` (u8), type-specific varint args. Types: TAP(tier), BUY(tier, count), BUY_MANAGER(tier), REINVEST(tier, on), REPORT(tier, index), CHARTER(tier), IPO, INDEX_INCLUSION(market), UNLOCK_MARKET(market), SPEND_FLOAT(kind, amount), SERVER_GRANT(kind, ref, signature), EVENT(sprint action). A typical day is 300 to 800 human inputs under 8 KB.
+
+### Replay validation algorithm
+
+1. Load `C_n`; reject if the client's `config_hash` differs from its rollout assignment.
+2. Check plausibility bounds on the raw log (table below).
+3. Apply inputs in order, advancing between them; any failed precondition (unaffordable BUY, IPO below target, SERVER_GRANT with a bad signature) marks the log REJECTED with a code.
+4. Hash the resulting state; compare with `claimed_state_hash`.
+5. Match: write `C_{n+1}` VERIFIED. Mismatch: write nothing, return `C_n`, increment `divergence_count`.
+
+**Cost per player-day.** About 250,000 structural events plus 800 inputs at roughly 40 ns each is about 10 ms of CPU at full automation, 2 to 3 ms typical; at 1M DAU that is 10,000 CPU-seconds a day, under three core-hours. Replay therefore runs on every checkpoint, not a sample, and completes before any Stock Credit, BELL or leaderboard write (ADR section 2; idle-design#32).
+
+### Plausibility bounds
+
+| Bound | Value | On breach |
+|---|---|---|
+| Client vs server elapsed | <= 1.02 x server + 20 ticks | Reject |
+| Input rate | <= 15/s over any 10 s; <= 25/s peak | Reject; flag if repeated |
+| Purchases | Affordable at the tick of purchase | Reject |
+| Production rate | Within the config envelope for owned counts and multipliers | Reject and page (kernel or config bug) |
+| Offline grants | Server-signed, once per session start | Reject |
+| Timing regularity | > 50 identical tick deltas in a row; identical tap coordinates across sessions | Fraud signal only (ADR section 6) |
+
+### On divergence
+
+Server state wins; the client reloads `C_n`. One divergence per day is tolerated. Three in 24 h freeze reward accrual until a clean 24 h checkpoint chain exists and queue the account for review; ten in 7 days applies the published ladder (pending credit forfeited, BELL accrual frozen). Fleet-wide, Gate 0 requires < 0.1% divergent checkpoints; above 0.5% the deploy that introduced it is rolled back, because at that rate it is a kernel or config bug, not cheating.
+
+## D.6 Verification tiers
+
+| Tier | Grants | Requirements | Attestation calls |
+|---|---|---|---|
+| T0 | Play; off-chain BELL and Stock Credit accrual (pending, capped at $5, 180-day expiry) | Device key; age self-declaration; geo | None |
+| T1 | On-chain BELL claim; sinks; Syndicates; nameplate | Play Integrity (PLAY_RECOGNIZED, LICENSED, MEETS_DEVICE_INTEGRITY) or App Attest assertion at claim time; device-intelligence pass; SIWE binding of the address to the Seat (or to the player before a Seat exists) | Per claim and per registry change |
+| T2 | Real-value redemption; sponsor drops | Verified Seat from the delivering party; 14 active days; the T1 checks | At Seat creation and every redemption |
+
+**Play Integrity.** Standard requests with `requestHash = SHA-256(claim payload)`, decrypted server-side through Google, never cached (tech#29). The default quota is 10,000/day; at 1M DAU, seasonal claims for about 30% of 4M MAU concentrate in a season's first week (roughly 170,000/day peak), so the increase to 250,000/day is requested through the Play Console form in Phase 2, and the client queues claims behind a server token bucket so a shortfall delays rather than fails them.
+
+**App Attest.** `attestKey` once per install at the first T1 action; `generateAssertion` per claim, verified on our servers with no Apple round trip (tech#30). We cap `attestKey` at 20/s globally with backoff, since Apple advises "double digits per second" and publishes no quota. App Attest does not detect jailbreak or hooking, so the device-intelligence call (emulator, VM, root, Frida, cloned app, VPN; tech#31) runs alongside it on both platforms.
+
+**Seat creation.** US SOLO: the Vault onboarding screen is served by the Broker Integration service in an isolated web view; CIP fields go to the broker over TLS and are never persisted by us (D.11); the broker account id is the `ref`. EEA SOLO: the CASP runs KYC with liveness and document/face dedup in its own SDK and posts `{ref, jurisdiction, is_18plus, verified_at}` on a signed webhook. PARTNER: Robinhood's `{verified, age18, jurisdiction, hash(customer_id)}`, which Robinhood would have to build (F4). A duplicate `(issuer, ref)` merges the newer player into the oldest Seat with a FORFEIT of its pending credit and a freeze of its BELL accrual (ADR section 6).
+
+## D.7 Chain layer
+
+Contracts target chain 4663 (testnet 46630), Solidity 0.8.x, OpenZeppelin Contracts 5.7.0 (tech missed); deployment is permissionless (tech#4). Under 5.7.0's EIP-712 ShortString change the permit domain name is `Bellwether`, version `1`.
+
+### BELL
+
+Immutable: `ERC20Capped(1_000_000_000e18)`, `ERC20Permit`, `AccessControl` with `MINTER_ROLE` granted once in the constructor to the Emission proxy and the admin role renounced.
+
+- `mint(address to, uint256 amount)`: `MINTER_ROLE` only.
+- `burnFrom(address from, uint256 amount)`: callable only by registered Sinks.
+- `registry()`: immutable SeatRegistry address.
+- `_update(from, to, value)`, the bound-transfer hook: mint requires `registry.seatOf(to) != 0`; burn requires `registry.isSink(msg.sender)`; any other transfer requires `registry.seatOf(from) == registry.seatOf(to) != 0`. Errors `UnregisteredAddress()`, `NotSameSeat()`, `NotSink()`.
+- Standard `Transfer` and `Approval` events; no pause, no admin, no upgrade. A future P2P mode is not in this contract; if the five gates ever pass (ADR section 3) it is a new token and a migration, deliberately.
+
+### SeatRegistry (UUPS behind the timelock)
+
+`bind(bytes32 seatId, address addr, bytes consent)` by `REGISTRAR_ROLE` (chain service) with the player's EIP-712 signature over `(seatId, addr, chainId, nonce)`; max 3 addresses per Seat; 7-day cooldown per Seat. `unbind`, `rotate(seatId, old, new)` for erasure (old address tombstoned after the player moves balances by same-Seat transfer). Views `seatOf(address)`, `addressesOf(seatId)`, `isSink(address)`. `setSink(address, bool)` by `SINK_ADMIN_ROLE` (timelock only). Events `SeatBound`, `SeatUnbound`, `SeatRotated`, `SinkSet`. Only the random `seatId` is on-chain (F17).
+
+### Emission and Merkle distributor (upgradeable)
+
+`publishSeasonRoot(uint32 season, bytes32 root, uint256 total, string uri)` by `ROOT_PUBLISHER_ROLE` (the 3-of-5 multisig directly; amounts are already published 30 days ahead and the ceiling is on-chain); reverts if `total > 20_000_000e18 x 95^n / 100^n` in integer math or if the season already has a root. `claim(season, index, seatId, to, amount, proof)` is permissionless (anyone may pay gas for anyone), leaf `keccak256(abi.encode(index, seatId, to, amount))`, claimed bitmap per season (Uniswap merkle-distributor pattern, tech#35), requires `registry.seatOf(to) == seatId`, then `BELL.mint`. Unclaimed leaves are re-included next season until the 180-day expiry. Events `SeasonRootPublished`, `Claimed`.
+
+### Sinks (upgradeable, each registered as a Sink)
+
+`AdReplacementSink.redeem(kind, permit)` burns 200 BELL and emits `BoostRedeemed(seatId, kind)`, which the Indexer converts into a SERVER_GRANT (Android and web only; zero Stock Credit). `CharterMint` burns BELL for ERC-1155 cosmetics; `Nameplate` burns 50 to 5,000; `Syndicate` burns 500 to found and locks 100 per season to join; `LadderTicket` burns 20. All accept EIP-2612 permits so the relayer can submit without the player holding ETH.
+
+### PayoutLedger and SponsorEscrow (publication only)
+
+`PayoutLedger.publish(uint32 period, bytes32 root, uint64 poolCents, uint64 accruedCents, uint64 paidCents, string uri)` monthly by the multisig; leaf `keccak256(seatId, period, paidCents, currency)`, so a player verifies their own line from the hub without revealing which leaf is theirs. `SponsorEscrow.commit(dropId, termsHash, escrowCents, fixedCents, eligibleCount)` before a drop is announced and `publishAllocation(dropId, root)` at allocation. Funds are never on-chain: escrow sits with Bellwether Rewards LLC at the delivering broker (US) or the EMI (EU); the contract makes "escrow before announcement" auditable (ADR D10).
+
+### Gas sponsorship and account abstraction
+
+Players never need ETH. (a) **Relayer plus permit**, the base path: `claim` is permissionless and sinks accept permits, so our relayer (a KMS-held key with a daily spend limit) submits and pays for any address, including Robinhood Wallet, whose smart-account support is unconfirmed (tech open questions). (b) **ERC-4337 with a paymaster** for embedded wallets against EntryPoint v0.7 `0x0000000071727De22E5E9d8BAf0edAc6f37da032`, bundled through Alchemy (Robinhood's account-abstraction docs, tech missed). **Paymaster vendor:** Robinhood's docs list Alchemy, ZeroDev, Privy and Dynamic and describe an Alchemy Gas Manager policy, while Alchemy's own pages do not confirm chain 4663 (tech#22, #23). Decision: Alchemy Gas Manager primary at 8% overhead, ZeroDev fallback, a self-hosted OpenZeppelin 5.7.0 `PaymasterSigner` as last resort; all three run on 46630 in Phase 0 (D.16).
+
+### Embedded wallets and Robinhood Wallet linking
+
+At T1 the player either links Robinhood Wallet through WalletConnect (QR or deep link; our domain registered with WalletConnect Verify; tech#21) and signs SIWE plus the bind consent, or receives an embedded EIP-7702 wallet from Privy with key export, provisioned only at first claim because Privy's free tier covers 0 to 499 MAU, then $299 to $499/month to 9,999 MAU, then $2,000 base plus $0.05/MAU (tech#22 skeptic); Dynamic ($249/month including 5,000 MAU) is the fallback vendor. Robinhood Wallet supports chain 4663 and Arbitrum natively (tech#21), which keeps the Arbitrum One contingency invisible to players.
+
+### Indexer
+
+A viem indexer subscribes over Alchemy WSS to `Transfer`, `Claimed`, `SeasonRootPublished`, `SeatBound`, `BoostRedeemed` and sink events, with polling fallback on the public RPC. The "~13 min hard finality" figure is unverified (tech#3 skeptic), so events are final after 64 blocks and re-checked at L1 batch posting; since the ledger is authoritative, a reorg can only delay a status update, never change a balance.
+
+### Chain-filter contingency and Arbitrum One migration runbook
+
+Robinhood can filter addresses at the sequencer and force-fail transactions through the ArbFilteredTransactionsManager precompile; the error string is "Transaction rejected by chain policy" (tech#5). The relayer counts that error and any post-inclusion force-fail; one occurrence involving a game contract pages on-call, and Gate 3 requires zero.
+
+Runbook, target 72 h, pre-published as the ADR's rule: (1) the 2-of-5 guardian pauses Emission and sinks on 4663; (2) notice in-app and on the hub; the ledger continues; (3) deploy the pre-audited mirror set, same bytecode, on Arbitrum One (42161), where EntryPoint v0.7 has the same address; (4) publish a genesis root equal to `bell_ledger` minted balances plus unminted accruals; bound tokens cannot be traded, so there is no cross-chain double-spend, and 4663 balances are void by the published rule; (5) replay the registry snapshot; players re-sign consent at their next hub visit; (6) switch client, hub and relayer chain id by config; Robinhood Wallet needs no user action; (7) re-run Gate 3 for 30 days.
+
+## D.8 Broker integration (the Vault, US SOLO)
+
+The Vault is a white-label account at an Alpaca-class FINRA member. Alpaca's Broker API documents fractional quantities to 9 decimals and journal types JNLC (cash) and JNLS (stock) for rewarding users (economics#24 and missed; legal-us missed); pricing is unpublished and the ADR assumes $3 per account (ADR assumption 1). Apex's white-label rail is the alternate (legal-us#4). Fractional shares are non-portable via ACATS and liquidated on transfer (legal-us#11), which the Vault discloses.
+
+| Flow | Our call | Our record |
+|---|---|---|
+| Account open | `OpenAccount(cip_payload, agreements, w9)` from the isolated onboarding view; idempotency key `seat_candidate_id` | `VaultAccount{cip_status}`; PII discarded after the response |
+| KYC status | Webhook ACTIVE, ACTION_REQUIRED, REJECTED | Seat created only on ACTIVE; ACTION_REQUIRED shows the broker's own link |
+| Cash journal | `Journal(JNLC, sponsor_firm_account -> account, amount, idempotency = redemption_id)` on Settlement Day | `Redemption.rail_ref`; REDEMPTION event |
+| Sign-up Grant | Same, `idempotency = seat_id:grant` | SIGNUP_GRANT then REDEMPTION |
+| Fractional order | `Order(notional, symbol in the 12-ETF list, market, idempotency = order_intent_id)` when the player picks; S&P 500 ETF default placed on day 30 if no choice | `orders`; `sell_lock_until = +3 trading days` |
+| Locks | No sell before `sell_lock_until`, no withdrawal before `withdraw_lock_until = journal + 30 d`, enforced in our Vault UI and orchestration (the only path to the account); the broker contract requires account-level restriction flags where the API offers them | Lock timestamps |
+| Statements and tax | Broker statements and confirms linked in the Vault tab; broker 1099-B for sales (fractional sales under $20 exempt, ADR table); Bellwether Rewards LLC tracks FMV per Seat per year for 1099-MISC, moot under the $83 ceiling but recorded | `last_statement_at`, `lifetime_value_cents` |
+| Sponsor drops | JNLC of the fixed amount, then an order for the named third-party sector ETF, 60 days after announcement | Allocation leaf |
+
+**Idempotency and reconciliation.** Every mutating call carries a key derived from our ledger id; a 5xx or timeout retries with backoff for 24 h, then parks for manual review. Nightly three-way reconciliation compares ledger REDEMPTION events, the broker's journal list for the sponsor firm account and that account's cash movement: a journal with no ledger event is an extra (manual); a ledger event with no journal is a missing (auto-retry); an amount mismatch pages. The firm account is pre-funded to the next Settlement Day plus the reserve (ADR section 7).
+
+**Sandbox plan.** Phase 1: all flows against the broker sandbox with synthetic identities, including duplicate webhooks, rejected CIP, journal timeouts and an ACTION_REQUIRED loop. Phase 2: broker certification, a 50-account staff pilot and reconciliation dry-runs over four Settlement Days.
+
+PARTNER: Robinhood Financial would deliver the same credit into the player's Robinhood account under a flat fee; the endpoint does not exist and Robinhood would have to build it (F4). The service targets an `IRedemptionRail` interface, so that rail is an adapter.
+
+## D.9 EMI/CASP disbursement (EEA SOLO)
+
+The disbursing party is a MiCA-authorised EMI/CASP (ZBD holds NL EMI and MiCAR licences, precedents#18); we never hold e-money or provide a crypto-asset service (ADR section 4). Asset: EURC, the e-money token Robinhood Europe uses for its own Dividend Match (legal-eu, Dividend Match terms). Chain: 4663 if EURC is deployed there, otherwise Arbitrum One (Robinhood Wallet supports both, tech#21); never a USD stablecoin for a EUR obligation.
+
+Per Settlement Day: (1) the Ledger emits `{seat_ref, amount_eur_cents, destination_address, ownership_proof}`, the proof being the player's WalletConnect signature over `(seatId, address, chainId, nonce)`; (2) the file is posted to the CASP with a batch idempotency key; (3) the CASP maps `seat_ref` to the identity it KYC'd, screens it, attaches the travel-rule data it must hold (originator: the Bellwether Rewards entity's name, registration number and address; beneficiary: the KYC'd name and the self-hosted address with the ownership proof on file), sends EURC and returns tx hashes; (4) the Indexer confirms each transfer; (5) the Ledger appends REDEMPTION events. DAC8 reporting is the CASP's obligation as the reporting service provider (legal-eu missed); we supply nothing beyond the payout file. Reconciliation is nightly across payout file, CASP report and indexed transfers; the EUR float at the CASP is topped up weekly to the next Settlement Day plus three months of trailing EU payouts. The post-settlement screen is the neutral "hold / withdraw / swap in your wallet" text with no token names or prefilled links (ADR D16). Fallbacks per member state by config: SEPA EUR through the same CASP, then Gems at 2x.
+
+## D.10 Security
+
+**Key management.** Contract admin is a 3-of-5 Safe multisig behind a 7-day timelock for upgrades and sink registration, with a 2-of-5 guardian subset holding pause-only power; signers use hardware keys in three jurisdictions. `REGISTRAR_ROLE` and the relayer live in cloud KMS with signing-only permissions, a $200 daily gas budget and an alarm at 50%; `ROOT_PUBLISHER_ROLE` is the multisig itself. Session JWTs use ES256 keys rotated every 90 days. SSV secrets live in the secret manager; AdMob keys are refreshed from `gstatic.com/admob/reward/verifier-keys.json` and cached at most 24 h (tech#32). Broker and CASP services have their own KMS keys and no read access to game tables.
+
+**Signing.** Every client request is signed by a per-install device key registered at first session; T1 and T2 requests also carry the Play Integrity token or App Attest assertion bound to the request hash. Server grants inside input logs are Ed25519-signed so replays verify them without a lookup.
+
+**Rate limits.** Checkpoints 4/min per player (bursts to 10); inputs 25/s inside a log; credited views 6/day with a 2-min gap and 8/day served; BELL claims 1 per season per Seat; redemptions 1 per week per Seat; registry binds 1 per 7 days per Seat; verification attempts 3 per 30 days; API 600/min per IP, 60/min unauthenticated; SSV endpoints accept only published network source IPs where lists exist (Unity Ads: `static.applifier.com/public_ips.json`, tech#32).
+
+**Abuse controls.** VPN, proxy or emulator blocks rewards, never play. Refunded IAP receipts append a REVERSAL inside the 35-day vest. One destination per Seat. Superhuman input rates reject the log; regular timing feeds the risk score. Enforcement follows the published ladder with 14-day human-reviewed appeals and quarterly published counts (ADR section 6).
+
+### Threat model
+
+| Threat | Vector | Control | Residual |
+|---|---|---|---|
+| Inflated Cash or Float | Memory edit, patched binary | Replay of every log; state hash; affordability | Cosmetic desync only |
+| Clock manipulation | Wall-clock or time-zone change | Server-clock offline; monotonic in-session ticks; 2% elapsed bound | None |
+| Forged or replayed SSV | Spoofed GET | Per-network signatures; unique `(network, txn_id)`; source-IP allowlists; nonce correlation | Network-side fraud, scrubbed before "net" |
+| Device farms and emulators | Physical farms +72% YoY (tech#31) | No real value without a Seat (C5); device intelligence at T1/T2; fleet signals | Real KYC'd humans capped at $83/year each |
+| Rented KYC identities | Gray-market documents | Face and document dedup at the vendor; one account per TIN at the broker; caps to $30/year and tenure to 30 days if identities fall below $20 (ADR assumption 12) | Bounded |
+| Multi-accounting | Many T0 accounts | $5 pre-verification cap with expiry; merge on duplicate attestation | UA metric pollution |
+| Human-speed automation | Scripted valid inputs | Not stoppable by server authority (idle-design#32); bounded by caps and the Seat | A bot earns boosts and cosmetics |
+| Relayer key compromise | Cloud breach | KMS signing only; gas budget; relayer cannot mint outside Merkle leaves or bind without consent signatures | Up to $200/day of gas |
+| Multisig signer compromise | Phishing | 3-of-5 plus 7-day timelock; guardian pause only; BELL immutable | Delayed periphery upgrade |
+| Sequencer filtering | Hash-list filtering (tech#5) | Ledger authoritative; pre-published Arbitrum One redeploy | 72 h claim outage |
+| Contract bug | Logic error | Minimal immutable token; audited periphery; Foundry invariants; guardian pause on periphery | Token unpausable by design |
+| Insider fraud | Admin balance edits | No edit path exists, only typed events with two-person approval and an append-only audit log; Earnings Call and on-chain roots | Two-admin collusion, caught by reconciliation |
+| PII breach | Broker or KYC data on our side | Attestations only; CIP transits an isolated segment unpersisted | Vendor breach, allocated by contract |
+| DDoS | Volumetric on SSV or checkpoint endpoints | CDN and WAF; network-IP-only SSV; small idempotent uploads | Accrual delay, never loss |
+
+## D.11 Privacy
+
+| Data class | Where | On-chain | Retention | Basis |
+|---|---|---|---|---|
+| Player id, progress, checkpoints, input logs | Game plane Postgres and object storage | No | Logs 35 days (the IAP vest window); checkpoints: last 30 plus monthly snapshots for 13 months | Contract |
+| Device key, integrity verdicts, risk signals | Fraud service | No | 13 months from last session | Legitimate interest, fraud prevention, DPIA'd |
+| Seat and attestation `{ref, jurisdiction, is_18plus, verified_at}` | Verification service | No | Seat life plus 12 months; the licensed party keeps the AML record under its own retention (F17) | Legitimate interest and legal obligation |
+| CIP fields, documents, selfies, biometrics | Never persisted by us | No | Vendor | Vendor's basis; BIPA/CUBI allocated by contract |
+| Stock Credit events, redemptions, tax FMV | Ledger | Merkle leaves only, `hash(seatId, period, amount)` | 7 years | Legal obligation |
+| seatId to address map | SeatRegistry | Yes, pseudonymous | Until rotation; tombstoned on erasure | Legitimate interest under the DPIA (EDPB v2.0; F17) |
+| Wallet address and ownership proof | Chain service; forwarded to the CASP | Address only | Seat life | Contract |
+| Analytics events | ClickHouse; player id hashed with a 90-day rotating key | No | 25 months | Legitimate interest; opt-out honoured |
+
+Rules: no personal data on-chain (F17); erasure rotates the on-chain address and tombstones the Seat record, leaving `seatId` a random value with no off-chain link; brokerage KYC data is never repurposed; Vault and CASP integrations are separated from analytics by network and IAM. DPIA inputs: whether public keys in the seatId map are personal data (legal-eu#38); device-intelligence processing at T1/T2; the attestation record's basis separate from AML retention (ADR open item 12); cross-border transfer to the KYC vendor; the under-16 EEA gate (GDPR Art 8; ADR D11).
+
+## D.12 Observability and SLOs
+
+| Surface | SLO | Alert |
+|---|---|---|
+| Game API availability | 99.9% monthly | Error rate > 1% for 5 min |
+| Checkpoint accept latency | p95 < 300 ms, p99 < 1 s | p99 > 2 s for 10 min |
+| Replay queue lag | < 5 min p99 | > 15 min |
+| Replay divergence | < 0.1% of checkpoints (Gate 0) | > 0.3% in an hour; auto-rollback at 0.5% |
+| SSV endpoint | 200 within 400 ms p99 (LevelPlay's stated target, unverified, tech#32 skeptic; adopted for all networks) | p99 > 800 ms; signature failures > 1% |
+| Ledger integrity | Balances equal event sums at the nightly check | Any mismatch pages |
+| Bell Rule coverage | Published monthly; < 1.0 for 14 days triggers the downward rate rule (ADR section 7) | < 1.0 for 7 days |
+| Settlement Day | 100% of queued redemptions SENT by T+1 | Incomplete at T+1 08:00 UTC |
+| Reconciliation breaks | None unresolved after 3 business days | Any older break |
+| Claims | 99% MINTED within 10 min | Any chain-policy error; success < 95% |
+| Play Integrity quota | Daily use < 70% | > 85% |
+
+Tracing is OpenTelemetry end to end with hashed player ids; logs never carry CIP fields; broker and CASP services log ids and amounts only. Dashboards mirror the Earnings Call so the published numbers are the operating numbers.
+
+## D.13 Infrastructure and cost per DAU
+
+Assumptions: 25 checkpoints per DAU per day (about 100 KB), 40 API calls, 3 SSV callbacks, 3 ms replay CPU, MAU = 4 x DAU, 30% of Seats link wallets, one claim per Seat per 90-day season, device-intelligence calls only at T1/T2 events. Vendor prices from tech#22, #23, #26, #31 and missed facts.
+
+| Monthly line | 10k DAU | 100k DAU | 1M DAU |
+|---|---|---|---|
+| Compute (API, replay workers, indexer) | $450 | $2,400 | $16,000 |
+| Postgres (managed, HA) plus Redis | $300 | $1,200 | $7,000 |
+| Object storage | $40 | $350 | $3,200 |
+| ClickHouse | $150 | $600 | $3,500 |
+| CDN, WAF, secrets, monitoring | $150 | $500 | $2,500 |
+| RPC (Alchemy: 30M CU free, then $0.45/M) | $0 | $150 | $1,400 |
+| Device intelligence (Fingerprint Pro Plus $99 for 20,000, then $4/1,000) | $99 | $250 | $2,100 |
+| Embedded wallets (Privy tiers) | $299 | $499 | about $10,000 ($2,000 base plus $0.05 x claimer MAU) |
+| Sponsored gas and wallet provisioning (about $0.05 per claimer per month, ADR section 7) | $60 | $600 | $6,000 |
+| Play Integrity, App Attest | $0 | $0 | $0 |
+| **Total** | **$1,550** | **$6,550** | **$51,700** |
+| **Per DAU-month** | **$0.155** | **$0.066** | **$0.052** |
+| Share of net revenue at net ARPDAU $0.056 (ADR worked example) | 9.2% | 3.9% | 3.1% |
+
+KYC, broker account fees and journals are rail costs inside the Bell Rule model (ADR section 7), not infrastructure. The 10k tier is fixed-cost dominated, which is acceptable in Phases 0 and 1 because no rail is live.
+
+## D.14 Testing strategy
+
+**Simulation harness.** A headless BellSim runner drives bot personas (three sessions a day, 24-hour watcher, Reinvest-everything, ad-maximizer) through 30 simulated days per config version and asserts the ADR pacing: first wall near 45 min, first IPO at 2.5 to 3.5 h, Index Inclusion on day 10 to 14. The economy sheet (idle-design#30) is the source of truth; tier costs and paybacks must match it to the cent.
+
+**Economy fuzzing.** Property tests over random revenue, geo-mix and verification-rate scenarios: the pool never exceeds 20% of banked net ads plus 5% of banked net IAP plus sponsor escrow; no Seat exceeds $0.10/day, $4/month, $50/year (+50% with the Pass), the $3 Grant and $20/year of drops; per-view rates stay within 0.5x to 1.25x of the prior month; accrued cents are always honoured; BELL never exceeds 150/day, 8,000/season or the season ceiling; the mint/burn halving fires exactly at 2:1 over two seasons. Run on every config change and in the monthly Earnings Call pipeline.
+
+**Replay determinism.** 10,000 random input logs replayed on x64 .NET 8, arm64 .NET 8, IL2CPP iOS arm64, IL2CPP Android arm64 and the Unity editor; zero hash differences is a merge requirement. A kernel change ships with a config version bump, and kernels stay side by side for 35 days so old checkpoints replay under their own kernel.
+
+**Contract tests and audit.** Foundry unit and invariant tests: cap never exceeded; only Emission mints; no transfer across Seats; only Sinks burn; season totals under the ceiling; no double claim; registry cooldowns hold under fuzzing. External audit of BELL, SeatRegistry, Emission, the sinks, PayoutLedger and SponsorEscrow at the boutique tier, $10-25k, 8-14 weeks (tech#36; ADR section 3), booked in Phase 0 for the Phase 3 mainnet; the Arbitrum One mirror is identical bytecode under the same report.
+
+**Load tests.** k6 at 10x the expected checkpoint rate for 1M DAU (about 3,000/s), an SSV burst of 500/s, a season-open spike of 200,000 claims in an hour and a 100,000-redemption Settlement Day, judged against the D.12 SLOs.
+
+**Store review dry-runs.** Internal-track builds with reviewer notes on read-only BELL on iOS, spending on the web hub, the Season-Pass-linked loyalty framing and the Google Financial Features declaration (ADR D12); a checklist against Apple 3.1.1 and 3.1.5 and Google's loyalty text runs before every phase gate.
+
+## D.15 Release and rollout
+
+Environments: dev, staging (testnet 46630, broker sandbox, CASP sandbox), production. Client releases on a two-week train, forced update only for kernel-incompatible changes; services deploy continuously behind health checks with automatic rollback on the divergence alert. Config rolls out at 1/5/20/100% by hashed cohort (ADR section 2), with the kernel config hash pinned per cohort. Rate tables publish 7 days ahead and emission tables 30 days ahead; the config service rejects edits to a published period. Contract upgrades pass the 7-day timelock with the proposal hash posted in the Earnings Call. Jurisdiction switches (the US Vault, each EEA member state, RoW countries) are per-country flags whose metadata must carry the counsel memo id. Kill switches exist for accrual, redemption, claims and each ad network. Each ADR gate (Gate 0 to Gate 4) is a release checklist item reading its metrics from the D.12 dashboards.
+
+## D.16 Open technical questions and the experiments that answer them
+
+| # | Question | Experiment | Decide by |
+|---|---|---|---|
+| 1 | Does a paymaster sponsor gas on chain 4663, at what cost? | 1,000 sponsored claims on 46630 through Alchemy Gas Manager, then ZeroDev, then the self-hosted OZ PaymasterSigner; measure cost and failure rate | End of Phase 0 |
+| 2 | Does Robinhood Wallet accept our WalletConnect session, SIWE and EIP-712 bind on 4663 without smart-account features? | 50-user internal test; the relayer-plus-permit path must succeed regardless | Phase 0 |
+| 3 | Is EURC deployed on 4663 and supported there by the CASP? | Verify the contract on Blockscout; CASP sandbox transfers on 4663 and Arbitrum One | Phase 2 |
+| 4 | Is BellSim bit-identical across IL2CPP and .NET? | The D.14 golden-vector matrix at 1M operations per platform | Before Gate 0 |
+| 5 | How much Play Integrity quota does season open need? | Model from Phase 1 claim-intent telemetry; file the increase six weeks ahead | Phase 2 |
+| 6 | Does App Attest throttling bite at season open? | Staged onboarding at 20 attestKey/s in a Phase 1 cohort; measure failures | Phase 1 |
+| 7 | Does Robinhood filter fresh game contracts or the relayer? | Deploy the contract set to mainnet in Phase 2 with zero value; 10,000 no-op transactions over 30 days; count chain-policy errors; ask Robinhood in the PARTNER track | Phase 2 |
+| 8 | Are the AppLovin MAX and LevelPlay SSV schemes as described? Both unverified (tech#32 skeptic) | Launch credit on AdMob and Unity Ads (verified schemes); certify MAX and LevelPlay against current vendor docs in a staging placement before enabling credit | Phase 1 |
+| 9 | Will an Alpaca-class broker enforce account-level lock flags, and at what per-account price? | RFP to two brokers with the D.8 flow table; sandbox test of restriction flags | Phase 1, Gate 1 input |
+| 10 | Are on-chain price feeds needed at launch? | No consumer exists: BELL has no price, the Vault shows broker values, EEA screens name no token; confirm no code path reads Chainlink and defer oracle work (feeds pause during corporate actions and go stale on weekends, tech missed) | Phase 3 design review |
+| 11 | Fingerprint or Sardine? | Parallel run on a Phase 1 cohort; compare emulator, farm and VPN catch rates at equal false-positive budgets | Phase 2 |
+| 12 | Is a Unity WebGL playable hub worth building? | Measure Exchange Floor visits per linked Seat in Phase 3; build only above 2 visits per Seat per month | Phase 5 |
+
+
+# Part E. Business model, go-to-market and roadmap
+
+
+## E.1 Positioning and target audience
+
+**Internal positioning statement.** For adults who enjoy idle tycoon games and have never held a diversified investment, Bellwether is a game about patience whose members earn cents to a few dollars a year in real fractional ETF shares or Stock Tokens, delivered by a licensed partner. Unlike get-paid-to-play apps (gift cards at $0.10-3 per hour, precedents#26-27) and tap-to-earn games (every major token down 95-99%, F18), the reward is a first, small, boring, diversified holding, and the game stands on its own without it.
+
+**Mandatory external line** (ADR section 1; store listing, first run, FTC substantiation file): "Bellwether is a game about patience. Member rewards are cents to a few dollars a year, paid in real fractional ETF shares or Stock Tokens by a licensed partner. The point is a first, small, boring, diversified holding, not trading." Listings never mention earning (Freecash removal, p2e#34); Android copy never promotes earning potential (Google Blockchain-based Content policy, economics missed).
+
+| Segment | Who | Why they come | What they get | Role in the model | Size signal |
+|---|---|---|---|---|---|
+| S1 Core idle players | 25-44, US/EU/UK, veterans of AdVenture Capitalist, Idle Miner Tycoon, Egg Inc, Cookie Clicker | Eleven-sector compounder with sqrt/cbrt prestige, Markets, Index Sprints | The full game; BELL cosmetics; Stock Credit as a footnote | Retention and ad revenue engine; 60%+ of DAU | Idle Miner Tycoon 100M+ downloads, AdCap >1M DAU at peak (idle-design#17, #20) |
+| S2 First-holding adults | 18-34, never invested, US first, EEA from Phase 4 | The Vault: a $5 ETF fraction earned by patience, no deposit, no trading | Verified Seat, Sign-up Grant, ETF fraction in a KYC'd account | Verified Seats (1-2% of MAU/month); the PARTNER pitch | Robinhood 28.4M funded customers, 1M+ international (robinhood#29, missed) |
+| S3 Robinhood Wallet / Chain natives | EEA and RoW holders of on-chain Stock Tokens, Wallet users, DEX users | BELL in Robinhood Wallet, Stock Token grants under RHEU's template (PARTNER) | BELL claims, Charters, Wallet quests (PARTNER) | On-chain activity that Robinhood can count; EEA cohort | 190+ Stock Tokens, Uniswap stock-token volume $1.5B in six weeks (robinhood#5, missed) |
+| S4 Gems-only players | Under-18 (13+/16+), UK, CA, CH, UAE | The game | Full game, Stock Credit redeemed as Gems at 2x | Ads and IAP only; no rail cost | UK eCPM ~$10.65 (economics#2) |
+| S5 Sponsors (B2B) | ETF issuers, consumer brands, banks with stock-reward programs | Verified, 18+, brokerage-holding adults completing a deterministic objective for about $1 each | Sector Sprint skin, aggregate reporting, on-chain escrow proof | Sponsor platform fees; drops <= $20/Seat/year | Bumped: +40% spend, +100% after $5-10 grants (economics#28) |
+
+Segment priority by phase: S1 only through Phase 1; S1+S2 (US) in Phase 2; S3 added in Phase 3-4; S5 from the Phase 2 pilot.
+
+## E.2 Revenue lines and expected mix
+
+| Line | Mechanism | Price points and rates | Share of net at steady state (ADR worked example) |
+|---|---|---|---|
+| R1 Rewarded video | x2 profit 15 min, 4 h skip, x2 offline, Report re-roll; hard cap 8/day, 6 credited; SSV-only | Gross eCPM US $15 / EEA $7 / UK-group $10 / RoW $3; 3.0 verified views/DAU; mediation take 12% | 50.5% ($847 per 1,000 DAU/month) |
+| R2 Interstitials | None in sessions 1-3, then max 1/session, first after 90 s | 1.0/DAU at 55% of rewarded eCPM | 9.2% ($155) |
+| R3 IAP | Starter pack $2.99 (permanent x3 + Golden Charter), Gems for Charters, time warps, cash infusions | 2.5% payers; gross IAP+subs ARPDAU $0.030; store fee 25% | 40.2% combined with R4 ($675) |
+| R4 Subscriptions | Ad removal $3.99/30 d ($0.99/7 d) with 24 h offline; Season Pass $4.99/30 d (event track, Float boosters, +50% caps, +$0.02/day Stock Credit) | Included above; Season Pass attach 1.5% of DAU | (in R3) |
+| R5 Sponsor platform fee | 20% of sponsor escrow, charged on top of the escrow that passes 100% to players | $0.25-1.00 per verified completion escrowed; 20% fee | 1-2% at scale ($20 per 1,000 DAU at 1M DAU) |
+| R6 Broker acquisition bounties | SOLO: affiliate CPAs $20-70 per funded account from un-incentivized placements only (F22 bars incentivized traffic); PARTNER: flat periodic marketing fee benchmarked at $30-50 per expected self-funded account | Never enters the pool, never reaches a player (FINRA 2040 / 15(a), legal-us#6) | 0% in the base case; shown as a sensitivity |
+
+Planning split: 55-60% ads / 40-45% IAP (ADR section 2 says ~55/45; the worked example lands at 60/40). R6 is excluded from every base-case number in this section because the ADR's model closes without it and because affiliate terms bar incentivized traffic; it is the single largest upside and is treated only as a sensitivity.
+
+## E.3 Unit economics
+
+**Per 1,000 DAU, per month, SOLO, token price zero, no Robinhood** (ADR section 7; geo mix US 50 / EEA 25 / UK-group 10 / RoW 15; MAU = 4 x DAU; 1.0% of MAU verify per month).
+
+| Item | $/month | % of net |
+|---|---|---|
+| Gross revenue: rewarded $963 + interstitial $176 + IAP/subs $900 | 2,039 | |
+| Less mediation take (12% of ads) $137 and store fees (25% of IAP) $225 | (362) | |
+| **Net revenue** (net ARPDAU $0.056) | **1,677** | 100% |
+| Reward pool by the Bell Rule (20% x $847 + 5% x $675) | 203 | 12.1% |
+| Player cash-out: pool-funded $120 (ad $77 after 50% pre-verification breakage, IAP stock-back $34, Season Pass $9) + Sign-up Grants 40 x $3 = $120 from margin | 240 | 14.3% |
+| Unspent pool set aside to the reserve (memo; not a cash cost until paid) | 83 | 4.9% |
+| Verification: 24 US x $3 broker fee + 16 EU/RoW x $1.85 | 102 | 6.1% |
+| Journals (~40 x $1), sponsored gas and claimer wallets (~200 x $0.05) | 55 | 3.3% |
+| **Reward rail, cash basis** | **397** | 23.7% |
+| **Contribution before fixed costs** | **1,280** | 76.3% |
+
+On a full-provision basis (pool expensed when set, not when paid) the rail is $480 (28.6%) until the reserve reaches three months of trailing payouts; the excess then releases to operating margin quarterly and is disclosed in the Earnings Call. Both bases stay under Mode Mobile's audited 25-33% bound (economics#19 and skeptic).
+
+**Per install.** Retention D1 45 / D7 18 / D30 7 / D90 2.5 / D365 0.8 integrates to about 11 active days per install in year one (including D0). Year-one net revenue per install is $0.62 blended, $0.47 after the rail (rail share by geo: US 27%, EEA 22%, UK-group ~3% because Gems cost nothing, RoW 20%). This number sets the paid-UA limits in E.5: ad and IAP money is cents per player-day (F20), so growth is organic first.
+
+| Geo | Net ARPDAU | Active days, year one | Net LTV | LTV after rail |
+|---|---|---|---|---|
+| US | $0.076 | 11 | $0.84 | $0.61 |
+| EEA (IE, NL, DE, FR, LT) | $0.042 | 11 | $0.46 | $0.36 |
+| UK / CA / CH / UAE | $0.056 | 11 | $0.62 | $0.60 |
+| Rest of world | $0.018 | 10 | $0.18 | $0.16 |
+| Blended (50/25/10/15) | $0.056 | 11 | $0.62 | $0.47 |
+
+**Per Verified Seat (US, year one).** Cost: Sign-up Grant $3, CIP/KYC $3, journals about $6 (one per redemption, ~6 per year), accruals $7-11 (a heavy watcher earns ~$11/year, ADR section 7): $19-23. Revenue: at 220 active days and US net ARPDAU $0.076, $16.7. On ad and IAP alone a Seat is break-even to -$5 per year, carried by the 99% of players who never verify and whose accruals expire at 180 days. Under PARTNER, a flat fee economically equivalent to $40 per self-funded account at a 35% self-funding rate adds $14 per Seat: bounties are the dominant per-converted-player funding source (F20), which is why they must never touch the pool (ADR Q5). The Seat is the on-ramp, not the profit centre.
+
+## E.4 Monthly P&L at 10k, 100k and 1M DAU
+
+Assumptions beyond the ADR example: (1) variable lines scale linearly with DAU (volume discounts on KYC and gas are unmodelled upside); (2) sponsor escrow passes through at 100% as a memo line; the 20% platform fee is revenue; (3) team fully loaded at $10,500-11,500 per FTE-month, remote, US/EU mix; (4) infrastructure covers 60-second checkpoints, deterministic replay, analytics, RPC, device intelligence at T1/T2 and support tooling (tech#26 pricing); (5) legal and compliance is outside counsel plus vendor fees, with the in-house compliance lead in the team line from Phase 2; (6) marketing follows E.5; (7) 10k is Phase 2 (Q2 2027), 100k the Phase 4 exit (Q4 2027 / Q1 2028), 1M a 2028-29 target; (8) SOLO throughout, with PARTNER as a sensitivity at $40 per self-funded account and 35% of new Seats self-funding within 90 days.
+
+| Line ($/month) | 10k DAU | 100k DAU | 1M DAU |
+|---|---|---|---|
+| Rewarded video, gross | 9,630 | 96,300 | 963,000 |
+| Interstitials, gross | 1,760 | 17,600 | 176,000 |
+| IAP and subscriptions, gross | 9,000 | 90,000 | 900,000 |
+| Sponsor platform fee (20% of escrow) | 400 | 2,000 | 20,000 |
+| Memo: sponsor escrow passed to players | (2,000) | (10,000) | (100,000) |
+| **Gross revenue** | **20,790** | **205,900** | **2,059,000** |
+| Ad-network mediation take (12%) | (1,370) | (13,700) | (137,000) |
+| Store fees (25% of IAP) | (2,250) | (22,500) | (225,000) |
+| **Net revenue** | **17,170** | **169,700** | **1,697,000** |
+| Reward pool set by the Bell Rule | 2,030 | 20,300 | 203,000 |
+| Player cash-out (pool-funded + Sign-up Grants) | (2,400) | (24,000) | (240,000) |
+| Memo: unspent pool to reserve | (830) | (8,300) | (83,000) |
+| Broker CIP / KYC | (1,020) | (10,200) | (102,000) |
+| Journals, sponsored gas, claimer wallets | (550) | (5,500) | (55,000) |
+| **Reward rail (cash)** | **(3,970)** | **(39,700)** | **(397,000)** |
+| **Contribution** | **13,200** | **130,000** | **1,300,000** |
+| Team (FTE) | (105,000) (10) | (155,000) (14) | (300,000) (26) |
+| Legal and compliance | (15,000) | (25,000) | (50,000) |
+| Infrastructure and tooling | (2,500) | (15,000) | (90,000) |
+| Marketing (E.5 guardrails) | (8,000) | (45,000) | (250,000) |
+| Support and rewards operations tooling | (2,000) | (6,000) | (30,000) |
+| G&A (entities incl. Bellwether Rewards LLC, accounting, insurance, banking) | (6,000) | (12,000) | (40,000) |
+| **Operating result** | **(125,300)** | **(128,000)** | **540,000** |
+| Operating margin on net revenue | -730% | -75% | 32% |
+| PARTNER sensitivity (flat fee, $40 equivalent x 35% x new Seats) | +5,600 | +56,000 | +560,000 |
+
+Readings. The company does not break even at 100k DAU SOLO: with the Phase 4 fixed base (14 FTE, EU compliance), breakeven is about 200k DAU SOLO and about 140k DAU under PARTNER. At 1M DAU the rail is 23.4% of net, the pool 12%, the operating margin 32%, and the PARTNER fee roughly doubles operating profit. Payouts never outgrow revenue because the pool is a fraction of banked prior-month revenue (C4). The ADR's stress tests apply unchanged; a 30% eCPM decline at 100k DAU widens the monthly loss by about $30k and pushes SOLO breakeven to ~260k DAU.
+
+## E.5 User acquisition plan
+
+**Organic and ASO (primary, all phases).** Category keywords only: idle tycoon, capitalist, compounding, sectors, IPO; never "earn", "cash", "stock" or "crypto" in titles, subtitles or screenshots (Freecash, p2e#34; Google Blockchain policy). Screenshots show the sectors, Go Public and Index Inclusion; the Vault appears in no store asset. Store pages localized in 8 languages at Phase 1 (EN, FR, DE, NL, ES, PT, IT, LT). Web build on the Exchange Floor hub (the domain registered with WalletConnect Verify) for r/incremental_games discovery. Target organic share >= 60% of installs.
+
+**Creators and the incremental-games community.** Seed 30-50 idle/incremental YouTubers and streamers at Phase 1 with early builds and a Golden Charter code, paid flat (never per install or per Seat), under the store copy rules. Personal-finance creators only from Phase 2, with the positioning line and never "free stock"; every EEA creator asset reviewed under UCPD (legal-eu#21). Community: Sector Sprint theme votes, a public economy sheet, the monthly Earnings Call as content.
+
+**Cross-promotion.** Placement swaps with two to four idle titles through the mediation cross-promo layer from Phase 1; expected 5-10% of installs at near-zero cost. No offerwalls or incentivized installs in either direction (affiliate fraud 36x SRNs, economics#21).
+
+**Robinhood ecosystem channels (SOLO unless marked).** (1) Arbitrum Open House 2026 buildathon from 14 Sept (four online buildathons, two Founder Houses, $1M committed by Robinhood; robinhood#10): enter the bound-transfer BELL contracts and the Exchange Floor hub on testnet 46630. (2) HOOD Summit, 29-30 Sept 2026, Houston (robinhood missed): relationship-building with Chain, Wallet and Robinhood Europe teams; no proposal before Gate 0 data. (3) Chain developer group (chain-developers-group@robinhood.com, robinhood#11) for RPC, paymaster and Marks questions. (4) WalletConnect-verified dApp: the hub is reachable from Robinhood Wallet on chain 4663 today (robinhood missed: connect-to-dapps). (5) PARTNER: in-app Wallet placement and quests are curated by Robinhood under its Onchain Integrations ToS and would have to be granted (robinhood missed). Copy follows the Chain brand guidelines: "Built on Robinhood Chain", "Stock Tokens", never $HOOD, never implied endorsement.
+
+**Paid UA guardrails.** Only self-reporting networks (Apple Search Ads, Google, Meta, TikTok) and the mediation networks' own UA with fraud protection; no affiliates, offerwalls or incentivized sources; no earning creative anywhere. Hard rules: CPI <= 0.8 x 12-month LTV after rail for that geo and platform; paid cohort D7 >= 80% of organic D7 or the campaign stops; paid UA <= 25% of trailing-month net revenue; Android finance-style install fraud is assumed at up to 50% pre-KYC (economics#21), so Android paid budgets are judged on D7 cohorts, never installs. Paid UA is not a growth engine SOLO; it is a test line until PARTNER changes the LTV.
+
+| Geo | Target CPI (max) | Payback target | Paid channel posture |
+|---|---|---|---|
+| US | $0.50 | <= 180 days on net-of-rail revenue | iOS Search Ads brand/category terms only; Android SRN tests; scale only under PARTNER (+$0.21 LTV per install at $40 x 35% x 1.5% Seat rate) |
+| EEA (IE first) | $0.30 | <= 180 days | Small tests from Phase 4; creators preferred |
+| UK / CA / CH / UAE | $0.45 | <= 150 days | Canada soft-launch cohorts in Phase 0 ($5-10k); UK tests Phase 1 |
+| Rest of world | $0.10 | organic only | No paid UA before Phase 5 |
+
+## E.6 The Robinhood partnership pitch
+
+**What Robinhood gets.** (1) Self-funded, KYC'd, 18+ accounts at a flat fee benchmarked at $30-50 per expected funded account, against Robinhood's own 2025 marketing cost of roughly $110-160 per gross new funded customer and 2026 ARPU of $187 (economics missed, 10-K and Q2 10-Q). (2) Wallet and Chain activity it can report: every BELL claim, burn and Charter mint is a chain 4663 transaction from an attested human; every EEA grant is a Stock Token holder in Robinhood Wallet; the Earnings Call publishes Seats, links and claims monthly with methodology. (3) A compliant loyalty rail: deterministic, no chance, no trade nudges, index-only, holding periods, tax on recipient: the same shape as Robinhood's June 2026 Share Token Giveaway terms (180-day hold, appropriateness-tested clients; robinhood missed) and inside its Massachusetts undertakings (F7). (4) An on-ramp story for regulators and press: a diversified ETF fraction earned by patience, not a scratch-off. (5) International funded customers arriving already holding an on-chain Stock Token under RHEU's own template.
+
+**The ask list** (every PARTNER item in the ADR, each with what Robinhood would have to build and the SOLO fallback, C9).
+
+| # | Ask | Robinhood would have to build or grant | SOLO fallback | Phase |
+|---|---|---|---|---|
+| A1 | Attestation endpoint `{verified, age18, jurisdiction, hash(customer_id)}` (F4, ADR section 6) | An attestation API or signed message flow; no such third-party path exists today | Broker CIP (US) or EMI/CASP KYC (EU) as the Seat issuer | 2-4 |
+| A2 | US delivery: Robinhood Financial credits the Stock Credit as a restricted cash credit and pays its own separate sign-up stock reward (F6) | A deposit endpoint and promotion terms | The Vault (Alpaca-class FINRA BD) | 2 |
+| A3 | EEA delivery: Robinhood Europe UAB runs the "Bellwether Stock Token Grant" under its giveaway template: on-chain Jersey token only, broad-market ETF token default, 180-day hold, signed eligibility attestation | A co-marketed promotion with MiFID II Art 24-approved creative; Robinhood as Authorised Offeror | EURC via MiCA EMI/CASP, self-directed swap in Robinhood Wallet; then SEPA; then Gems 2x | 4 |
+| A4 | BELL tiers as Robinhood Wallet quests (Lighter precedent, robinhood#15) | Quest surface and curation | Web hub quests reachable via WalletConnect | 3-4 |
+| A5 | Written assurance that game contracts are not sequencer-filtered; Marks consent; commercial-integration consent for Wallet surfaces (ADR D13, open item 14) | A letter and a Marks licence | Pre-published Arbitrum One redeploy rule; Marks used only per the Chain ToS | 3 |
+| A6 | Partner Stock Program access for sponsor own-stock drops (ADR open item 13) | Enrolment of sponsors | Third-party ETF drops only | 4-5 |
+| A7 | Flat periodic marketing fee and FINRA 2210 principal approval of co-branded copy | Commercial agreement | None needed | 2 |
+| A8 | Buildathon and Open House participation; HOOD Summit visibility | Already offered publicly | Same | 0 |
+
+**The flat-fee structure.** A fixed quarterly co-marketing fee, set twelve months in advance, benchmarked on forecast Seats x $30-50 x the measured self-funding rate, renegotiated only at renewal, with no per-account, per-trade, per-asset or AUM component (FINRA 2040 / 15(a), ADR open item 1). Bellwether never recommends securities, opens accounts or touches funds; the player opens and funds the Robinhood account inside Robinhood. Robinhood's own sign-up stock reward is paid under Robinhood's terms; the Sign-up Grant rises to $5-10 only when Robinhood is the delivering broker and pays it as its "separate sign up stock reward" (F6). The Tiered Referrals Program is not used: it is for individuals and its per-referral bonuses are exactly the per-account compensation we avoid (robinhood#23).
+
+**Who to approach and when.** September 2026: the Chain developer group and buildathon mentors (engineering only); HOOD Summit, 29-30 Sept, Houston: Chain and Wallet product leads and Robinhood Europe attendees, warm intros through the chain's published partners (Offchain Labs, Alchemy, Chainlink; robinhood#3). Q1 2027, with Gate 0 data: Robinhood Europe UAB product and compliance in Vilnius on A3, Lithuanian memo in hand. Q3 2027, with Gate 2 data (Seats, self-funding, complaint and fake-Seat rates): Robinhood Financial partnerships and Legal on A1, A2 and A7. Robinhood's referral CAC history is $15-20 and >80% organic (robinhood#30), so the pitch is quality and compliance, not volume.
+
+**If they say no.** Nothing changes: the model above is SOLO, and "Built on Robinhood Chain" stays because deployment is permissionless (F3). The ask is re-presented after every second gate. Alternative US PARTNER brokers with their own stock-bonus programmes (Public, Webull, SoFi; precedents#7) are approached under the identical flat-fee structure from Phase 3; EEA stays EURC-or-Gems. If Robinhood filters our contracts, the Arbitrum One redeploy triggers and Robinhood Wallet still holds BELL via Arbitrum support (ADR D13). If Robinhood objects to the Marks, copy drops to "an app on chain 4663".
+
+## E.7 Sponsor sales playbook
+
+**Targets, in order.** (1) ETF issuers with a full eleven-sector family: their sector ETFs are the drop asset, the Sector Sprint is their theme, and an ETF grant is not the issuer's own stock (Section 5, Reg M, 10b-18; economics#29-30). (2) Consumer brands with retail investor programmes: the Bumped study is the pitch (+40% spend at rewarded brands, +100% after $5-10 grants; economics#28), but the grant is a third-party ETF, never the brand's shares unless counsel clears broker-executed 10b-18 purchases (ADR D10). (3) Banks and credit unions already paying for stock-reward modules (Bits of Stock on Q2 and Banno, precedents#4). (4) Financial-literacy foundations for EEA drops where commercial sponsors are slow.
+
+**Product.** A Sector Sprint skin ("Energy Sprint presented by X") plus a fixed $0.25-1.00 third-party sector-ETF grant to every Seat with >= 30 active days that completes the published objective; oversubscription by Seat seniority; delivered 60 days after the Sprint (Acorns Earn lag, precedents#5); EEA drops as ETF credits via PARTNER or EURC, never derivatives (F14). Sponsors get aggregates only.
+
+**Pricing.** Escrow $0.25-1.00 per completion x the sponsor's declared maximum completions, plus a platform fee of 20% of delivered grants (a 20% deposit on the escrow is invoiced on receipt and trued up); minimum campaign $10,000 escrow; unallocated escrow refunded within 90 days. All-in cost per verified 18+ brokerage-holding adult: $0.30-1.20, against $20-70 broker affiliate CPAs for a funded account (economics#13). Category exclusivity per Sprint only; no annual exclusivity before 100k DAU.
+
+**Escrow and reporting.** Funds land in Bellwether Rewards LLC's segregated sponsor account before the drop is announced (Bumped died when brands stopped paying, precedents#3); the SponsorEscrow Merkle root on chain 4663 proves the allocation matched the published rule. Report within 7 days of Sprint end: completions, geo split, tenure bands, delivered value, delivery date; no PII, no wallet addresses.
+
+**Compliance rules for sponsors.** No own-stock drops by default; no single-name mention; no "free", "win" or trading verbs; creative approved by the sponsor's own compliance where it is a financial firm; nothing randomized (C1); sponsors cannot buy eligibility, rate or cap changes (ADR Q3).
+
+**Pipeline targets.** Phase 2: one ETF-issuer pilot, $5-10k escrow. Phase 3-4: three sponsors, $30-60k escrow per quarter. 2028 at 1M DAU: 8-12 sponsors, ~$100k escrow and ~$20k platform fee per month. Sponsor revenue is deliberately small (1-2% of net); its job is player value and the on-chain proof of fairness.
+
+## E.8 Competitive landscape
+
+| Category | Examples | Reward and funding | Standalone fun | Legal posture | Bellwether difference |
+|---|---|---|---|---|---|
+| Idle tycoons | AdVenture Capitalist, Idle Miner Tycoon, Egg Inc, Cats & Soup | None; 55-60% ads, IAP, subs (idle-design#17, #19) | High; D1 60%+ reported | Clean | Same loop and monetization, plus a deterministic loyalty credit and a bound token that never touch the loop (ADR Q3) |
+| Get-paid-to-play | Mistplay, JustPlay, Swagbucks, Mode Mobile | Gift cards, $0.10-3/hr, $550/yr cap, floating rate, KYC at cash-out; advertiser-funded (precedents#26-28) | Low; portals | Fixed-ratio, 18+ | Real diversified asset via a licensed party; a game worth playing unpaid; lower caps ($83/yr) under a published rule |
+| Crypto-for-play | Bitcoin Miner (Fumb/ZBD), Bitcoin Blast, Sweatcoin | Sats or engagement-minted tokens; ad-funded; ~$0.25/day caps; SWEAT -99.7% (precedents#16, #25) | Medium | Store-policy churn; ZBD pivoting to payments (precedents#18-19) | Exogenous asset (ETF fraction); token has no price; iOS token read-only, no 3.1.5(v) exposure |
+| Tap-to-earn | Hamster Kombat, Notcoin, Catizen, Blum | Airdropped tokens, 95-99% drawdowns, 40-70% bots, retroactive rules (precedents#30-33) | Low | Unregulated; boycotts | No TGE, listing or price; minted only as earned to attested Seats; rules a season ahead (ADR Q1) |
+| Stock-reward fintechs | Stash Stock-Back, Acorns Earn, Bits of Stock, Grifin, TickerPerks; Bumped (dead) | 0.5-1% of spend in stock; subscription, interchange or brand-funded; BD-delivered (precedents#1-5, #10-11) | None | Registered BD/RIA, 18+ | Same BD delivery rail, but funded by game ads and IAP: no card, no spend, no brand dependency |
+| Broker acquisition promos | Robinhood tiered referrals, Webull free shares, Moomoo NVDA tiers | $5-1,000 stock for deposits with hold vesting (precedents#6-7) | None | Broker-run; MA settlement | Reward for patience, not deposits; no chance; the broker's own reward is additive under PARTNER |
+| Tokenized-stock venues (adjacent) | Robinhood Stock Tokens, xStocks, Ondo, Dinari, Coinbase on Base | Venues, not rewards; none pays tokenized shares for gameplay (precedents#13) | n/a | Securities; non-US | First path from play to a Stock Token holding, via Robinhood's template or self-directed swap |
+
+## E.9 Roadmap
+
+| Phase | Dates | Deliverables | Entry gate | Exit gate | KPIs measured |
+|---|---|---|---|---|---|
+| 0 Counsel and the game | Sep-Dec 2026 | Server-authoritative core, economy sheet, LiveOps backend, Canada/NZ game-only soft launch, counsel engaged (US + LT), testnet 46630 contracts, audit booked, buildathon entry, HOOD Summit | Funding for Phase 0-1 secured; team of 6-7 | Gate 0: D1 >= 40%, D7 >= 15%, gross ad ARPDAU >= $0.03 tier-1, opt-in >= 45%, crash-free >= 99.5%, replay divergence < 0.1%; kill D1 < 35% | Retention, sessions, first-IPO time, ad opt-in, ARPDAU, crash-free, replay |
+| 1 Global points-only | Q1 2027 | Global launch, BELL and Stock Credit as off-chain points, Vault hidden, Season 1 emission table, weekly Sprints, creators wave 1 | Gate 0 passed | Gate 1: net ARPDAU >= $0.04 US-weighted, payer rate >= 2%, US memos signed (2040 letter, 50-state read, tax, stores), economy simulation at three geo mixes and 2x verified rate | Net ARPDAU, payer rate, interstitial tolerance, bot share < 5% |
+| 2 US Vault | Q2 2027 | Broker agreement, Bellwether Rewards LLC, Bell Rule and caps published, US redemption and Grant live, Earnings Call, sponsor pilot | Gate 1 passed; broker executed | Gate 2 (two consecutive months): rail <= 25% of net, fake-Seat < 2%, KYC pass >= 85%, complaints < 0.5% of withdrawals, refund fraud < 0.3% of IAP, zero store strikes | Seat conversion, KYC pass, rail %, coverage, complaints, self-funding rate |
+| 3 BELL on Robinhood Chain | Q3 2027 | Audit, contracts on 4663 bound mode, seasonal Merkle claims, Wallet linking, Exchange Floor hub, Arbitrum One mirror, DPIA | Gate 2; audit report; US digital-tool memo; LT Art 4(3)/(5) opinion; store reviews | Gate 3: >= 30% of Seats link a wallet, claim gas < $0.01, zero chain-policy rejections, mint/burn <= 2:1, both stores approve | Wallet links, gas, mint/burn, claim rate, chain errors |
+| 4 EEA member state by state | Q4 2027 | Ireland, then NL, DE, LT, FR; Belgium fenced; EMI/CASP contract; per-state opinions; RHEU PARTNER track | Gate 3; Lithuanian opinion per state; EMI/CASP signed | Gate 4: EU KYC <= EUR 3 per Seat, EU rail <= 25% of EU net, complaints < 0.5% | EU Seats, KYC cost, rail %, EURC payout cost |
+| 5 RoW and transferability review | 2028 | Country whitelist on the EEA SOLO template at 0.5x ratios; review of BELL P2P transfer against the five gates no earlier than 12 months after mainnet; no TGE | Reg Crypto Assets and CLARITY outcomes known | Per-country memos; five gates (ADR section 3) | RoW rail %, sybil audit, sink consumption >= 50% of emission |
+
+**Monthly milestones, Phases 0-2.**
+
+| Month | Milestones |
+|---|---|
+| Sep 2026 | Engage US and Lithuanian counsel; open IE/NL/DE/LT/FR memos; trademark clearance; buildathon entry (14 Sept); HOOD Summit (29-30 Sept); economy sheet v1; first-five-minutes vertical slice; hire lead engineer, client engineer, economy designer |
+| Oct 2026 | Server-authoritative checkpoints and replay; mediation with SSV; LiveOps backend; tiers 1-7 tuned; Canada/NZ builds submitted; bound-transfer ERC-20 and SeatRegistry on testnet 46630 |
+| Nov 2026 | Canada/NZ soft launch with 1/5/20/100% rollouts; first cohorts' D1/D7; first-IPO timing tuned to 2.5-3.5 h; audit slot booked for Jun 2027; broker RFP issued |
+| Dec 2026 | Gate 0 read on four-week cohorts; go/kill decision; broker term sheet; KYC vendor selected; Bellwether Rewards LLC documents prepared; Season 1 emission table drafted |
+| Jan 2027 | Global points-only launch (nothing redeemable, Vault hidden); localization; creators wave 1; cross-promo swaps; interstitial tolerance test |
+| Feb 2027 | Weekly Sector Sprints; Season 1 live; bot share measured; US memos in draft (2040 letter, 50-state read, tax, stores); Apple and Google pre-review of the Vault UI |
+| Mar 2027 | Gate 1 read; memos signed; economy simulation at three geo mixes and 2x verified rate; broker agreement in final form; Bell Rule text published "not yet redeemable" |
+| Apr 2027 | Broker agreement executed; JNLC/JNLS journals tested; Bellwether Rewards LLC formed and pre-funds the broker; CIP flow in-app; caps and month-1 rates published 30 days ahead; sponsor pilot escrow received |
+| May 2027 | US Vault to 5%, then 20% of self-declared 18+ US players; Sign-up Grant live; first Settlement Day; first Earnings Call; pilot Sprint drop |
+| Jun 2027 | 100% US rollout; Gate 2 month 1; contracts frozen, audit starts; DPIA drafted; Robinhood Financial meeting scheduled for Q3 with Gate 2 data |
+
+## E.10 Team and budget by phase
+
+**Team plan** (FTE at phase end; loaded $10,500/FTE-month blended, rising to $11,500 by Phase 5 as compliance seniority increases).
+
+| Phase | FTE | Roles |
+|---|---|---|
+| 0 | 6.5 | Founder (product/CEO), lead engineer (server, economy sim), client engineer, backend/LiveOps engineer, game/economy designer, technical artist/UI, QA (0.5); contractors: US and LT counsel, audio, ASO |
+| 1 | 8 | + data analyst, + community and support lead |
+| 2 | 10 | + compliance and rewards-operations lead (broker, KYC vendor, Earnings Call, enforcement ladder), + trust-and-safety/fraud engineer |
+| 3 | 12 | + smart-contract engineer (fixed-term through audit and Gate 3), + web hub engineer; fractional DPO |
+| 4 | 14 | + EU operations and localization lead, + partnerships and sponsor sales |
+| 5 / 1M DAU | 24-28 | Second client pod, LiveOps content team (3), data (2), compliance (3), support (4), growth (2) |
+
+**Budget by phase** (ranges; payroll from the FTE table; reserve 10-15% of the phase).
+
+| Phase | Payroll | Contract art/audio | Legal memos and agreements | Audit | Broker, KYC, EMI/CASP vendors | Reward reserve seed | Marketing | Infra and tools | Reserve | Phase total |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 0 (4 mo) | 250-320k | 30-60k | 60-100k | 5-10k deposit | 0-10k | 0 | 10-25k | 10-15k | 40-75k | 405-615k |
+| 1 (3 mo) | 230-290k | 20-40k | 50-80k | 0 | 5-10k | 0 | 35-70k | 10-20k | 35-60k | 385-570k |
+| 2 (3 mo) | 290-360k | 20-40k | 60-100k | 0 | 15-30k | 30-50k | 40-80k | 15-25k | 45-75k | 515-760k |
+| **Through Phase 2** | | | | | | | | | | **1.3-1.95M** |
+| 3 (3 mo) | 350-430k | 20-40k | 40-70k | 15-45k (audit + re-audit, tech#36) | 8-25k (gas, wallets, RPC) | 0 | 50-100k | 20-35k | 50-80k | 555-825k |
+| 4 (3 mo) | 410-500k | 20-40k | 90-160k (five member-state memos, EMI/CASP, UCPD, tax) | 0 | 15-40k | 10-20k (EUR reserve) | 60-120k | 25-40k | 65-100k | 695-1,020k |
+| **Through Phase 4** | | | | | | | | | | **2.55-3.8M gross** |
+
+Revenue offsets in 2027 (DAU ramp 10k in Q2, 25k in Q3, 50k in Q4; Q1 points-only) contribute about $0.35-0.6M after the rail, so the net funding need to exit Phase 4 is $2.2-3.4M. Recommendation: raise $2.0-2.5M now to fund Phase 0-2 with a six-month buffer, and a $3-4M round at Gate 2 with Seats, self-funding and complaint data in hand. Buildathon prize money, if any, is not budgeted.
+
+## E.11 KPI dictionary and analytics events
+
+| KPI | Definition | Target | Source event |
+|---|---|---|---|
+| D1 / D7 / D30 retention | Share of installs with a session on UTC day N after install | 45 / 18 / 7% (floors 40 / 15; kill D1 < 35) | `session_start` joined to `install` |
+| Sessions per DAU; median session | Sessions per active user per day; median `duration_s` | 3-4; 5-8 min | `session_start`, `session_end` |
+| First-IPO time | Median elapsed real time from install to first `prestige_ipo` | 2.5-3.5 h | `prestige_ipo{first:true}` |
+| Rewarded views per DAU; opt-in | SSV-verified views per DAU; accepted / offered | 3.0; >= 50% | `ad_reward_ssv` / `ad_offer_shown` |
+| Gross ad ARPDAU | Mediation gross revenue / DAU | >= $0.03 tier-1 (Gate 0) | Mediation reporting API |
+| Net ARPDAU | Net revenue / DAU | >= $0.045; >= $0.04 US-weighted (Gate 1) | Finance |
+| Payer rate | Share of 30-day actives with >= 1 verified purchase | >= 2% | `iap_purchase_verified` |
+| Crash-free sessions | Sessions without a crash | >= 99.5% | Crash SDK |
+| Replay divergence | Checkpoints whose deterministic replay disagrees with the client | < 0.1% | `server_replay_result` |
+| Behavioural bot share | DAU flagged by behavioural rules | < 5% | `fraud_flag` |
+| Seat conversion | New Verified Seats / MAU per month | 1-2% | `seat_verified` |
+| KYC pass rate | `kyc_result{pass}` / `kyc_started` | >= 85% | `kyc_result` |
+| Fake-Seat rate | Duplicates merged / Seats created | < 2% | `seat_duplicate_merged` |
+| Reward rail share | (Payouts + Grants + KYC + journals + gas) / net revenue | <= 25% | Finance |
+| Coverage ratio | Pool / accrual at 100% vesting | >= 1.0 (rates fall after 14 days below) | `stock_credit_accrued`, pool ledger |
+| Complaint rate | Support tickets tagged rewards / redemptions | < 0.5% | Support system |
+| Refund fraud | Store refunds flagged / IAP count | < 0.3% | Store server notifications |
+| Self-funding rate | Vault accounts with an external deposit within 90 days / Seats | >= 25% (PARTNER pitch input) | `vault_deposit_external` (broker webhook) |
+| Wallet link rate | Seats with a linked or embedded wallet | >= 30% (Gate 3) | `wallet_linked` |
+| Mint/burn ratio | Season BELL minted / burned | <= 2:1 | Chain events |
+| Claim gas | Sponsored gas per Merkle claim | < $0.01 | Paymaster logs |
+| Chain-policy rejections | RPC errors "Transaction rejected by chain policy" | 0 | RPC error log |
+| Store strikes | Policy actions from either store | 0 | Store consoles |
+| Organic share | Organic installs / all installs | >= 60% | Attribution |
+| Paid cohort quality | Paid D7 / organic D7 | >= 80% | Attribution + `session_start` |
+| CAC and payback by geo | Spend / paid installs; days to recover CPI from net-of-rail revenue | E.5 table | Attribution + finance |
+| Sponsor completion rate | Completions / eligible Seats | >= 40% | `sponsor_drop_completed` |
+
+**Analytics event list** (pseudonymous `player_id`, `seat_id` only after T2, country from IP and KYC, no PII in any event; every event feeding Stock Credit is server-originated; RNG-dependent code paths cannot emit into the reward services, C1).
+
+Core loop: `install`, `session_start`, `session_end`, `ftue_step`, `generator_buy`, `manager_buy`, `report_buy`, `milestone_hit`, `cycle_complete`, `prestige_ipo`, `index_inclusion`, `market_unlock`, `offline_return`, `checkpoint_written`, `server_replay_result`.
+Monetization: `ad_offer_shown`, `ad_offer_accepted`, `ad_reward_ssv` (server, network callback id), `ad_interstitial_shown`, `iap_offer_shown`, `iap_purchase_verified` (server receipt), `subscription_state`, `season_pass_state`, `sprint_join`, `sprint_complete`.
+Ledgers: `stock_credit_accrued` (server; event type from the allowlist), `stock_credit_expired`, `bell_accrued`, `bell_claim_minted`, `bell_burn`, `sink_used`.
+Rewards and identity: `age_gate_declared`, `vault_tab_viewed`, `redemption_requested`, `kyc_started`, `kyc_result`, `seat_verified`, `seat_duplicate_merged`, `settlement_executed`, `vault_deposit_external`, `sponsor_drop_completed`, `sponsor_drop_delivered`, `wallet_linked`, `gems_fallback_redeemed`.
+Integrity: `fraud_flag`, `enforcement_action`, `appeal_filed`, `integrity_check` (Play Integrity / App Attest verdict at T1/T2), `geo_block`.
+Operations: `earnings_call_published`, `rate_table_published`, `emission_table_published`.
+
+## E.12 Risk register
+
+| # | Risk | Likelihood | Impact | Mitigation | Owner | Trigger |
+|---|---|---|---|---|---|---|
+| 1 | Soft launch misses D1 40% / D7 15% (idle-adjacent medians are 17-22%, economics#9) | Medium | Fatal to the reward layer | Kill criterion; Phase 0 spent on the loop; rewards never used to rescue retention | Founder, economy designer | Gate 0 D1 < 35% |
+| 2 | A strict state treats idle-game time as consideration despite deterministic rewards (F9) | Medium | Geo-fence for real value | 50-state memo before Phase 2; fence, never argue; Gems 2x there | Counsel, compliance lead | Memo flag; AG inquiry |
+| 3 | Google reads "subordinate" strictly or Apple treats ETF rewards like 3.1.5(v) | Medium | Android ad credits to web; iOS game-only | Store pre-review Feb 2027; Season-Pass-linked framing; web hub ready | Founder, counsel | Rejection or policy change |
+| 4 | FINRA 2040 / 15(a): broker or Robinhood fee read as finder compensation | Low-Medium | Fee line lost | Flat periodic fee only; 2040(a) support letter | Counsel | Broker refuses letter |
+| 5 | Broker white-label fee 2-3x the $3 assumption, or no BD serves a game | Medium | US minimum $10, monthly batching; worst case IAP stock-back plus Grant only | Two-broker RFP Nov 2026; term sheet before Gate 1 | Compliance lead | RFP responses > $6 |
+| 6 | Lithuanian counsel does not clear the EURC-to-wallet screen (F14) | Medium | EEA becomes PARTNER-or-Gems | Ireland first; RHEU track in parallel; SEPA fallback | Counsel, EU ops | Negative opinion for IE and NL |
+| 7 | Rewarded eCPM falls 40-70% | Medium | Rates float down; at -70% IAP stock-back becomes primary | Bell Rule floats; reserve; standing stress test | Economy designer | Trailing eCPM -40% |
+| 8 | Verified funnel 2x with KYC pass < 70% | Medium | Rail to 34% of net | Tenure gate to 21 days; Grant paused (published as contingent) | Compliance lead | Two months rail > 25% |
+| 9 | Device farms plus rented KYC identities below $20 each; refund fraud on IAP stock-back | Low-Medium | Payout leakage | Face dedup; caps to $30/yr, tenure 30 days; 35-day vest; enforcement ladder | Fraud engineer | Fake-Seat > 2%; refund fraud > 0.3% |
+| 10 | Robinhood sequencer-filters a game contract (tech#5) | Low | Chain claims halt | Off-chain ledger authoritative; pre-published Arbitrum One redeploy | Lead engineer | Any chain-policy rejection |
+| 11 | Robinhood never partners | High | None to the base case; upside lost | Model closes SOLO; alternative brokers; re-pitch with data | Founder | Two declined proposals |
+| 12 | EDPB treats the seatId-to-address map as erasable personal data | Medium | BELL returns to points | DPIA in Phase 3; address rotation; per-claim fresh-address design in reserve | DPO, lead engineer | DPIA finding; supervisor letter |
+| 13 | Reg Crypto Assets, CLARITY or the digital-tool reading shifts against earned tokens (F10) | Medium | BELL stays points | Points-first; no TGE; transferability review only after outcomes | Counsel | Final rule text |
+| 14 | RHJ base prospectus (valid to 24 June 2027) lapses or token terms amended unilaterally (robinhood missed) | Low-Medium | EEA PARTNER asset changes | EEA SOLO pays EURC; player self-directs; no token named in copy | EU ops | Lapse; amendment notice |
+| 15 | Press frames Bellwether as play-to-earn; an issuer or Robinhood disavows (OpenAI precedent, robinhood#9) | Medium | Store scrutiny; sponsor loss | Positioning line everywhere; no earning copy; no implied endorsement; open-market ETFs only | Founder | Any "earn stock by playing" headline |
+| 16 | KYC or broker outage on Settlement Day; withdrawal freeze on vendor change (Lolli, precedents missed) | Medium | Complaints, trust | Published delays; 7-day pending buffer; dual-vendor readiness at 100k DAU | Compliance lead | Missed Settlement Day |
+| 17 | Stock Credit or Gems treated as a Reg E prepaid account or escheatable stored value (Stockpile wind-down; ADR open item 16) | Low-Medium | Ledger redesign, escheat filings | Counsel memo before Phase 2; 180-day expiry; "no cash value until redeemed" | Counsel | Memo finding |
+| 18 | Funding shortfall before Gate 2 | Medium | Cut order (E.14) | Raise Phase 0-2 plus six months; monthly burn review | Founder | Runway < 6 months |
+
+## E.13 Decisions the founder must make now
+
+| # | Decision | Recommendation |
+|---|---|---|
+| 1 | Entity structure | Delaware C-corp parent (studio) now; Bellwether Rewards LLC as the promotion sponsor formed in Phase 2 (ADR D14); EU affiliate Bellwether Rewards Europe Ltd (Ireland, per Part C) formed at Phase 4 unless counsel prefers Lithuania, not before |
+| 2 | Funding path | Pre-seed $2.0-2.5M now against Phase 0-2 plus buffer; seed at Gate 2; equity only; zero token allocation to anyone (ADR section 3) |
+| 3 | Soft-launch markets | Canada primary, New Zealand secondary (ADR Q7); both excluded from Stock Tokens, so the retention read is pure |
+| 4 | Broker RFP | Alpaca-class first (documented JNLC/JNLS journals, economics#24), Apex white label as alternate; term sheet before Gate 1 |
+| 5 | KYC vendor for EU/RoW | Sumsub Compliance tier ($1.85, AML screening included, economics#22) or Veriff; face dedup required; US uses the broker's CIP |
+| 6 | Ad mediation | One mediation platform with SSV callbacks (AppLovin MAX or LevelPlay) with AdMob and Unity as networks; SSV is a hard requirement; final vendor choice belongs to the engineering section |
+| 7 | Buildathon participation | Yes, with the bound-transfer BELL contracts and the hub; game-only framing; no reward claims in the submission |
+| 8 | Robinhood approach sequencing | Relationship only at HOOD Summit; RHEU proposal in Q1 2027 with Gate 0 data; Robinhood Financial proposal in Q3 2027 with Gate 2 data |
+| 9 | Publishing the Bell Rule early | Publish the rule text in Phase 1 marked "not yet redeemable"; numeric rates and caps 30 days before Phase 2 |
+| 10 | Trademark | Clearance search on "Bellwether" in classes 9 and 41 (US, EU, UK) in September; if blocked, rename before the Canada/NZ store listing |
+| 11 | Team location and cost base | Remote, US/EU mix at $10,500 loaded; compliance lead hired in the US for Phase 2 |
+| 12 | NY on-chain claims | Off until counsel confirms the BitLicense gaming exclusion for a bound token (ADR section 8) |
+| 13 | Web build scope | Ship at Phase 1 for r/incremental_games discovery and as the iOS spending surface (Apple 3.1.1), on the same server-authoritative backend |
+
+## E.14 Cut order if funding is short
+
+The order is the ADR's (section 9), with what each cut saves and what it costs.
+
+| Cut | Saves | Costs | Never cut |
+|---|---|---|---|
+| 1 Sponsor drops | Sponsor sales role, escrow ops, ~$40-60k/yr; SponsorEscrow contract scope | 1-2% of net; the public fairness proof | Server authority; verification at withdrawal; the published Bell Rule; the no-chance invariant; the positioning line |
+| 2 EEA SOLO EURC rail | Phase 4 legal $90-160k, EMI/CASP setup, EU ops hire; Phase 4 slips two quarters | EEA becomes PARTNER-or-Gems; the Stock Token leg depends on RHEU | |
+| 3 On-chain BELL (keep points) | Audit $15-45k, contract engineer, gas and wallet vendors, DPIA; Phase 3 collapses into Phase 4 | The Robinhood Chain anchor; Wallet linking | |
+| 4 Markets 2-3 and the Prestige Exponent | One content pod; ~$60-90k per quarter | Day-14+ depth; D30 pressure | |
+| 5 Ad-funded Stock Credit (keep IAP stock-back and the broker-paid Grant) | Pool falls to 5% of net IAP; SSV crediting scope; ~40% of KYC volume | Most players' accrual; the on-ramp shrinks to payers | |
+
+The floor is an idle game plus a broker-delivered welcome ETF fraction, the only version with surviving precedents (precedents#1-8). At the floor, the Phase 2 budget drops to $450-620k and the team to 8 FTE; the 10k DAU P&L loses ~$100k/month instead of $125k, and SOLO breakeven falls to ~150k DAU.
+
+
+# Appendix 1. Decision log
+
+
+| ID | Decision | Rationale | Rejected alternatives |
+|---|---|---|---|
+| Q1 | BELL: capped immutable ERC-20 on chain 4663 in bound-transfer mode (one Seat's registered wallets, incl. Robinhood Wallet, and burn sinks); minted only as earned at fixed per-milestone amounts; 0% team/investor/liquidity; no sale, listing, MM, buyback or TGE; P2P reviewed after 12 months behind five gates, possibly never. | F18 (95-99.9% collapses); bound transfer keeps the digital-tool (F10), MiCA Art 4(3)/(5) (F13), FinCEN/BitLicense/DFAL and UK exclusions intact while the token lives in Robinhood Wallet (F4); minted-only-as-earned inverts SLP (p2e#1, #5). | Tradeable at launch with seeded liquidity (Draft 4's Unlock Gate, 15% team): F18 capital structure plus an earnings claim once priced. Draft 2's Phase C buybacks/MM loan: price-support promise, MSB exposure. No token: loses the Robinhood anchor; kept as cut #3. Retroactive genesis: farm magnet. |
+| Q2 | Stock Credit as a promotional cash credit; US SOLO via a FINRA BD (Alpaca-class) as a restricted JNLC credit self-directed into a 12-ETF list; US PARTNER Robinhood Financial under a flat fee; EEA PARTNER RHEU giveaway template delivering the Jersey on-chain token; EEA SOLO EURC via MiCA EMI/CASP with self-directed swap, member state by member state; fallbacks SEPA then Gems 2x; Classic excluded; UK/CA/CH/UAE Gems only. | F8; F2; F14; C3; the Cash App/Grifin form is the live legal shape (precedents#9; legal-us#5). | Game-funded ETF inventory (Drafts 3/4): C3 breach. Voucher contract routing stablecoin into a Stock Token (Draft 4): unlicensed execution. USDG for a EUR obligation (Draft 1): FX mismatch. "Pick any stock" or a 26-name menu (Drafts 1/5): single-name nudge (F7). EU-first (Draft 4): open F14 on the critical path. |
+| Q3 | No relationship; identity is the only shared element; cap tiers follow the Season Pass entitlement. | F10; legal-us#23; F11; C2; Google "not subject to purchase". | Draft 1's 25-BELL settlement ticket; Draft 3's 500-BELL drop gate plus 100 BELL per Season Pass; Draft 5's Tier II pending shortening and withdrawal burn; staking for a multiplier. |
+| Q4 | Verified Seat from the licensed delivering party, one per human, created at first redemption; T0/T1/T2; $5 pre-verification cap; 180-day expiry; 14-day tenure; 7-day pending; 35-day IAP vest; attestation-only storage; opaque seatId on-chain. | C5; F17 (attestation is the GDPR/AMLR-safe primitive; salted hashes are still personal data per EDPB v2.0); F22 and tech#31 (device farms). | On-chain identity-hash BoundRegistry (Draft 5). World ID as primary (coverage; no Router on 4663, tech#34). WalletConnect signature alone. |
+| Q5 | Bell Rule: 20% banked net ads + 5% banked net IAP + 100% sponsor escrow; rates float at 20% of trailing net eCPM, clamped 0.5x-1.25x, published 7 days ahead; caps $0.10/$4/$50 (+50% with Pass), $3 Grant from margin paid by the delivering broker, drops <= $20/yr, ceiling $83; bounties fund verification and margin only; 3-month reserve; Earnings Call; standing stress tests. | F19 (ZBD 10-20% of ads; Mode <= ~25-33%); pool from banked prior-month revenue cannot be overspent; caps under F12 and EU exemptions; CPA pass-through is finder compensation (legal-us#6) and the DEP pattern (F7). | Draft 1's Listing Bonus funded by an incentivized affiliate referral into a second brokerage (F22). Grants keyed to a bounty being received (Drafts 3/4/5). Draft 4's 30%+15% pool with $60/yr drops. $200/yr cap (Draft 1). |
+| Q6 | Bellwether, the patient compounder: eleven sectors, Reinvest as the only verb, Go Public (sqrt Float), Index Inclusion (cbrt Weight, upgradable exponent, new Markets); securities only in the Vault tab as index-only holdings; positioning line; no prices, charts, trade verbs, streaks with value, chance or single names. | F7; legal-us#9; legal-eu#18-19; F23; index-only removes the ticker nudge. | "Dividend Ledger / Dividend Day" (Draft 4): mislabels a loyalty credit in a product whose Stock Tokens pay no cash dividends (F1). Daily-login cash (Draft 4) and a real-value streak (Draft 2): DEP-listed. |
+| Q7 | Phase 0 counsel + Canada/NZ game-only soft launch (Gate 0 D1 >= 40%, D7 >= 15%; kill < 35%); Phase 1 points-only; Phase 2 US Vault; Phase 3 BELL bound on-chain; Phase 4 EEA Ireland-first; Phase 5 RoW and transferability review; no TGE. | F8 and F20 (US settled law, best eCPM); F14 needs per-state counsel; points-first fits MiCA "existing utility" and C6; "sell the game first" (F18; p2e#21, #27). | EU-first (Draft 4). Token bundled with US redemption in one quarter (Draft 1). |
+| D8 | Name Bellwether / BELL (Draft 1 chassis) with Draft 5's Reinvest fantasy and Draft 2's loop. | Chassis ranked first by two judges; the loop and theme grafts were the judges' fun fixes. | Renaming to a grafted draft's brand. |
+| D9 | Index-only asset menu: one S&P 500 ETF (default after 30 days) plus eleven sector ETFs, chosen inside the licensed account. | Strongest DEP/ESMA posture (F7); avoids forfeiture; sector ETFs keep the theme without single names. | Any stock; Robinhood's 26 large caps; single-ETF-only (loses the sector tie). |
+| D10 | Sponsor drops escrowed first, fixed per Seat, 30-active-day tenure, Seat-seniority allocation, third-party ETFs only, 60-day delivery, <= $20/yr. | Deterministic and fair; Reg M/10b-18 (F21); Bumped (precedents#3). | First-N races (Draft 1); token-gated eligibility (Drafts 3/5); own-stock without counsel. |
+| D11 | Ages: 13+ to play (US), 16+ EEA default, 18+ for any real value; minors redeem to Gems 2x. | CIP is effectively 18+ (F12); COPPA and GDPR Art 8. | 18+ app-wide; no play gate (Draft 1 gap). |
+| D12 | Stores: iOS read-only BELL with spend and redemption on the web hub; Android Financial Features declaration; Season-Pass-linked accrual as primary loyalty framing; ad credits move to web on Android if Google reads "subordinate" strictly. | Apple 3.1.1/3.1.5 (legal-us#31); Google loyalty and Blockchain policies (legal-us#32). | In-app crypto unlocks; earnings language (Freecash, p2e#34). |
+| D13 | Off-chain ledger authoritative; pre-published Arbitrum One redeploy if any contract is sequencer-filtered. | Single sequencer with ArbOS 61 filtering (tech#5); Security Council emergency actions. | Waiting on a Robinhood assurance (PARTNER ask only). |
+| D14 | Bellwether Rewards LLC as promotion sponsor funding the BD; the BD holds and journals. | Stash Cash Management / Stash Capital pattern (precedents missed); C3. | Studio-owned firm account holding ETF inventory. |
+| D15 | Burn/mint ratio published; if mint > 2x burn for two seasons, next season's amounts halve. | Axie's 4x signal (p2e#3); sinks-only did not save SLP (p2e missed). | Static emission. |
+| D16 | EEA copy never names a Stock Token, prefills a swap or presents securities' terms. | Base prospectus consents only to Authorised Offerors; "offer to the public" is any sufficient communication (legal-eu missed). | Draft 1's EU screen describing the Jersey debt securities. |
+
+# Appendix 2. Open items for counsel
+
+
+1. **FINRA 2040 / 15(a):** confirm a flat periodic marketing fee from the delivering BD or Robinhood, with no per-account, per-trade or per-asset component, does not make the studio an unregistered finder; obtain the Rule 2040(a) support letter; confirm the broker-paid Sign-up Grant is not compensation to us.
+2. **Google Play loyalty text:** whether ad-view Stock Credit on Android is "supplementary and subordinate to a qualifying monetary transaction" or must move to web.
+3. **Apple:** whether ETF rewards for in-app actions are treated like 3.1.5(v); whether the Vault UI trips 3.1.5(iv)/3.2.1(viii); whether read-only BELL display survives 3.1.1.
+4. **State gambling:** whether idle-game time is consideration in strict states when rewards are deterministic (legal-us#12); whether any state rule treats ETF fractions awarded as prizes as an unregistered offering.
+5. **Tax:** prize (1099-MISC) versus services (1099-NEC) for play-linked Stock Credit; state withholding; W-9 timing; whether BELL (no market, non-transferable) has a determinable FMV under Rev. Rul. 2023-14.
+6. **NY BitLicense and California DFAL:** confirm a bound-transfer token with no outside market stays inside the gaming/rewards exclusions; decide whether NY on-chain claims stay off.
+7. **SEC-CFTC digital-tool memo:** BELL as a credential earned for play; the DoubleZero and Fuse no-action letters as the closest precedents (legal-us#22); a comms policy that never implies appreciation.
+8. **Lithuania / MiFID / Prospectus:** whether the neutral EURC-to-wallet screen is an offer to the public, reception/transmission, placing or marketing of a financial instrument (F14); whether a marketing-partner agreement with RHEU needs a tied-agent structure (legal-eu#16).
+9. **MiCA:** the Art 4(3) "existing utility" hook (BELL is not "free", since sign-up data is collected); Art 4(5) confirmation for our claim/sink contracts; whether the SeatRegistry or Merkle claim is a custody or transfer service.
+10. **EMT and rails:** EURC's MiCA status and issuer; whether EURC is deployed on chain 4663 or only Arbitrum One; the EMI/CASP's travel-rule and DAC8 duties for our payouts.
+11. **Per-member-state memos:** Ireland (prize vs gift), Netherlands (promotional-game code; gift tax), Germany (Sec 22 No 3 vs prize), Lithuania (withholding under PARTNER; 2026 progressive scale), France (60% gift rate vs promotional-winnings doctrine), Italy (concorsi a premio or fencing).
+12. **GDPR:** DPIA for the seatId-to-address map (legal-eu#38); erasure via address rotation; lawful basis for the attestation record separate from AML retention.
+13. **Sponsor own-stock drops:** conditions for broker-executed 10b-18 purchases with Reg M monitoring; Partner Stock Program terms under PARTNER.
+14. **Robinhood Chain ToS and brand:** commercial-integration consent for Wallet surfaces; Marks compliance; that a bound token is not a "token issuance" needing written authorization.
+15. **Biometrics:** BIPA/CUBI compliance of the KYC vendor and broker.
+16. **Consumer rails:** whether the Stock Credit ledger or Gems is a prepaid account under Regulation E or a stored-value instrument with escheat duties (Stockpile precedent); CFPB posture (legal-us#30).
+
+# Appendix 3. Assumptions that would change the design
+
+
+1. **A FINRA BD will white-label a rewards account at ~$3 all-in and journal restricted cash credits** (pricing unpublished, economics#24). If 2-3x higher, the US minimum rises to $10 and redemptions batch monthly; if no BD serves a game, US collapses to IAP stock-back plus the broker-paid Grant.
+2. **Deterministic, revenue-funded, purchase-linked loyalty credit is a permitted fixed-ratio program on both stores.** If not, ad credits move to web on Android and iOS ships game-only.
+3. **Idle-game time is not consideration in strict states when rewards are deterministic.** If a state disagrees, it is geo-fenced for real value.
+4. **Lithuanian counsel clears the neutral EURC-to-wallet screen in at least Ireland and the Netherlands.** If not, EEA is PARTNER-or-Gems and the Stock Token leg depends on RHEU signing.
+5. **EURC is deployable to the player's wallet on chain 4663 or Arbitrum One via a licensed EMI/CASP at < EUR 0.05 per payout.** If not, EEA falls to SEPA EUR.
+6. **The bound-transfer hook and opaque seatId satisfy EDPB v2.0.** If not, BELL becomes off-chain points until a per-claim fresh-address design is audited.
+7. **BELL with no price and no outside application remains a digital tool / Art 4(3) utility token.** If not, BELL stays off-chain points; nothing else changes.
+8. **Robinhood does not sequencer-filter game contracts.** If it does, the pre-published Arbitrum One redeploy triggers (Robinhood Wallet supports Arbitrum, tech#21).
+9. **Rewarded eCPMs hold near US $15 / EEA $7 at 3.0 views/DAU.** A 40% decline is absorbed by the floating rate; a 70% decline makes ad credits sub-cent and IAP stock-back becomes the primary accrual.
+10. **Verified-Seat conversion runs 1-2% of MAU per month with KYC pass >= 85%.** At 5%+, Grants and verification exceed the model and the Grant is paused; below 70% pass, the tenure gate rises.
+11. **No Robinhood partnership ever lands.** The model closes SOLO. If Robinhood later ships a rewards API or a US tokenized-stock product after an SEC exemption, US delivery moves to that rail under the same Bell Rule.
+12. **Device farms plus rented KYC identities do not scale at $83/year per Seat.** If gray-market identities fall below ~$20 and pass face dedup, caps drop to $30/year and tenure rises to 30 days.
+13. **The idle game reaches D1 >= 40% / D7 >= 15% on its own.** If not, nothing above ships; rewards cannot rescue retention and would only attract extractors (p2e#15).
+
+# Appendix 4. Adversarial review log and adopted amendments
+
+
+Three of four adversarial reviewers completed before the review run was stopped to save budget: a US securities and state-gaming regulator, an EU (Bank of Lithuania / ESMA / Apple App Review) supervisor, and a bot-farm operator and tokenomics short-seller. The player-critic review did not complete. They returned no fatal findings, 24 major and 18 minor. The full reports are in `docs/design/_attacks.md`.
+
+The amendments below are adopted into this specification as of v1.0. **Where an amendment conflicts with text in Parts A-E, the amendment governs**; the body text will be reconciled in v1.1. Findings are grouped by theme; the reviewer numbers are R1 (US regulator), R2 (EU supervisor and App Review), R3 (exploiter and economist).
+
+## Amendments adopted
+
+**AM-1. No default investment and no game-curated securities menu (R1, R2).** The 30-day automatic election of the S&P 500 ETF is removed everywhere. A player's cash credit stays as cash in the Vault until the player makes an affirmative election inside the broker-dealer's own hosted interface, under the broker's programme terms. The twelve-ETF list is the broker's published list, approved and displayed by the broker; the game shows sector names only and never renders a securities picker. If the broker will not curate a sector list, the menu is a single broad-market ETF. Counsel item 1 is extended to cover whether any studio involvement in the menu is investment advice.
+
+**AM-2. In-app Vault tab is a status view only (R2).** Account opening, identity verification, ETF election and holdings live in the broker's hosted web surface opened in the system browser view. The in-app Vault tab shows "credit pending" and "credit delivered" amounts, the delivering party's name and a link where the storefront permits one (Apple 3.1.1(a) in the US storefront). This satisfies Apple 3.2.1(viii) and 3.1.5(iv) by never presenting a trading, investing or money-management interface inside the game.
+
+**AM-3. Sponsor drops: flat fee, brand sponsors only, no gameplay condition, never oversubscribed (R1, R2, R3).** The studio's sponsor fee is a flat per-campaign marketing fee fixed before the campaign, never a percentage of escrow or of securities delivered. Fund sponsors and ETF issuers are excluded as drop sponsors; sponsors are consumer brands funding a broad-market ETF grant, and any fund-sponsor money flows only to the broker under the broker's own agreements. Eligibility is tenure and purchase based only: every Verified Seat with 30 or more active days in the trailing 90 days and an active Season Pass or a qualifying purchase in the season, with no Sprint objective. The per-Seat amount is published as escrow divided by the enumerated eligible Seats, floored at $0.25; if the floor is not met the drop is cancelled and the escrow returned. Seat-seniority allocation is withdrawn. On Android the drop is claimed on the web hub and the Sprint never presents an objective as a reward condition. The Phase 2 pilot partner is a consumer brand, not an ETF issuer.
+
+**AM-4. Broker acquisition bounties are removed from the SOLO funding stack (R1, R2, R3).** Under SOLO, money flows only from the studio to the delivering broker; the studio takes no per-account, per-trade or per-asset payment from any broker and steers no player into a second brokerage. The base-case model already closes without this line. Under PARTNER the fee is a fixed dollar amount for the term, never reconciled to accounts, trades or assets, supported by a FINRA Rule 2040(a) letter; Robinhood's separate sign-up stock reward is Robinhood's own programme, described to players as such.
+
+**AM-5. Positioning line per rail, never in store listings (R1, R2).** The mandatory positioning line moves out of both store listings into the first-run consent screen, the web hub and the FTC substantiation file; store listings describe the game only, which also satisfies Google's Blockchain-based Content rule against promoting earnings. Each rail carries its own wording naming only what that rail delivers. US: "real fractional ETF shares in a brokerage account at [broker]". EEA SOLO: "a euro credit delivered by a licensed EU payment firm to your own wallet". EEA PARTNER: wording drafted and approved by Robinhood Europe under MiFID II Article 24. UK, Canada, Switzerland, UAE: "in-game Gems". The words "Stock Tokens" and "shares" never appear in EEA copy, and Robinhood's product is never named in the US storefront.
+
+**AM-6. Android ad-view credit is web-hub-only from day one (R2).** Rather than waiting on counsel item 2 after a listing is live, the Android build accrues Stock Credit from Season Pass and purchases only; rewarded-ad credit is earned and displayed on the web hub. This is the ADR's own fallback, promoted to the launch configuration.
+
+**AM-7. Every on-chain cosmetic is bound to the Seat (R1, R2, R3).** Charters, IPO plaques and Time Capsules minted by burning BELL inherit the same same-Seat bound-transfer rule as BELL, are non-listable, and the studio never operates or integrates a marketplace. On iOS, BELL-minted charters are display-only in a gallery and are never applied as in-game skins; iOS skins come only from purchases or game currency (Apple 3.1.1). Charter-as-skin remains on Android and web. The 1155 contracts are added to counsel items 6, 7 and 9.
+
+**AM-8. No randomness reachable with consideration (R1).** The Analyst Report re-roll rewarded placement is removed, and the daily Morning Brief offers a choice of three tasks revealed before commitment. The engineering invariant is extended from "no chance in any cash-value ledger" to "no purchasable or ad-watched path can trigger, influence or re-roll any random outcome, and no random outcome yields progression value"; remaining randomness is cosmetic only.
+
+**AM-9. EEA SOLO: the player is the e-money institution's customer (R2).** The player opens a light e-money account at the MiCA-authorised EMI/CASP, which performs customer due diligence, liveness and duplicate checks under its own AML basis; EURC or EUR is credited to that account and the player withdraws to Robinhood Wallet. The studio commissions no identity checks on EU residents, holds no EU identity documents, and receives only the attestation record. Bellwether Rewards Europe Ltd is the contracting party.
+
+**AM-10. EEA PARTNER is relabelled "requires Robinhood to build" (R2).** Robinhood's June 2026 giveaway template delivers Classic tokens held in-account, which this spec excludes. The PARTNER path therefore asks Robinhood Europe to act as an Authorised Offeror delivering on-chain Stock Tokens into Robinhood-custodied client crypto accounts under its CASP custody licence, applying the appropriateness gate and 180-day hold there, with withdrawal to Robinhood Wallet after the hold. Nothing about this exists today.
+
+**AM-11. No on-chain Seat registry (R2).** The public seatId-to-address mapping is removed. Bound transfer is enforced in the token's transfer hook by verifying an EIP-712 authorisation ("from, to, same Seat, nonce, expiry") signed by an off-chain Seat signer, with no persistent public linkage. BELL is held in a separate embedded EIP-7702 account, not in the wallet that holds a player's Stock Tokens, unless the player explicitly links them. The DPIA covers the signer service instead of a registry.
+
+**AM-12. On-chain minting only for Verified Seats (R3).** BELL is minted on-chain only for T2 accounts. T1 accounts keep off-chain BELL, which already works in every sink. The season ceiling counts mints only.
+
+**AM-13. Season emission is pro-rata against a published pool (R3).** Each season n publishes a pool P_n = 20,000,000 x 0.95^n. At the season-end claim every Seat receives amount_earned x min(1, P_n / total_earned). This is deterministic, published a season ahead and never retroactive, and removes the contradiction between fixed per-milestone amounts, the ceiling and the 100,000-Seat gate. Allocation is restated as player emission at most 400M (40% of the hard cap), reserve 100M, and 500M never mintable.
+
+**AM-14. IAP-derived credit vests after 120 days (R3).** The 35-day vest is replaced by 120 days, matching the longest store and card-network refund windows. The backend consumes App Store Server Notifications REFUND events and Google Play Voided Purchases to void pending credit, debits already-delivered amounts from the Seat's future accrual, and counts refunded purchases against the Seat's season cap.
+
+**AM-15. Fixed overhead and a break-even gate for the reward layer (R3).** The per-1,000-DAU model is variable-cost only. Part B and Part E gain a fixed-overhead line (audit $10-25k, KYC vendor minimums, embedded-wallet tiers, broker relationship minimums, compliance staff) and publish the reward layer's break-even: at roughly $1.28-1.51 contribution per DAU-month after the variable rail, every $10,000 a month of fixed overhead needs about 7,000 DAU. The Phase 2 go decision is conditional on DAU above that break-even.
+
+**AM-16. Steady-state funnel restated (R3).** The worked example's 40 new Seats a month per 1,000 DAU is a launch-month figure. At steady state (month four onward, roughly 4,000 MAU and 100 active payers) the model expects 10-15 new Seats a month, grants and verification of $30-45 each, and player-received value of about $100-120 a month rather than $240, because most redemptions are purchase-derived credit from a small paying base. Both figures are kept in Part B, with the steady-state one governing the P&L.
+
+## Findings noted, not adopted as written
+
+- **Transferability review "gates" should say never (R3).** Kept as five gates, because "never" is a promise the studio cannot bind future counsel to; the player-facing copy already says transfer "may never be enabled" and that no sale or airdrop will ever be announced. The gates now also require the ERC-1155 cosmetics to be reviewed together with BELL.
+- **UAE exclusion (R2 minor).** Kept, on the basis of the press release, until the RHJ restricted-jurisdictions page is re-checked.
+- **Eighteen minor findings** (copy precision, date corrections, table alignment) are logged in the review file for v1.1.
+
+## What the missing review would have covered
+
+The player-critic pass (loop pacing, walls, dead time, honesty of the reward framing) did not run. Part A's own simulation harness already flags the one known pacing defect: with the ADR's constants the first IPO lands at 12-16 hours rather than the 2.5-3.5 hour target, and Phase 0's first tuning task is to lower K_Home into the 1e12-1e13 range and raise the Weight divisor in step. A designer review of Part A before the soft launch is the open action.
+
+
+# Appendix 5. Sources
+
+378 sources gathered 1-2 September 2026 by topic; each line is URL, publication date, topic, and the claim it supports.
+
+
+- https://seekingalpha.com/pr/20152206-robinhood-launches-stock-tokens-reveals-layer-2-blockchain-and-expands-crypto-suite-in-eu-and (2025-06-30) [robinhood] — Classic Stock Tokens launched June 30, 2025 for EU/EEA customers (30 countries, ~400M people): 200+ US stock and ETF tok
+- https://www.theblock.co/post/387563/five-years-after-the-gamestop-saga-robinhood-ceo-wants-tokenized-stocks-to-trade-onchain-24-7 (2026-01-29) [robinhood] — Classic Stock Token catalogue grew from 200+ (June 2025) to 2,000+ US-listed equities/ETPs by January 2026, still tradin
+- https://robinhood.com/us/en/newsroom/robinhood-accelerates-global-expansion-robinhood-chain-mainnet-stock-tokens-agentic-trading/ (2026-07-01 (updated 2026-07-30); testnet PR 2026-02-10; ArbitrumDAO factsheet) [tech] — Robinhood Chain public mainnet launched 2026-07-01 (announced at Robinhood's London keynote) after a public testnet that
+- https://docs.robinhood.com/chain/building-with-stock-tokens (2026-07-01) [robinhood] — On-chain Stock Tokens are standard ERC-20 tokens (18 decimals) with no transfer hooks or holder whitelist described; 'ca
+- https://robinhood.com/rhj/stocktokens/ (2026-08-19) [robinhood] — Per the issuer page, dividends are not paid in cash: 'dividend is automatically reinvested to purchase more shares' and 
+- https://robinhood.com/eu/en/legal/rhj/ (2026-08-13) [robinhood] — RHJ disclosure library lists a Base Prospectus dated June 30, 2026, 400+ Final Terms (dated June 30, 2026 or Aug 12, 202
+- https://docs.robinhood.com/rhj/restricted-jurisdictions (2026-09-01) [tech] — Robinhood's RHJ 'Restricted Jurisdictions' page names prohibited investor jurisdictions Cuba, Belarus, Iran, North Korea
+- https://blog.arbitrum.io/robinhood-chain-mainnet/ (2026-07-01) [robinhood] — INFERENCE: Classic Stock Tokens cannot be withdrawn to self-custody or external wallets. Basis: the July 1, 2026 release
+- https://finance.yahoo.com/news/robinhood-faces-review-eu-over-161324297.html (2025-07-07) [robinhood] — OpenAI/SpaceX controversy: around June 30–July 7, 2025 Robinhood gave eligible EU users EUR 5 each of 'OpenAI' and 'Spac
+- https://robinhood.com/us/en/newsroom/robinhood-chain-launches-public-testnet (2026-02-10) [robinhood] — Robinhood Chain public testnet went live Feb 10, 2026 (Ethereum L2 on Arbitrum tech; partners Alchemy, Allium, Chainlink
+- https://docs.robinhood.com/chain/connecting (accessed 2026-09-01; chainlist.org/chain/4663) [tech] — Network parameters: mainnet chain ID 4663 (0x1237), testnet 46630; public rate-limited RPCs https://rpc.mainnet.chain.ro
+- https://docs.robinhood.com/chain/bridging (2026-07-01) [robinhood] — Bridging: canonical Arbitrum bridge (portal.arbitrum.io/bridge; ETH and ERC-20; deposits ~10 min; withdrawals subject to
+- https://forum.arbitrum.foundation/t/arbitrumdao-factsheet-robinhood-chain-mainnet-launch/31041 (2026-07-06) [robinhood] — ArbitrumDAO factsheet (July 6, 2026): Robinhood Chain runs under the Arbitrum Expansion Program license paying 10% of pr
+- https://finance.biggo.com/news/US_HOOD_2026-07-29 (2026-07-30) [robinhood] — Post-launch chain stats reported by Robinhood on the Q2 2026 call (July 29–30, 2026): 'fastest chain to 100 million tran
+- https://www.datawallet.com/crypto/robinhood-chain-explained (2026-07-02) [robinhood] — Robinhood Chain has no native network token and no Robinhood points program was found; HOOD stock is the only 'investmen
+- https://en.cryptonomist.ch/2026/08/19/robinhood-tokenized-stocks/ (2026-08-19) [robinhood] — US tokenized stocks: Robinhood offers Stock Tokens in 120+ countries but not the US; on Aug 18, 2026 Tenev posted on X u
+- https://phemex.com/blogs/sec-delays-tokenized-stock-innovation-exemption-reasons (2026-05-26) [robinhood] — SEC 'innovation exemption' for tokenized stocks: reported as due by May 18, 2026 (Chair Atkins had called it 'imminent')
+- https://www.sec.gov/newsroom/press-releases/2026-76-sec-proposes-new-regulation-crypto-assets (2026-08-18) [economics] — On August 18, 2026 the SEC proposed 'Regulation Crypto Assets' (Release 2026-76), following March 2026 interpretive guid
+- https://robinhood.com/us/en/support/articles/robinhood-wallet/ (2026-08-10) [robinhood] — Robinhood Wallet (self-custody, iOS/Android) is offered by Robinhood Non-Custodial, Ltd. (Cayman Islands); supports Ethe
+- https://robinhood.com/us/en/newsroom/introducing-robinhood-connect-simplifying-access-to-web-3/ (2023-04-27) [robinhood] — Robinhood Connect was announced April 27, 2023 (Consensus) as a way for Robinhood Crypto customers to fund Web3 wallets 
+- https://robinhood.com/us/en/newsroom/robinhood-crypto-trading-api/ (2024-05-30) [robinhood] — Robinhood's only public API is the Crypto Trading API (announced May 30, 2024): US customers with active Robinhood Crypt
+- https://www.bitstamp.net/api/ (2026-08-01) [robinhood] — Bitstamp acquisition closed June 2–3, 2025 for $200M, giving Robinhood its first institutional crypto business, 50+ lice
+- https://robinhood.com/us/en/support/articles/invite-friends-pick-stock/ (2026-09-01) [economics] — Robinhood referral program as of Sept 2026: standard refer-a-friend gives both parties a gift stock worth $5-$200, about
+- https://www.stocktrak.com/robinhood-free-stock/ (2026-08-18) [robinhood] — Legacy referral/sign-up reward (in force until Sept 1, 2026): a stock reward worth $5–$200 for referrer and referee once
+- https://robinhood.com/us/en/support/articles/ira-match-faq/ (2026-08-01) [robinhood] — Robinhood Gold: $5/month (first 30 days free); 3.35% APY on brokerage cash; 3% IRA match on annual contributions (1% wit
+- https://robinhood.com/us/en/newsroom/robinhood-prediction-markets-joint-venture/ (2025-11-25) [robinhood] — Prediction markets: hub launched March 17, 2025 with KalshiEX LLC (CFTC DCM) via Robinhood Derivatives LLC (FCM), initia
+- https://robinhood.com/us/en/newsroom/robinhood-social-beta/ (2026-03-18) [robinhood] — Robinhood Social entered beta March 18, 2026 (1,000 HOOD Summit attendees, then 10,000 more): KYC-verified 'real person'
+- https://www.wealthmanagement.com/regulation-compliance/robinhood-pays-7-5m-to-settle-massachusetts-gamification-charge (2024-01-18) [robinhood] — Gamification enforcement history: Massachusetts Securities Division's December 2020 complaint cited confetti animations,
+- https://finance.yahoo.com/markets/stocks/articles/robinhood-q2-2026-earnings-beat-132303262.html (2026-07-30) [robinhood] — Q2 2026 results (reported July 29, 2026): net revenue $1.31B (+32% YoY); transaction-based revenue $776M (options $342M 
+- https://www.sec.gov/Archives/edgar/data/1783879/000162828021015076/robinhood424.htm (2021-07-29) [robinhood] — Robinhood's 2021 prospectus explains that it lowered acquisition cost by 'awarding shares only when new customers initia
+- https://robinhood.com/us/en/support/articles/coin-availability/ (2026-08-01) [robinhood] — Crypto listing: Robinhood publishes no listing framework or criteria; its coin-availability page lists 130+ supported cr
+- https://robinhood.com/us/en/newsroom/robinhood-launches-crypto-trading-for-uk-investors/ (2026-08-10) [robinhood] — UK: Robinhood launched crypto trading for UK investors on Aug 10, 2026 through Bitstamp UK Ltd (FCA-registered cryptoass
+- https://www.tradingview.com/news/financemagnates:946696fac094b:0-robinhood-s-tokenized-stocks-face-eu-scrutiny-as-openai-distances-itself-report/ (2025-07-07) [robinhood] — Bank of Lithuania/EU regulatory status of Classic Stock Tokens: they are offered by Robinhood Europe, UAB under its Lith
+- https://cdn.robinhood.com/assets/robinhood/legal/eu-crypto-user-agreement.pdf (2026-06-30) [robinhood] — Classic Stock Tokens are contractually non-transferable: Robinhood Europe Customer Agreement (Jun 30, 2026) Schedule E 1
+- https://cdn.robinhood.com/assets/robinhood/legal/stock_tokens_kid_eu.pdf (2026-07-01) [legal-eu] — Robinhood Europe's PRIIPs KID (produced 1 July 2026) describes the "Classic" stock token as a "US-listed Share / ETP Der
+- https://cdn.robinhood.com/assets/robinhood/legal/robinhood_onchain_integration_terms.pdf (2026-07-01) [robinhood] — Robinhood Onchain Integrations Terms of Service (last updated July 1, 2026; Robinhood Non-Custodial, Ltd.) govern the in
+- https://docs.robinhood.com/chain/terms-of-service (2026-08-24) [robinhood] — Robinhood Chain Terms of Service (effective Aug 24, 2026; operator RHDA, LLC): Robinhood 'makes no guarantee of uptime o
+- https://docs.robinhood.com/chain/brand-guidelines (2026-07-01) [robinhood] — Robinhood Chain brand guidelines: refer to the network only as 'Robinhood Chain' (no 'Hood Chain'), say 'Stock Tokens' n
+- https://docs.robinhood.com/chain/governance (2026-07-01) [robinhood] — Chain governance: an eight-seat Security Council (Robinhood 2 seats; BitGo, Chainlink Labs, Fireblocks Trust Company, Of
+- https://docs.robinhood.com/chain/account-abstraction (2026-09-01) [tech] — Robinhood Chain account-abstraction docs publish ERC-4337 EntryPoint v0.6.0 (0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789)
+- https://docs.robinhood.com/rhj/product (2026-07-01) [robinhood] — RHJ on-chain Stock Token economics and legal transfer limit: purchase/subscription fee 0.00%; redemption 0.00% in the fi
+- https://docs.robinhood.com/chain/oracles-and-price-feeds (2026-09-01) [tech] — Robinhood Chain's oracle docs state Chainlink is the only onchain price source, stock feeds update 24/5 and are paused w
+- https://rpc.mainnet.chain.robinhood.com (2026-09-01) [robinhood] — Verified live on Sept 1, 2026 via JSON-RPC POST to https://rpc.mainnet.chain.robinhood.com: eth_chainId returns 0x1237 (
+- https://robinhood.com/us/en/support/articles/connect-to-dapps/ (accessed 2026-09-01; robinhood.com/on-ramp; newsroom 2023-04-27) [tech] — Robinhood Wallet supports WalletConnect (QR and mobile deep link, with WalletConnect Verify API domain checks) and conne
+- https://robinhood.com/us/en/agentic-trading/ (2026-07-29) [robinhood] — Agentic Trading launched May 2026: Robinhood's MCP server lets customers connect a third-party AI agent to a dedicated R
+- https://cdn.robinhood.com/assets/robinhood/legal/public_company_stock_token_giveaway_terms_eu.pdf (2026-06-24) [legal-eu] — Robinhood's own "RHEU Share Token Giveaway Terms" (24 June 2026): the promotion is "only available to Robinhood clients 
+- https://cdn.robinhood.com/assets/robinhood/legal/private_stock_giveaway_promotion_terms_and_conditions_eu.pdf (2025-09-19) [legal-eu] — Robinhood's "Private Company Stock Token Giveaway Terms" (19 Sept 2025): OpenAI and SpaceX tokens are derivative contrac
+- https://robinhood.com/us/en/support/articles/robinhood-wallet-perpetual-futures/ (2026-08-10) [robinhood] — Lighter perpetuals inside Robinhood Wallet are 'not available to residents of the U.K., US, Canada, Switzerland, UAE, Si
+- https://robinhood.com/us/en/newsroom/ (2026-08-10) [robinhood] — Upcoming catalyst: HOOD Summit '26 ('Engines of Creation') is scheduled for Sept 29-30, 2026 in Houston (announced Aug 1
+- https://cdn.robinhood.com/assets/robinhood/legal/rhj_base_prospectus.pdf (2026-06-25) [robinhood] — Jersey status: the Issuer holds only a JFSC 'COBO Consent' under the Control of Borrowing (Jersey) Order 1958, which the
+- https://cdn.robinhood.com/assets/robinhood/legal/rhj_notice_of_proposed_amendments.pdf (2026-08-14) [robinhood] — RHJ issuer fees: subscription 0.00%; redemption 0.00% in the first 90 days, 0.05% thereafter. The Aug 14, 2026 Notice of
+- https://cdn.robinhood.com/assets/robinhood/legal/fee_schedule_EU.pdf (2026-06-22) [robinhood] — Classic Stock Tokens per the July 1, 2026 KID: OTC derivative under MiFID II with Robinhood Europe as sole counterparty;
+- https://l2beat.com/scaling/projects/robinhood (2026-09-01) [robinhood] — L2BEAT classifies Robinhood Chain as Stage 0 with ~$1.65B value secured; state validation uses interactive fraud proofs 
+- https://chainid.network/chains.json (2026-09-01) [robinhood] — On-chain check via public RPC (rpc.mainnet.chain.robinhood.com and robinhood-rpc.publicnode.com): eth_chainId returns 0x
+- https://www.sec.gov/newsroom/press-releases/2026-81-sec-proposes-modernize-rules-registered-transfer-agents (2026-09-01) [legal-us] — SEC staff (Jan 28, 2026) classifies third-party tokenized stock as either a 'custodial' security entitlement (a security
+- https://www.sec.gov/newsroom/speeches-statements/peirce-statement-tokenized-securities-070925 (2025-07-09) [precedents] — SEC Commissioner Hester Peirce's July 9, 2025 statement 'Enchanting, but Not Magical': 'Tokenized securities are still s
+- https://www.sec.gov/newsroom/press-releases/2026-83-sec-announces-agenda-panelists-roundtable-preparations-24-hour-trading (2026-09-01) [tech] — The SEC will hold a roundtable on 'Preparations for 24-Hour Trading' on 2026-09-17 (Release 2026-83), covering exchange/
+- https://news.google.com/rss/search?q=Coinbase+tokenized+stocks+Base+launch&hl=en-US&gl=US&ceid=US:en (2026-08-24) [robinhood] — Coinbase launched tokenized US stocks on Base on Aug 24, 2026 (Apple, Nvidia, Meta among the first), initially for non-U
+- https://news.google.com/rss/search?q=Uniswap+%22Robinhood+Chain%22+stock+token+volume+%241.5+billion&hl=en-US&gl=US&ceid=US:en (2026-08-31) [robinhood] — Robinhood Chain traction since launch: Uniswap stock-token volume passed $1.5B in six weeks (Aug 31, 2026); a record ~$8
+- https://www.globenewswire.com/news-release/2026/04/28/3283181/0/en/robinhood-reports-first-quarter-2026-results.html (2026-04-28) [robinhood] — Q1 2026 (reported April 28, 2026): total net revenues +15% YoY; crypto revenue $134M (−47%); crypto notional $66B (app $
+- https://news.google.com/rss/search?q=ESMA+tokenised+stocks+warning+investors+2026&hl=en-US&gl=US&ceid=US:en (2026-02-24) [robinhood] — ESMA stated on Feb 24, 2026 that perpetual futures fall under EU CFD rules (product-intervention regime).
+- https://www.sec.gov/enforcement-litigation/administrative-proceedings/34-41631 (1999-07-21) [legal-us] — SEC In re Joe Loofbourrow (Securities Act Rel. 33-7700 / Exchange Act Rel. 34-41631, July 21, 1999): 'free' stock given 
+- https://cdn.stash.com/disclosures/stock-back-bonus-rewards-terms-and-conditions.pdf (2026-01-01 (terms date; PDF metadata 2026-08-01)) [precedents] — Inference: Stash funds base Stock-Back from debit interchange plus subscription revenue, and merchant 'bonus' rates (up 
+- https://www.fool.com/money/buying-stocks/reviews/robinhood-review/robinhood-promotions/ (2026-09) [legal-us] — Robinhood referral/new-account stock reward (as described Sept 2026): value randomly assigned with disclosed odds of 99%
+- https://www.bitsofstock.com/app-support/faq (2026-09-01 (accessed; FAQ undated)) [legal-us] — Apex Fintech 'Stock Rewards' lets consumer brands/FIs and programs like Bits of Stock award fractional shares; Apex Clea
+- https://www.grifin.com/legal/welcome-bonus (2026-09-01 (accessed)) [legal-us] — Grifin welcome bonus rules: promotion run by Interest Financial LLC; $10 'promotional cash credit' deposited to the brok
+- https://www.finra.org/rules-guidance/rulebooks/finra-rules/2040 (2015-08-24) [legal-us] — FINRA Rule 2040(a): no member may pay 'any compensation, fees, concessions, discounts, commissions or other allowances' 
+- https://www.finra.org/rules-guidance/notices/26-05 (2026-02-27) [legal-us] — FINRA Regulatory Notice 26-05 clarifies that Rule 3220 (the $300 gift limit) does not apply to gifts between a member an
+- https://www.finra.org/rules-guidance/rulebooks/finra-rules/2210 (2026-09-01 (accessed; rule current)) [legal-us] — FINRA Rule 2210(d)(1): all member communications must be 'fair and balanced' and 'no member may make any false, exaggera
+- https://www.sec.gov/files/rules/other/2021/34-92766.pdf (2021-08-27) [legal-us] — SEC Request for Information on Digital Engagement Practices (Rel. 34-92766, Aug 27, 2021) lists as DEPs 'games, streaks 
+- https://en.wikipedia.org/wiki/Robinhood_Markets (2026-09-01 (accessed)) [legal-us] — Massachusetts Securities Division filed an administrative complaint against Robinhood in December 2020 alleging it 'expl
+- https://library.apexfintechsolutions.com/wp-content/uploads/2025/04/AFBS-Fractional-Trading-Disclosure.pdf (2025-03-01) [legal-us] — Apex's Fractional Share Trading Disclosure (Updated March 2025): on ACATS transfer 'any fractional shares will be liquid
+- https://www.olshanlaw.com/sweepstakes-law-basics (2026-09-01 (accessed; undated page)) [legal-us] — Sweepstakes law basics: an illegal lottery requires prize, chance and consideration; consideration includes not only pur
+- https://www.nysenate.gov/legislation/laws/GBS/369-E (2026-09-01 (accessed; statute current)) [legal-us] — N.Y. Gen. Bus. Law 369-e: a game of chance promotion with total announced prize value 'in excess of five thousand dollar
+- https://www.fasthofflawfirm.com/blog/sweepstakes-state-registration-bonding (2026-06-08) [legal-us] — Rhode Island (R.I. Gen. Laws 11-50): registration required only for promotions conducted at retail establishments with p
+- https://www.sweepsy.com/us/ (2026-07-30) [legal-us] — Sweepstakes-casino bans in force or enacted as of July 30, 2026: Connecticut SB 1235 (signed 6/11/2025), Montana SB 555 
+- https://www.nelsonmullins.com/insights/blogs/cards-on-the-table/all/game-over-states-mull-sweepstakes-casino-bans (2025-07-16) [legal-us] — Enforcement/litigation precedents: NY AG sent cease-and-desist letters to 26 sweepstakes platforms (March 2025) and anno
+- https://en.wikipedia.org/wiki/Loot_box (2026-09-01 (accessed)) [legal-us] — Loot boxes: FTC settled with Genshin Impact developer HoYoverse/MiHoYo in January 2025 for $20 million over failure to d
+- https://www.mistplay.com/terms-of-use (2026-07-15) [legal-us] — Mistplay caps redemptions at 'an aggregate maximum amount of $550 USD... in gift cards or other rewards per calendar yea
+- https://www.federalregister.gov/documents/2026/03/23/2026-05635/application-of-the-federal-securities-laws-to-certain-types-of-crypto-assets-and-certain (2026-03-23) [legal-us] — Same release, Section VII (airdrops): an airdrop of a non-security crypto asset is not an investment contract because 't
+- https://www.federalregister.gov/documents/2026/08/21/2026-17183/regulation-crypto-assets (2026-08-21) [legal-us] — Proposed 'Regulation Crypto Assets' (Rel. 33-11434/34-106150, File S7-2026-27; FR Aug 21, 2026; comments due Oct 20, 202
+- https://www.sec.gov/newsroom/speeches-statements/corpfin-certain-liquid-staking-activities-080525 (2025-08-05) [legal-us] — SEC Division of Corporation Finance staff statements: meme coins (Feb 27, 2025) are not securities because value comes f
+- https://www.lw.com/en/us-crypto-policy-tracker/legislative-developments (2026-08) [legal-us] — CLARITY Act (H.R. 3633): passed House 294-134 on July 17, 2025; Senate Banking released successive drafts (Sept 5, 2025;
+- https://www.govinfo.gov/content/pkg/BILLS-119hr3633rfs/html/BILLS-119hr3633rfs.htm (2025-07 (House-passed text)) [legal-us] — CLARITY text as referred to the Senate (H.R. 3633 RFS): 'digital commodity' means 'a digital asset that is intrinsically
+- https://www.federalregister.gov/documents/2026/08/18/2026-16796/genius-act-regulations-on-payment-stablecoin-issuance-offer-and-sale (2026-08-18) [legal-us] — GENIUS Act (S.1582) signed July 18, 2025: only 'permitted payment stablecoin issuers' may issue payment stablecoins in t
+- https://www.fincen.gov/system/files/2019-05/FinCEN%20Guidance%20CVC%20FINAL%20508.pdf (2019-05-09) [legal-us] — FinCEN FIN-2019-G001 (May 9, 2019): money transmission is acceptance and transmission of 'currency, funds, or other valu
+- https://www.law.cornell.edu/regulations/new-york/23-NYCRR-200.2 (2026-09-01 (accessed; regulation current)) [legal-us] — NY BitLicense (23 NYCRR 200.2): 'Virtual Currency Business Activity' includes transmitting virtual currency and 'control
+- https://www.federalregister.gov/documents/2024/08/22/2024-18519/trade-regulation-rule-on-the-use-of-consumer-reviews-and-testimonials (2024-08-22) [legal-us] — FTC Endorsement Guides revision effective July 26, 2023 (16 CFR 255): material connections (payments, free products, swe
+- https://files.consumerfinance.gov/f/documents/cfpb_banking-in-video-games-and-virtual-worlds_2024-04.pdf (2024-04) [legal-us] — CFPB 'Banking in video games and virtual worlds' (April 2024): 'The Consumer Financial Protection Bureau (CFPB) is monit
+- https://developer.apple.com/app-store/review/guidelines/ (2026-09-01) [economics] — Apple App Store Review Guideline 3.1.5(v): 'Cryptocurrency apps may not offer currency for completing tasks, such as dow
+- https://support.google.com/googleplay/android-developer/answer/9877032 (2026-09-01 (live policy page)) [idle-design] — Google Play's Real-Money Gambling, Games, and Contests policy prohibits games that 'accept money in exchange for an oppo
+- https://www.federalregister.gov/documents/2025/04/22/2025-05904/childrens-online-privacy-protection-rule (2025-04-22) [legal-us] — Amended COPPA Rule (16 CFR 312) effective June 23, 2025 with compliance deadline April 22, 2026 for most provisions (sep
+- https://www.irs.gov/instructions/i1099mec (2026-08-04) [economics] — IRS 2026 information-return rules: brokers need not file Form 1099-B for 'sales of fractional shares of stock if gross p
+- https://www.courtlistener.com/api/rest/v4/search/?q=%22Friel%22+%22Dapper+Labs%22&type=r (2026-09-01 (accessed)) [legal-us] — Friel v. Dapper Labs, Inc., No. 1:21-cv-05837 (S.D.N.Y., filed July 7, 2021) is a pending/concluded securities class act
+- https://robinhood.com/us/en/crypto/chain/ (2026-09-01) [p2e-lessons] — Robinhood Stock Tokens cannot be delivered to US persons: 'Stock Tokens are not registered under U.S. securities laws an
+- https://finance.yahoo.com/markets/crypto/articles/sec-delays-tokenized-securities-innovation-144753306.html (2026-08-18) [legal-us] — The SEC's 'innovation exemption' that would let US firms issue, custody and trade tokenized equities without full regist
+- https://cointelegraph.com/news/coinbase-taps-chainlink-for-tokenized-stock-data-on-base (2026-08-24) [legal-us] — Coinbase launched tokenized US stocks ('B20') on Base on Aug 24, 2026, backed 1:1 via Alpaca custody, but only for eligi
+- https://www.govinfo.gov/content/pkg/FR-2026-08-21/pdf/2026-17183.pdf (2026-08-21) [legal-us] — SEC 2026 Interpretation footnote 141: if recipients 'would have to fulfill further conditions subsequent to the announce
+- https://dfpi.ca.gov/digital-financial-assets-law/ (2026-09-01 (accessed)) [legal-us] — California's Digital Financial Assets Law licensing requirement takes effect July 1, 2026 (delayed from July 1, 2025 by 
+- https://www.irs.gov/pub/irs-drop/rr-23-14.pdf (2023-07-31) [legal-us] — IRS Rev. Rul. 2023-14 (July 31, 2023): crypto rewards are included in gross income at fair market value when the taxpaye
+- https://robinhood.com/us/en/support/articles/invite-friends-pick-stock-200/ (2026-09-01) [legal-us] — Robinhood's Sept 1, 2026 program terms: the new-account reward 'replaces the fractional stock rewards program previously
+- https://www.velaw.com/insights/game-over-robinhood-pays-7-5-million-to-resolve-gamification-securities-violations/ (2025-11-27) [legal-us] — The Massachusetts consent order (Jan 18, 2024) required Robinhood to stop, for Massachusetts accounts, confetti animatio
+- https://www.modemobile.com/terms (2025-12-01) [legal-us] — Mode Mobile's US age floor is 13 ('IN THE UNITED STATES, THE SERVICE IS NOT FOR PERSONS UNDER THE AGE OF 13'), alongside
+- https://www.doctorofcredit.com/stockpile-to-close-on-april-17-2026-accounts-transferred-to-public-stash-apex/ (2026-03-20) [legal-us] — Stockpile, a long-running stock-gifting broker, closed on April 17, 2026 with accounts transferred to Public/Stash/Apex;
+- https://robinhood.com/us/en/newsroom/robinhood-accelerates-global-expansion-robinhood-chain-mainnet-stock-tokens-agentic-trading (2026-07-01) [legal-us] — Robinhood's July 1, 2026 announcement (updated July 30, 2026) states 'Stock Tokens are not available in the US or to US 
+- https://robinhood.com/newsroom/robinhood-launches-stock-tokens-reveals-layer-2-blockchain-and-expands-crypto-suite-in-eu-and-us-with-perpetual-futures-and-staking/ (2025-06-30) [legal-us] — Robinhood's original stock-token launch (June 30, 2025) covered only EU/EEA customers (30 countries, 200+ US stock and E
+- https://robinhood.com/us/en/legal/ (2026-07-29) [precedents] — Robinhood's disclosure library (Sept 2026) contains only Robinhood-run reward programs and no third-party rewards/giftin
+- https://apexfintechsolutions.com/who-we-serve/consumer-brands/ (2026-09-01) [legal-us] — US B2B stock-reward rails exist outside Robinhood: Alpaca Broker API's 'Journal' feature lets marketers 'reward loyal cu
+- https://www.govinfo.gov/content/pkg/FR-2026-03-23/html/2026-05635.htm (2026-03-23) [legal-us] — The SEC-CFTC 2026 Interpretation expressly lists among legitimate airdrop purposes to 'award high-scoring players of an 
+- https://www.govinfo.gov/content/pkg/FR-2026-08-21/html/2026-17183.htm (2026-08-21) [legal-us] — Proposed Regulation Crypto Assets defines 'covered transaction' under the startup exemption to include 'transactions ref
+- https://www.sec.gov/rules-regulations/2023/07/s7-12-23 (2025-06-17) [precedents] — The SEC formally withdrew the 'Conflicts of Interest Associated with the Use of Predictive Data Analytics by Broker-Deal
+- https://www.courtlistener.com/opinion/9422566/robinhood-financial-llc-v-secretary-of-the-commonwealth/ (2023-08-25) [legal-us] — The Massachusetts SJC decided Robinhood Financial LLC v. Secretary of the Commonwealth (SJC-13381) on Aug 25, 2023, supe
+- https://www.irs.gov/individuals/international-taxpayers/frequently-asked-questions-on-virtual-currency-transactions (2025-01-01) [legal-us] — IRS virtual-currency FAQ: property (including crypto) received 'in exchange for performing services' is ordinary income 
+- https://www.law.cornell.edu/cfr/text/16/255.5 (2026-09-01) [legal-us] — FTC Endorsement Guides 16 CFR 255.5 Example 9: a program where a user earns points for social-media posts about products
+- https://www.bitsofstock.com/legal/general-terms-and-conditions (2026-09-01) [precedents] — Bits of Stock's terms: operated by Emcee Invest, Inc.; brokerage accounts cleared through Velox Clearing LLC; users must
+- https://cdn.ca9.uscourts.gov/datastore/opinions/2018/03/28/16-35010.pdf (2018-03-28) [legal-us] — Kater v. Churchill Downs Inc., 9th Cir. No. 16-35010 (filed March 28, 2018), held Big Fish Casino's virtual chips are a 
+- https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202520260AB831 (2025-10-11) [legal-us] — California AB 831 (Ch. 623, chaptered Oct 11, 2025) adds Penal Code 337o: misdemeanor with a fine of not less than $1,00
+- https://support.google.com/googleplay/android-developer/answer/13607354 (2026-09-01) [economics] — Google Play 'Blockchain-based Content' policy: developers 'may not promote or glamorize any potential earning from playi
+- https://www.sec.gov/news/press/pressarchive/1999/99-83.txt (1999-07-22) [economics] — Rule 504 of Regulation D now permits up to $10,000,000 of securities in any 12-month period (not $5M), and the SEC's Jul
+- https://www.govinfo.gov/content/pkg/PLAW-119publ27/html/PLAW-119publ27.htm (2025-07-18) [legal-us] — GENIUS Act Sec. 3(b)(1) restrictions on digital asset service providers dealing in non-permitted payment stablecoins tak
+- https://www.mica.wtf/mica/title-i-subject-matter-scope-and-definitions-art.-1-3/article-3 (2023-06-09) [legal-eu] — MiCA Art 3(1)(9) defines a utility token as "a type of crypto-asset that is only intended to provide access to a good or
+- https://www.mica.wtf/mica/title-ii-crypto-assets-other-than-arts-or-emts-art.-4-15/article-4 (2023-06-09) [legal-eu] — MiCA Art 4(2) waives the white-paper obligations for offers to fewer than 150 natural/legal persons per Member State, of
+- https://www.mica.wtf/mica/title-ii-crypto-assets-other-than-arts-or-emts-art.-4-15/article-4.md (2023-06-09) [legal-eu] — Inference from the Art 4(1) list of obligations (a)-(g): the Art 4(2) small-offer exemptions only remove the white-paper
+- https://www.mica.wtf/mica/title-ii-crypto-assets-other-than-arts-or-emts-art.-4-15/article-7 (2023-06-09) [legal-eu] — MiCA Art 7 requires marketing communications to be clearly identifiable as such, fair/clear/not misleading, consistent w
+- https://www.mica.wtf/mica/title-i-subject-matter-scope-and-definitions-art.-1-3/article-2.md (2023-06-09) [legal-eu] — MiCA Art 2(4) excludes crypto-assets that qualify as financial instruments (and deposits, funds, securitisation position
+- https://www.esma.europa.eu/sites/default/files/2026-04/ESMA75-113276571-1679_Statement_on_the_end_of_transitional_periods_under_MiCA.pdf (2026-04-17) [legal-eu] — ESMA's 17 April 2026 statement adds that the reverse-solicitation exception 'also applies in a business-to-business cont
+- https://www.mica.wtf/mica/title-ix-transitional-and-final-provisions-art.-140-149/article-143.md (2023-06-09) [legal-eu] — MiCA Art 143(3): CASPs operating under national law before 30 Dec 2024 could continue until 1 July 2026 or until authori
+- https://www.lb.lt/en/sfi-financial-market-participants/robinhood-europe-uab (2026-03-12) [legal-eu] — Inference (no primary ruling found): under MiFID II, a third party that introduces players to Robinhood and routes their
+- https://tr.tradingview.com/news/zacks:cc2decb01094b:0-robinhood-tokenized-stocks-face-scrutiny-from-lithuania-central-bank (2025-07-08) [legal-eu] — On 7 July 2025 the Bank of Lithuania said it had "contacted Robinhood and are awaiting clarifications regarding the stru
+- https://www.cryptopolitan.com/esma-says-tokenized-stocks-mislead-investors/ (2025-09-01) [legal-eu] — ESMA Executive Director Natasha Cazenave (Dubrovnik, reported 1 Sept 2025) warned that tokenised instruments "typically 
+- https://www.esma.europa.eu/sites/default/files/2026-02/ESMA35-243228190-8024_-_Public_statement_on_derivatives_in_scope_of_the_CFD_product_intervention_measures.pdf (2026-02-24) [legal-eu] — ESMA Public Statement ESMA35-243228190-8024 (24 Feb 2026): the CFD definition from ESMA Decision (EU) 2018/796 is "a der
+- https://www.esma.europa.eu/press-news/esma-news/esma-agrees-prohibit-binary-options-and-restrict-cfds-protect-retail-investors (2018-03-27) [legal-eu] — The 2018 ESMA CFD measures (mirrored in permanent national measures) prohibit "any form of monetary and non-monetary ben
+- https://cms.law/en/int/legal-updates/EU-Retail-Investment-Strategy-Political-Agreement-Key-Points-and-Implications-for-EU-and-non-EU-Firms (2025-12-19) [legal-eu] — Council and Parliament reached political agreement on the Retail Investment Strategy on 18 Dec 2025: a partial inducemen
+- https://www.esma.europa.eu/press-news/esma-news/esma-makes-recommendations-improve-investor-protection (2022-04-29) [legal-eu] — ESMA technical advice ESMA35-42-1227 (29 April 2022) states that "Gamification techniques in trading apps and personal r
+- https://www.iosco.org/library/pubdocs/pdf/IOSCOPD794.pdf (2025-05-19) [legal-eu] — IOSCO Final Report FR/07/2025 on Digital Engagement Practices (May 2025) finds that gamification techniques "such as bad
+- https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32022R2065 (2022-10-27) [legal-eu] — Digital Services Act (Reg. 2022/2065, fully applicable 17 Feb 2024): Art 25 prohibits providers of online platforms from
+- https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:02005L0029-20220528 (2022-05-28) [legal-eu] — UCPD (2005/29/EC, consolidated) Annex I item 20 bans describing a product as "free" if the consumer must pay anything be
+- https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:52021XC1229(05) (2021-12-29) [legal-eu] — Commission UCPD Guidance 2021/C 526/01 (29 Dec 2021): "The presence of paid random content (e.g. loot boxes, card packs,
+- https://blog.promise.legal/lootbox-regulation-2026-game-studios/ (2026-07-17) [legal-eu] — Netherlands: the Council of State (March 2022) reversed the Ksa's EUR 10m fine against EA, holding loot boxes integrated
+- https://www.dlapiper.com/en/insights/publications/2026/01/supreme-court-shifts-the-playing-field-lootboxes-fall-outside-the-austrian-gambling-act (2026-01-29) [legal-eu] — Austrian Supreme Court (OGH) 6 Ob 228/24h, decided 18 Dec 2025 (published Jan 2026): FIFA Ultimate Team packs are not ga
+- https://blog.promise.legal/loot-box-laws-game-developers/ (2026-05-09) [legal-eu] — Belgium: the Gaming Commission's April 2018 decision treats paid loot boxes as games of chance under the Gaming Act of 7
+- https://programminginsider.com/loot-boxes-regulation-and-where-the-line-sits-in-2026/ (2026-01-01) [legal-eu] — Germany: under the Interstate Treaty on Gambling (GlüStV 2021, §3) gambling requires consideration (a stake of not insig
+- https://www.cuatrecasas.com/es/spain/propiedad-intelectual/art/espana-primera-regulacion-de-las-loot-boxes-o-cajas-botin-en-espana (2022-09-06) [legal-eu] — Spain published a draft law (July 2022) to regulate "random reward mechanisms": prohibition for under-18s with ID verifi
+- https://kansspelautoriteit.nl/kansspel-om-iets-te-promoten (2026-09-01) [legal-eu] — Kansspelautoriteit conditions for licence-free promotional games of chance also include: winners must be selected impart
+- https://www.mimit.gov.it/it/mercato-e-consumatori/concorrenza-e-commercio/manifestazioni-a-premio/concorsi-a-premio (2026-09-01) [legal-eu] — Italy: prize contests (concorsi a premio, DPR 430/2001) require a notice to MIMIT at least 15 days before launch via the
+- https://www.legislation.gov.uk/ukpga/2005/19/section/6 (2005-04-07) [legal-eu] — UK Gambling Act 2005 s.6: "gaming" means playing a game of chance for a prize, a game of chance includes games mixing ch
+- https://researchbriefings.files.parliament.uk/documents/CBP-8498/CBP-8498.pdf (2024-08-13) [legal-eu] — UK loot-box policy: the Gambling Commission holds that in-game items "confined for use within the game and cannot be cas
+- https://www.legislation.gov.uk/uksi/2023/612/made (2023-06-07) [legal-eu] — UK cryptoasset financial promotions: SI 2023/612 (made 7 June 2023, regime effective 8 Oct 2023) makes a "qualifying cry
+- https://www.fca.org.uk/publications/policy-statements/cryptoasset-regime (2026-06-30) [legal-eu] — UK cryptoasset regime: the FSMA 2000 (Cryptoassets) Regulations 2026 were approved 4 Feb 2026; the FCA published final r
+- https://docs.robinhood.com/chain/stock-tokens/ (accessed 2026-09-01; defiprime 2026-07-02) [tech] — Inference (labelled): Robinhood's restrictions appear to be enforced by (a) geofenced distribution through Robinhood Wal
+- https://www.eupersonalfinance.eu/articles/robinhood-europe-review (2026-08-31) [legal-eu] — Robinhood Europe serves 30 EEA countries (EU-27 plus Iceland, Liechtenstein, Norway); the UK is served by a separate ent
+- https://www.edpb.europa.eu/system/files/2026-07/edpb_guidelines_202502_blockchain_v2_en.pdf (2026-07-07) [legal-eu] — EDPB Guidelines 02/2025 on blockchain, version 2.0 adopted 7 July 2026: storing personal data on-chain should be avoided
+- https://eur-lex.europa.eu/eli/reg/2024/1624/oj (2024-06-19) [legal-eu] — AML Regulation (EU) 2024/1624 applies from 10 July 2027 (Art 90); crypto-asset service providers are obliged entities (A
+- https://www.gesetze-im-internet.de/estg/__37b.html (2024-01-01) [legal-eu] — Germany: Sec. 37b EStG lets the giver pay a flat 30% income tax (plus solidarity surcharge/church tax) on business-motiv
+- https://nl.wikipedia.org/wiki/Kansspelbelasting (2026-08-27) [legal-eu] — Netherlands: gaming tax (kansspelbelasting) rose from 30.5% (2024) to 34.2% (1 Jan 2025) and 37.8% (1 Jan 2026); prizes 
+- https://www.service-public.gouv.fr/particuliers/vosdroits/F14203 (2026-05-13) [legal-eu] — France: gifts between persons with no family tie are taxed at 60% with no abatement ("Vous n'avez droit à aucun abatteme
+- https://www.revenue.ie/en/gains-gifts-and-inheritance/cat-exemptions/small-gift-exemption/index.aspx (2026-01-01) [legal-eu] — Ireland: gifts up to EUR 3,000 per disponer per calendar year are exempt from Capital Acquisitions Tax (small gift exemp
+- https://taxsummaries.pwc.com/lithuania/individual/income-determination (2026-03-10) [legal-eu] — Lithuania (PwC summary, last reviewed 10 Mar 2026): awards and prizes not exceeding EUR 200 received from the same perso
+- https://cdn.robinhood.com/assets/robinhood/legal/stock_token_dividend_match_terms_eu.pdf (2026-02-24) [legal-eu] — Robinhood's EU promotion terms (giveaway 24 June 2026; dividend match 24 Feb 2026) uniformly state that taxes are "solel
+- https://robinhood.com/eu/en/legal/ (2026-07-01) [legal-eu] — Robinhood Europe Client Agreement (last updated 1 July 2026): s.4.2 requires users to be at least 18 years of age; s.4.3
+- https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32023R1114 (2023-06-09) [legal-eu] — MiCA Art 3(1)(5) defines a crypto-asset as 'a digital representation of a value or of a right that is able to be transfe
+- https://eur-lex.europa.eu/eli/dec/2018/796/oj (2018-06-01) [legal-eu] — ESMA Decision (EU) 2018/796 Art 3 (mirrored in the permanent national CFD measures): 'It shall be prohibited to particip
+- https://www.esma.europa.eu/esmas-activities/digital-finance-and-innovation/markets-crypto-assets-regulation-mica (2026-08-21) [legal-eu] — ESMA published Final Reports (December 2024) on Guidelines on the conditions and criteria for the qualification of crypt
+- https://eur-lex.europa.eu/eli/dir/2023/2226/oj/eng (2023-10-17) [legal-eu] — Council Directive (EU) 2023/2226 (DAC8) requires Member States to apply crypto-asset reporting rules from 1 January 2026
+- https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:32022R2065 (2022-10-27) [legal-eu] — DSA Art 25(2): the dark-pattern prohibition in Art 25(1) 'shall not apply to practices covered by Directive 2005/29/EC o
+- https://taxsummaries.pwc.com/lithuania/individual/significant-developments (2026-03-10) [legal-eu] — Lithuania's 2025 tax reform introduced, from 1 January 2026, an aggregated progressive personal income tax scale of 20% 
+- https://www.stash.com/stock-back-debit-card (2026-09-01 (page fetched); NerdWallet corroboration 2025-12-16) [precedents] — Stash Stock-Back: on the $12/month Stash plan, cardholders earn 1% back in stock on all purchases up to $1,000 per month
+- https://www.doctorofcredit.com/bumped-app-earn-stock-rewards-on-retail-purchases-by-linking-a-card/ (2022-12-19 (update); corroborated by https://moneyat30.com/bumped-app-obituary/ 2022-12-23) [precedents] — Bumped (brand-loyalty-in-stock): users linked a card via Plaid and opened a brokerage account (SSN required); rewards we
+- https://financefeeds.com/jack-henry-partners-with-bits-of-stock-to-offer-fractional-shares-as-everyday-spending-rewards/ (2025-09-11; corroborated by https://fintech.global/2025/09/09/jack-henry-partners-with-bits-of-stock-on-rewards/ 2025-09-09 and https://finovate.com/bits-of-stock-now-available-in-q2s-digital-banking-platform/ 2024-02-21) [precedents] — Bits of Stock is alive and pivoted to B2B: fractional-share rewards embedded in Q2's digital banking platform (Feb 21, 2
+- https://www.acorns.com/earn/ (2026-09-01) [economics] — Acorns Earn: bonus investments come from 10,000+ partner-brand offers (Kohl's, Apple, Nike, Walmart, etc.), i.e. brand/a
+- https://www.thelines.com/prediction-markets/robinhood/referral-code/ (2026-08-24; corroborated by https://www.cryptoninjas.net/referral-code/robinhood/ 2026-06-20) [precedents] — Robinhood referral/gift stock (2026): each reward is $5-$200 in a fractional share the user picks from a list; Robinhood
+- https://www.finder.com/investments/webull-bonus (2026-08-03; corroborated by https://www.wallstreetzen.com/blog/how-to-get-free-stocks-for-signing-up/ 2026-07-01) [precedents] — Webull (Jul 22-Oct 14, 2026): 10 free fractional shares each worth $3-$300, randomly drawn from NVDA, TSLA, SPCX and AAP
+- https://www.investmentnews.com/regulation-legal-compliance/robinhood-to-pay-75m-to-settle-massachusetts-charges/248214 (2024-01-18; corroborated by https://www.velaw.com/insights/game-over-robinhood-pays-7-5-million-to-resolve-gamification-securities-violations/ 2024-01 and https://btlj.org/2025/11/the-gamification-of-investments-a-comparative-approach-between-the-us-and-eu/ 2025-11-03) [precedents] — Massachusetts Securities Division v. Robinhood settled January 18, 2024 for a $7.5M fine under the state's 2020 fiduciar
+- https://finance.yahoo.com/news/cash-app-now-lets-users-170046294.html (2021-12-14) [precedents] — Cash App (Block) launched stock and bitcoin gifting on December 14, 2021: US users can gift as little as $1 of stock (e.
+- https://www.grifin.com/ (2026-09-01 (page fetched); Price.com deal https://finance.yahoo.com/markets/stocks/articles/shop-save-invest-price-com-130300787.html 2026-07-14) [precedents] — Grifin (alive, 1.5M+ downloads): invests $1 (adjustable $1-$99) of the user's own money into the stock of each public co
+- https://www.globenewswire.com/news-release/2026/02/18/3240416/0/en/Shareholder-Perks-Pioneer-TiiCKER-Unveils-New-Points-Rewards-App-TickerPerks.html (2026-02-18) [precedents] — TiiCKER launched TickerPerks on February 18, 2026: verified shareholders earn points for verified stock ownership, in-ap
+- https://www.moneyprodigy.com/stock-apps-for-under-18/ (2026-08-22) [precedents] — Fidelity Youth Account (ages 13-17): $50 bonus when the parent opens and funds with $50, no fees, $0 commissions; Greenl
+- https://www.coingecko.com/learn/what-are-tokenized-stocks (2026-07-01) [precedents] — CoinGecko (updated Jul 1, 2026) asserts that 'the SEC approved Nasdaq's rules for tokenized equity trading in March 2026
+- https://s205.q4cdn.com/875401827/files/doc_news/Venmo-Introduces-Venmo-Stash-to-Reinvent-Rewards-2025.pdf (2025-11-10) [precedents] — Venmo Stash mechanics: 1% cash back on Venmo Debit Mastercard spend, rising to 2% when auto-reload is on and 5% with $50
+- https://tech.yahoo.com/gaming/articles/earn-real-bitcoin-playing-mining-170103986.html (undated in snippet (article by Decrypt, c. 2024-2025); corroborating snippet from https://www.mexc.com/news/533378 (now 410)) [precedents] — Bitcoin Miner by Fumb Games (Android/iOS idle miner, 20M+ downloads) pays real sats through ZBD; the game is ad-funded w
+- https://www.coingecko.com/en/coins/bitcoin (2026-09-01) [precedents] — Inference: at the CoinGecko bitcoin price of $77,254 on 2026-09-01, a 330-sat daily cap is about $0.25/day (~$7.60/month
+- https://www.prnewswire.com/news-releases/zbd-announces-40m-series-c-to-bring-real-money-payments-and-rewards-natively-into-video-games-302668175.html (2026-01-22; corroborated by https://bitcoinmagazine.com/news/bitcoin-payments-startup-zbd-raises-40m 2026-01-22 and https://fintech.global/2026/01/23/zbd-secures-40m-funding-to-scale-gaming-payments/ 2026-01-23) [precedents] — ZBD raised a $40M Series C on January 22, 2026 led by Blockstream Capital ($36M); it processes 120M+ transactions/year, 
+- https://bitcoinmagazine.com/business/thndr-targets-95-billion-gambling-sector-with-new-bitcoin-lightning-api (2023-10-12) [precedents] — THNDR Games shifted in October 2023 from ad-funded bitcoin reward games (e.g., Club Bitcoin: Solitaire) to Clinch, a Lig
+- https://www.appbrain.com/app/bitcoin-blast-earn-bitcoin/app.getloaded.bitcoinblast (2026-07-30 (version date per listing)) [precedents] — Bling's Bitcoin Blast (Android/iOS) remains maintained: version 3.6.2 released July 30, 2026; Bling acknowledged reviews
+- https://financefeeds.com/coinbase-learn-and-earn-vs-binance-learn-and-earn/ (2026-07-29; corroborated by Coinbase Help 'Learning rewards' FAQ (snippet) https://help.coinbase.com/en/coinbase/getting-started/getting-started-with-coinbase/learning-rewards-faq-and-terms) [precedents] — Coinbase Learning Rewards ended May 27, 2025 after distributing more than $150M in crypto (typically $1-$5 per lesson) t
+- https://www.theblock.co/news/business/2026-05-19-lolli-launches-automatic-bitcoin-cashback-on-linked-debit-and-credit-card-purchases-401837 (2026-05-19; acquisition https://thesis.co/blog/doubling-down-on-bitcoin-rewards-thesis-acquires-lolli 2025-07-02) [precedents] — Lolli: 600,000+ users have received more than $20M in bitcoin since 2018; acquired by Thesis on July 2, 2025 (prior Seri
+- https://www.globenewswire.com/news-release/2026/05/27/3302114/0/en/CORRECTION-Fold-Rolls-Out-New-Bitcoin-Rewards-Credit-Card.html (2026-05-27) [precedents] — Fold Holdings (Nasdaq: FLD) began rolling out its Fold Bitcoin Credit Card to waitlist members in batches as of May 27, 
+- https://coinbureau.com/review/sweatcoin-review (2026-01-13; corroborated by https://www.sidehustlenation.com/sweatcoin-sweat-wallet-review/ 2026-01-03 and https://www.coingecko.com/en/coins/sweat-economy 2026-09-01) [precedents] — Sweatcoin/Sweat Economy: 120M+ users; free tier mints 1 sweatcoin per 1,000 steps capped at 10/day (20/day on $5/month P
+- https://www.mistplay.com/legal/economy-disclosure (2024-07-25) [economics] — Mistplay Economy Disclosure (last updated July 25, 2024, still current): users can redeem 'rewards or gift cards with a 
+- https://www.eneba.com/hub/play-to-earn/mistplay-vs-justplay/ (2026-08-26; corroborated by https://www.nerdwallet.com/finance/learn/game-apps-pay-real-money 2026-06-11) [precedents] — JustPlay: ~80,000 coins = $1 (ranging 70,000-100,000+ by region, reward type and advertiser spend, explicitly tied to ad
+- https://dollarsprout.com/swagbucks-review/ (2025) [precedents] — Swagbucks (Prodege): 1 SB = $0.01; over $935M paid to members since 2010; rewards funded by brands paying for survey/mar
+- https://askthemoneycoach.com/whats-the-deal-with-mode-mobile/ (2025-06-28; share-redemption option per Mode helpdesk https://helpdesk.modemobile.com/hc/en-us/articles/33963255132692-Your-Guide-to-Earning-Rewards-in-the-Mode-Earn-App (snippet, 403 on fetch)) [precedents] — Mode Mobile (Mode Earn app/EarnPhone): 40M+ registered users, users have collectively earned $325M, company revenue 'ten
+- https://decrypt.co/235669/notcoin-loses-11-after-the-not-airdrop-claim-ends (2024-06-17; corroborated by https://coinedition.com/notcoins-viral-rise-airdrop-deadline-tokenomics-and-market-performance/ 2024-05-30 and https://www.coingecko.com/en/coins/notcoin 2026-09-01) [precedents] — Notcoin: ~35M players, 11.5M holders claimed the airdrop (2.5M on-chain); launched May 16, 2024 on TON; peak ~$1.5-1.8B 
+- https://cryptopotato.com/hamster-kombat-announces-details-of-airdrop-2-3m-accounts-banned-for-cheating/ (2024-09-22; corroborated by https://crypto.news/hamster-kombat-game-airdrop-controversy-boycott/ 2024-09-23, https://www.altcoinbuzz.io/cryptocurrency-news/hamster-kombat-airdrops-tokens-bans-2-3-million-cheaters/ 2024-09-24 and https://www.coingecko.com/en/coins/hamster-kombat 2026-09-01) [precedents] — Hamster Kombat: 300M+ signups since March 2024; 131M (43%) qualified for the Sept 26, 2024 airdrop; 2.3M accounts banned
+- https://en.cryptonomist.ch/2024/09/21/catizen-airdrop-the-mini-app-of-telegram-completes-the-listing-of-cati-on-the-crypto-markets/ (2024-09-21; corroborated by https://coinmarketcap.com/academy/article/telegrams-catizen-game-launches-cati-token-amid-community-airdrop 2024-09 and https://www.coingecko.com/en/coins/catizen 2026-09-01) [precedents] — Catizen: 39M+ users and $16M+ in in-app-purchase revenue by July 2024; 1B CATI supply with 15% airdropped (150M) and 190
+- https://www.coingecko.com/en/coins/blum (2026-09-01; DOGS history https://www.cryptotimes.io/2024/08/31/150k-notcoin-users-receive-3-3-million-in-dogs-airdrop/ 2024-08-31; Blum background https://www.bitget.com/academy/blum-telegram-mini-app-airdrop-listing-date-investor-guide 2025-03-31) [precedents] — Other Telegram tokens on 2026-09-01: DOGS (airdropped Aug 2024; 150k Notcoin users received 2.75B DOGS worth ~$3.3M; pea
+- https://www.prnewswire.com/news-releases/invstr-launches-fantasy-finance-investment-game-as-winning-alternative-to-fantasy-sports-craze-843065620.html (2018-12-06; Fortune City https://yourstory.com/2022/06/app-friday-fortune-city-game-like-approach-personal-finance 2022-06) [precedents] — Invstr Fantasy Finance (launched Dec 6, 2018): players run a $1M virtual portfolio across stocks, commodities and 23 cry
+- https://robinhood.com/newsroom/ (2026-07-01) [precedents] — On July 1, 2026 Robinhood announced (from London) 'Robinhood Accelerates Global Expansion with Robinhood Chain Mainnet, 
+- https://cdn.robinhood.com/assets/robinhood/legal/Robinhood_Gold_Card_Rewards_Program_Rules.pdf (2026-07-29) [precedents] — Robinhood Gold Card Rewards and Benefits Program Rules (Last Updated July 29, 2026) include a 'Mystery Box' where cardho
+- https://cdn.robinhood.com/assets/robinhood/legal/match.pdf (2026-03-18) [precedents] — Robinhood IRA Deposit Match Terms (Mar 18, 2026): 1% match on eligible IRA deposits, 'subject to a five (5) year earn-ou
+- https://lp.stash.com/stride-stash-stock-back-rewards-terms-and-conditions/ (2025-05-01) [economics] — Stash's Stock-Back Rewards Terms (effective May 1, 2025) show how a fractional-stock rewards program is operated: reward
+- https://en.wikipedia.org/wiki/List_of_acts_of_the_119th_United_States_Congress (2026-09-01) [precedents] — The GENIUS Act (payment stablecoins) became Public Law 119-27 on July 18, 2025; the Digital Asset Market Clarity Act (H.
+- https://venmo.com/stash-rewards (2026-09-01) [precedents] — Venmo Stash terms as of Sept 2026: 1% cash back from day one, 2% after $250 in monthly qualifying spend, 5% after $1,500
+- https://www.moomoo.com/us/support/topic4_748 (2026-09-01) [precedents] — Moomoo's welcome-bonus terms (Sept 1-30, 2026): 'Offer is only valid for US residents with a valid SSN who are at least 
+- https://www.mistplay.com/legal/terms-of-use (2026-07-15) [precedents] — Mistplay's Terms of Use (LAST UPDATED JULY 15th, 2026) state 'MINORS UNDER 18 YEARS OF AGE ARE NOT ALLOWED TO USE THE SE
+- https://help.swe.at/hc/sweat/articles/1773344121-how-much-sweat-can-i-earn-a-day (2026-08-11) [precedents] — Sweat Wallet help (updated Aug 11, 2026): free users mint $SWEAT only for steps 'between 3,000 and 10,000 a day' (a 3,00
+- https://ondo.finance/global-markets (accessed 2026-09-01 (latest news 2026-08-28); docs.ondo.finance eligibility/secondary-market pages) [tech] — Ondo Stocks (formerly Ondo Global Markets): 440+ tokenized US stocks/ETFs on Ethereum, BNB Chain and Solana (bridgeable 
+- https://xstocks.com/ (2026-09-01) [precedents] — xStocks are 'issued by Backed Assets (JE) Limited (a Jersey private limited company)' and offered through Payward Digita
+- https://www.stockpile.com/terms (2026-07-23) [precedents] — stockpile.com now hosts only a 'Stockpile Gift Card refund request' portal run by CIMI2603, Inc. (Arizona corp.; Leawood
+- https://www.bitsofstock.com/ (2026-09-01) [precedents] — Bits of Stock's 2026 site (Emcee Invest, Inc., Miami) now claims 'Stock Rewards drove a 50.6% increase in monthly spend,
+- https://greenlight.com/plans (2026-09-01) [precedents] — Greenlight's current pricing: Core $5.99/mo, Max $10.98/mo (first tier including 'Let them invest with guardrails' - par
+- https://thesis.co/blog/doubling-down-on-bitcoin-rewards-thesis-acquires-lolli (2025-07-02) [precedents] — Thesis paused Lolli withdrawals for a 90-day transition starting July 4, 2025 while migrating payout infrastructure afte
+- https://robinhood.com/eu/en/ (2026-07-01) [economics] — Robinhood Europe (Lithuania-licensed, supervised by the Bank of Lithuania) delivers 'US stock' exposure in the EEA as to
+- https://dinari.com/blog/dinari-launches-724-tokenized-stocks-available-to-u-s-investors-and-businesses (2026-08-04) [precedents] — On Aug 4, 2026 Dinari launched 724 tokenized US stocks (entire S&P 500) 'available to eligible U.S. investors and busine
+- https://www.stockpile.com/ (2026-09-01) [precedents] — Stockpile's consumer site has been replaced by a gift-card refund portal run by CIMI2603, Inc. with a cardcompliant.com 
+- https://zbdpay.com/ (2026-09-01) [precedents] — ZBD (zbd.gg now redirects to zbdpay.com) states it 'holds US Money Transmitter Licenses (NMLS 2188007), EU EMI and MiCAR
+- https://foldapp.com/credit-card (2026-09-01) [precedents] — Fold Bitcoin Credit Card details: issued by Celtic Bank under a Visa license, no annual fee, up to 4% back in bitcoin (1
+- https://invest.modemobile.com/ (2026-09-01) [precedents] — Mode Mobile raises from users under Regulation A+ (current round at $0.55/share; '$95,463,239 invested to date'; raising
+- https://www.federalregister.gov/documents/2025/06/17/2025-11110/withdrawal-of-proposed-regulatory-actions (2025-06-17) [precedents] — The SEC's formal withdrawal of the 2023 'Conflicts of Interest Associated with the Use of Predictive Data Analytics by B
+- https://tickerperks.com/ (2026-09-01) [precedents] — TickerPerks lists its app launch as Mar 2, 2026 (the Feb 18, 2026 date was the announcement); ownership is verified by c
+- https://www.gamedeveloper.com/design/the-math-of-idle-games-part-i (2016-10-13) [idle-design] — Canonical generator formulas: cost_next = cost_base * rate_growth^owned; production_total = (production_base * owned) * 
+- https://cookieclicker.wiki.gg/wiki/Buildings (2026 (live wiki; consistent with Dinogame 2025 summary)) [idle-design] — Cookie Clicker building price = base * 1.15^(owned - free); base cost/CpS: Cursor 15/0.1, Grandma 100/1, Farm 1,100/8, M
+- https://cookieclicker.wiki.gg/wiki/Heavenly_Chips (2026 (live wiki); formula also in Pecorella Part III 2017-02-01) [idle-design] — Cookie Clicker prestige = floor(cbrt(lifetime cookies baked / 1e12)); heavenly chips gained 1:1 with prestige levels; ea
+- https://steamcommunity.com/app/346900/discussions/0/620712999971234569/ (Steam thread (undated, ~2015); formula corroborated by Pecorella Part III 2017-02-01) [idle-design] — AdVenture Capitalist angels = 150 * sqrt(lifetime earnings / 1e15) minus angels already claimed; each angel gives +2% pr
+- https://www.gamedeveloper.com/design/the-math-of-idle-games-part-iii (2017-02-01) [idle-design] — Prestige exponent sets run length: square-root formulas (AdCap, Realm Grinder p = (sqrt(1 + 8*c_M/1e12) - 1)/2) need ~4x
+- https://www.gamedeveloper.com/game-platforms/the-math-of-idle-games-part-ii (2016-12-14) [idle-design] — Derivative Clicker models generators that produce lower-tier generators: costs like 5 * 1.1^n; tiered production follows
+- https://archive.org/stream/GDC2015Pecorella/GDC2015-Pecorella_djvu.txt (2015-03 (GDC 2015)) [idle-design] — Pecorella GDC 2015 design takeaways: exponential cost/reward growth is 'a natural energy system without an energy curren
+- https://www.gdcvault.com/play/1022065/Idle-Games-The-Mechanics-and (2015-03 (figures from archive.org transcript of same talk)) [idle-design] — Historical idle KPIs from Kongregate (2015): AdVenture Capitalist D1 ~60%, D7 ~50% (web), lifetime buyer rate ~8-10%, iO
+- https://blog.clickerheroes.com/primal-bosses-clicker-heroes-tips-and-farming/ (2025-09-02 (DPS bonus and ascension timing from coolmathgames guide, undated)) [idle-design] — Clicker Heroes hero souls: 1 HS per 2,000 cumulative hero levels on ascension; primal boss HS = ((zone - 80)/25)^1.3 * (
+- https://antimatterdimensions.wiki.gg/wiki/Infinity (2026-09-01 (live wiki)) [idle-design] — Antimatter Dimensions' Infinity Point divisor is not a fixed 308: IP = floor(IPmult x 10^(log10(AM)/Divisor - 0.75)) whe
+- https://gamehive.helpshift.com/hc/en/3-tap-titans-2/faq/75-should-i-prestige-when/ (FAQ last updated ~April 2023 (page shows 'Last Updated: 1218d' on 2026-09-01)) [idle-design] — Tap Titans 2's prestige grants not only relics but also Skill Points, Raid XP (clan raid damage), Stage Rush, and a Star
+- https://egg-inc.fandom.com/wiki/Earnings_Bonus/Eggs_of_Prophecy (undated wiki (retrieved via search 2026-09-01; fandom direct fetch returned 402)) [idle-design] — Egg Inc: Soul Eggs permanently add +10% earnings each (additive); Eggs of Prophecy multiply: bonus = ((105 + Prophecy Bo
+- https://tideward.app/offline-progression/ (2026-08 (page 'Updated August 2026'); Melvor wiki accessed 2026-09-01) [idle-design] — Tideward's August 2026 survey lists other live offline caps the researcher omitted: Idle Clans 12h base extended to 24h 
+- https://games.themindstudios.com/post/idle-clicker-game-design-and-monetization/ (2024-04-22) [idle-design] — Rewarded-ad and IAP UX patterns in idle games: rewarded 'x2 income for 5 min' and '20 min time skip' boosts are the prim
+- https://www.gameanalytics.com/reports/2026-mobile-pc-gaming-benchmarks (2026-08-24) [idle-design] — GameAnalytics 2026 Mobile & PC Gaming Benchmarks (published 2026-08-24): mobile P50 D1 ~22%, D7 just under 4%, D30 ~0.7-
+- https://blog.playio.co/d1-d7-d30-retention-benchmarks-2026 (2026-07-27) [idle-design] — Other 2026 retention benchmark statements diverge: Playio (2026-07-27) cites industry median 26/10/3-4%, 'good' 35/15/5,
+- https://www.gameanalytics.com/blog/making-a-hit-idle-game-eight-lessons-from-kolibri-games (2025-02-26 (corroborated by Kolibri slide deck 2019 and WN Hub 2019-12-26)) [idle-design] — Kolibri Games (Idle Miner Tycoon, released 2016-07-01): prototype D1 63-81% and a claimed 75% D1 vs ~40% industry; avera
+- https://www.gamerefinery.com/battle-pass-trend-mobile-games/ (2019-12-17 (GameAnalytics BP article updated 2025-03-17 repeats the same figures)) [idle-design] — Idle Miner Tycoon battle pass: $9.99, 1-month season, points earned from event mines; rewards are income-boost items, re
+- https://business.mistplay.com/resources/mobile-game-monetization (2024-06-06 (downloads: Neowiz PR 2023-10-16 and Persona.ly 2026-05-25; LevelPlay: Unity case study 2022-07-21)) [idle-design] — Cats & Soup (Neowiz): 50M downloads by 2023-10-16 and 80M+ by 2026-05; monetization mixes interstitial + rewarded ads + 
+- https://gdcvault.com/play/1023119/-Adventure-Capitalist-Postmortem-or (2016-03 (GDC 2016); platform/mechanic details from Wikipedia (2026)) [idle-design] — AdVenture Capitalist history: browser 2014-05-30, Android Dec 2014, iOS 2015-02-18, Steam 2015-03-30; >1M DAU at peak; s
+- https://en.wikipedia.org/wiki/Universal_Paperclips (2026 (Wikipedia); Lantz interview YC 2018-12) [idle-design] — Universal Paperclips (2017-10-09): 450,000 players in 11 days; three phases (paperclip business -> corporate/Earth takeo
+- https://en.wikipedia.org/wiki/Hamster_Kombat (2026 (Wikipedia); decline figures via tradersunion.com (2025) search snippet; mechanics via gate.com 2026-07-08; token status via coinmarketcap.com 2026-08-31) [idle-design] — Hamster Kombat: launched March 2024 as a Telegram tap-to-earn/idle game; $HMSTR began trading 2024-09-26; token allocati
+- https://blog.playio.co/rewarded-ad-benchmarks-2026 (2026-05-18) [economics] — US rewarded-video eCPM benchmark (Appodeal data): Android $16.49, iOS $19.63; premium-market rewarded eCPMs span $10-$50
+- https://adreact.com/blog/interstitial-ad-best-practices-mobile-games/ (2026-05-08 (rewarded metrics AdReact 2026-06-24; retention penalty AppFollow 2025-08-30; caps CAS.AI 2025-10-09; 1-2/session Audiencelab 2026-04-15)) [idle-design] — Ad-frequency best practice (2025-2026): first interstitial only after a 60-90 s delay (claimed +5-8% D1); 1-2 interstiti
+- https://appdevelopermagazine.com/mobile-casual-benchmarks-report-2025/ (2025-05-05) [economics] — Appodeal Mobile Casual Benchmarks Report 2025 (data June 2024-January 2025): Idle games average 73.2 rewarded videos per
+- https://appsamurai.com/blog/maximize-ltv-with-hybrid-monetization/ (2025-09-22 (Audiencelab 2026-04-15; Mistplay 2025-11-11; Gamigion 2025-07-20; Mind Studios 2024-04-22; Mistplay 2024-06-06)) [idle-design] — Payer conversion and hybrid mix: Unity data cited as 1.83% of players making IAPs while IAP still accounts for ~95% of u
+- https://www.gamigion.com/idle/ (2025-07-20) [idle-design] — Hybrid-casual idle KPIs (Gamigion, 2025-07-20): My Perfect Hotel ~$0.36 daily ARPU in tier-1 West; Pizza Ready ~$0.29 US
+- https://github.com/Patashu/break_eternity.js/blob/master/README.md (2026 (live README; break_infinity README at https://raw.githubusercontent.com/IvarK/break_infinity.js/master/README.md)) [idle-design] — break_infinity.js stores numbers as mantissa*10^exponent up to 1e(9e15), prioritising speed over accuracy: ~50x faster a
+- https://machinations.io/articles/19-tips-to-successfully-improve-your-game-economy (2023-12-06 (Pecorella spreadsheets 2016-10-13; Kolibri 2025-02-26)) [idle-design] — Economy tooling: Pecorella's Kongregate articles ship the balancing models as duplicable spreadsheets (cost/production/t
+- https://developer.android.com/reference/android/os/SystemClock (2026 (live docs); Unity Cloud Code use case https://docs.unity.com/en-us/cloud-code/scripts/use-cases/server-time-anti-cheat (2026); Unity discussions thread 256735) [idle-design] — Time-manipulation defenses: Android System.currentTimeMillis is wall-clock and user-editable, while SystemClock.elapsedR
+- https://crux.supercraft.host/blog/server-authoritative-anti-cheat-backend/ (2026-08-13 (AccelByte 2026-04-21; Tideward 2026-08)) [idle-design] — Server-authoritative principles applicable to idle games: the client sends intent and the server decides outcomes; clien
+- https://appfollow.io/blog/mobile-game-ads-formats-monetization (2025-08-30 (Wikipedia AdCap 2026; Steam Melvor thread; PSU publication abstract via search)) [idle-design] — Community/critical reception signals on idle monetization: reviewers criticised AdCap's IAP costs as excessive (Pocket G
+- https://gdcvault.com/play/1023208/Idle-Chatter-What-We-Can (2016-03 (GDC 2016)) [idle-design] — Reference talks/docs inventory: GDC 2015 'Idle Games: The Mechanics and Monetization of Self-Playing Games' (Pecorella);
+- https://egg-inc.fandom.com/wiki/Grain_Silos (2026-09-01 (live wiki; references version 1.9 and 1.20.9 changes)) [idle-design] — Egg Inc's current offline ('away') time is 1 hour per silo, with 2 silos on the Standard Permit and 10 on the Pro Permit
+- https://egg-inc.fandom.com/wiki/Earnings_Bonus/Soul_Eggs (2026-09-01 (live wiki)) [idle-design] — Egg Inc's current soul-egg prestige formula is a piecewise sum over earnings bands with exponents 0.15, 0.16, 0.17, 0.18
+- https://steamcommunity.com/app/1267910/discussions/0/3192493998739513526/ (2022-03-01) [idle-design] — In the Melvor Steam thread the 'load-time performance' justification for the offline cap came from a player, and another
+- https://docs.unity.com/en-us/cloud-code/scripts/use-cases/server-time-anti-cheat (2026-09-01 (live docs)) [idle-design] — Unity Cloud Code's server-time anti-cheat guide states that 'the writing of fully-fledged server-authoritative code is a
+- https://coinmarketcap.com/currencies/hamster-kombat/ (2026-09-01) [p2e-lessons] — HMSTR fell 43% in its first 24h and 50% within 42 hours; MAU fell from ~55M to 48.5M in one week (about 1M users/day) by
+- https://clickerheroes.fandom.com/wiki/Ascension (2026-09-01 (live wiki)) [idle-design] — Clicker Heroes' ascension design details omitted by the claims: zones 110, 120 and 130 are always primal; Centurion boss
+- https://play.google.com/store/apps/details?id=com.hidea.cat&hl=en_US&gl=US (2026-08-25 (listing 'Updated on' date)) [idle-design] — Cats & Soup is still in active operation (Google Play listing updated 2026-08-25) but sits in the 10M+ download bucket o
+- https://en.wikipedia.org/wiki/Kolibri_Games (2026-09-01 (live article; site checked same day)) [idle-design] — Kolibri Games context behind the Idle Miner Tycoon benchmarks: Ubisoft bought a 75% stake in February 2020 at a EUR160M 
+- https://chainclarity.io/axie-infinity (2026-05-31) [p2e-lessons] — Axie Infinity SLP fell from ~$0.39 (July 2021) to under $0.004 by mid-2022; DAU peaked at 2.7M in Nov 2021 and MAU fell 
+- https://yukaichou.com/gamification-study/economy-design-framework-axie-infinity-collapse/ (2026-03-19) [p2e-lessons] — Yu-kai Chou's Axie post-mortem identifies three design failures: imbalanced sources/sinks, speculation-driven rather tha
+- https://www.coindesk.com/tech/2022/02/08/axie-infinity-reduces-slp-emissions-to-prevent-collapse (2022-02-08) [p2e-lessons] — In February 2022 Sky Mavis cut SLP emissions (removing SLP from daily quests/adventure mode) to head off what it called 
+- https://blog.axieinfinity.com/p/slpcap (2024-01-11) [p2e-lessons] — Sky Mavis's Jan 2024 SLP monetary policy: hard cap of 44B SLP; target 2% annual deflation; 20% of every SLP burned is di
+- https://bitpinas.com/cryptocurrency/slp-halt/ (2026-01-06) [p2e-lessons] — On 7 Jan 2026 Sky Mavis stopped all SLP emissions from Axie Origins ranked play. Stated reason: the player base shrank w
+- http://blockchainph.org/insights/the-axie-collapse-told-us-everything-we-didnt-listen/ (2025-01-01) [p2e-lessons] — Philippines: roughly half of Axie's 2.7M peak DAU were Filipino; scholars typically received 50-60% of SLP earned and ea
+- https://naavik.co/digest/stepn-rise-fall-future/ (2022-07-04) [p2e-lessons] — STEPN: GST launched at $1.80 (Dec 2021), ATH $7.80 (29 Apr 2022), $0.18 by 13 Jun 2022, $0.0223 by 23 Nov 2022. Peak 104
+- https://www.smithandcrown.com/research/stepn (2022-12-07) [p2e-lessons] — Smith & Crown's STEPN analysis: GST is uncapped and 'exhibits similar properties to Axie's SLP'; incumbent earnings were
+- https://solanacompass.com/projects/stepn (2026-09-01) [p2e-lessons] — STEPN as of Sept 2026: the STEPN GO program shows ~1.7K unique signers per 24h on Solana; GST trades at ~$0.0013. Find S
+- https://yellow.com/learn/sweat-move-to-earn-revival-explained (2026-05-10) [p2e-lessons] — Sweat Economy survived where STEPN did not by (a) launching with 110M existing Sweatcoin users, (b) requiring no NFT pur
+- https://www.coingabbar.com/en/crypto-currency-news/hamster-kombat-airdrop-dispute-teaches-us-theres-no-free-money (2024-09-24) [p2e-lessons] — Hamster Kombat: ~300M claimed users; 131M qualified for the 26 Sept 2024 airdrop of ~60B HMSTR; 2.3M accounts banned for
+- https://www.coingabbar.com/en/crypto-currency-news/hamster-kombat-telegram-game-user-number-decline-reasons (2024-08-23) [p2e-lessons] — Before its TGE Hamster Kombat's Telegram-verified user count was ~155M versus 300M claimed, with ~87M MAU (Aug 2024); an
+- https://coinmarketcap.com/currencies/notcoin/ (2026-09-01) [p2e-lessons] — Notcoin: 35M users, 6M+ peak DAU; 78% of the 102.7B NOT supply went to players/voucher holders; players detected using t
+- https://cointelegraph.com/news/notcoin-telegram-gaming-tap-to-earn-dead-token2049 (2025-05-05) [p2e-lessons] — Notcoin's founders (Token2049, May 2025): 'tap-to-earn games are probably dead because they're not sustainable'; 'users 
+- https://coinmarketcap.com/currencies/blum/ (2026-09-01) [p2e-lessons] — Telegram Mini App wave outcomes as of 1 Sept 2026: DOGS -97.5% from ATH (28 Aug 2024); X Empire -98.6% from ATH (10 Nov 
+- https://www.bittime.com/en/blog/catizen-sudah-distribusikan-airdrop-ini-detail-token-dan-prediksi-harga-cati (2024-09-23) [p2e-lessons] — Catizen pre-TGE metrics (team-reported): $31M revenue, 1.1M+ paying users, 8M DAU, 39M on-chain interactions. Of 35.8M p
+- https://www.blockchaingamer.biz/news/28816/pixels-40-percent-players-bots/ (2023-11-22) [p2e-lessons] — Pixels CEO Luke Barwikowski (Nov 2023) estimated ~40% of 115K daily active wallets were bots (~45K). Countermeasures: $3
+- https://cointelegraph.com/magazine/bots-airdrops-push-ronin-to-no-2-blockchain-for-daily-users-not-pixels-fans/ (2024-05-27) [p2e-lessons] — May 2024: an outside studio CEO estimated ~70% of Pixels accounts were bots; Pixels banned 750,000 accounts in a single 
+- https://www.tradingview.com/news/cointelegraph:d43507f4c094b:0-ronin-and-zksync-s-onchain-metrics-fell-the-most-in-2025/ (2025-12-15) [p2e-lessons] — Pixels peaked at ~1.6M DAU (Feb 2024) / 1M DAUW (May 2024), was ~300K DAU by Dec 2024, and Ronin active addresses fell ~
+- https://games.gg/news/big-time-generates-over-100-million-in-revenue-since-preseason/ (2024-03-28) [p2e-lessons] — Big Time Studios reported $100M revenue and $230M player transaction volume since its Oct 2023 preseason with zero token
+- https://tokenomist.ai/gods-unchained (2026-09-01) [p2e-lessons] — Gods Unchained allocated 34% of the 500M GODS supply to play-to-earn rewards on linear vesting; ~88.9% of supply is unlo
+- https://docs.echelon.io/echelon-prime-foundation/7.0-initial-token-distribution/7.4-token-burns.md (2025-07-02) [p2e-lessons] — Parallel/Echelon Prime: PRIME earning is capped at 5 ranked wins per day (6 with The Core); sink proceeds are split over
+- https://thedefiant.io/news/nfts-and-web3/illuvium-team-cuts-wages-to-extend-runway (2025-08-08) [p2e-lessons] — Illuvium restructured from 100-150 to 66 contributors (Feb 2025) targeting $500K/month burn (from $900K); by Aug 2025 30
+- https://thedefiant.io/news/nfts-and-web3/gunzilla-games-launches-gun-token-for-off-the-grid-battle-royale-game (2025-03-31) [p2e-lessons] — Off The Grid / GUN: TGE 31 Mar 2025 via Binance Launchpool ($15.8B staked, 1.7M participants, 4% of supply); ATH $0.1152
+- https://coinmarketcap.com/currencies/sonic-svm/ (2026-09-01) [p2e-lessons] — Sonic SVM: SONIC TGE 7 Jan 2025 distributed 7.8M SONIC to SonicX TikTok tap-to-earn players; ATH $1.25 on 8 Jan 2025; $0
+- https://games.gg/news/gigaverse-hits-3m-revenue-and-73k-users/ (2026-06-09) [p2e-lessons] — Gigaverse (Abstract): $3M revenue and 73,500 sign-ups in its first 111 days, ~37% of users paying (27,500 Giga Juice pur
+- https://blog.mexc.com/token-reviews/abstract-chain-airdrop-2026-how-to-farm-xp-badges-and-pudgy-penguin-boosts/ (2026-04-08) [p2e-lessons] — Abstract chain (Pudgy Penguins' L2, mainnet Jan 2025) runs an XP/badge points program toward a future TGE with no date s
+- https://mpost.io/token-unlocks-remain-cryptos-biggest-headwind-while-cash-flow-models-emerge-as-long-term-winners-delphi-report/ (2026-06-17) [p2e-lessons] — Delphi Digital (June 2026) found buybacks alone do not offset unlocks: Aave's buyback achieved only 0.90x coverage of un
+- https://www.orrick.com/en/Insights/2026/04/SEC-Issues-Interpretive-Guidance-on-Crypto-Asset-Classification (2026-04-03) [p2e-lessons] — SEC and CFTC joint interpretive release (17 Mar 2026) defines five categories: digital commodities, digital collectibles
+- https://docs.zbdpay.com/earn/sdk (2026-01-22) [p2e-lessons] — ZBD's Earn SDK documentation states a 'typical reward budget' of 10-20% of ad revenue; studios set reward amounts and wi
+- https://www.eneba.com/hub/play-to-earn/mistplay-how-to-earn-money/ (2026-05-06) [p2e-lessons] — Mistplay has paid out $150M+ to users since 2015 across 40M+ MAU; units convert at roughly $0.003 each ($5 card = 1,800 
+- https://unstar.app/blog/does-mistplay-justplay-cash-giraffe-copper-actually-pay-reward-game-apps-2026 (2026-06-27) [p2e-lessons] — Reward-app review analysis (June 2026): earnings decay from 'generous at first' to ~$0.15/hour; cash-out thresholds ($5,
+- https://techcrunch.com/2026/04/14/how-the-rewards-app-freecash-scammed-its-way-to-the-top-of-the-app-stores/ (2026-04-14) [p2e-lessons] — Freecash's removal cited App Store guidelines 3.1.2(a) and 2.3.1 (scams, bait-and-switch, misleading marketing); it had 
+- https://www.appsflyer.com/resources/reports/state-fraud-marketers-report/ (2026 (Q1 2025–Q1 2026 data); fingerprint.com/pricing accessed 2026-09-01; sardine.ai) [tech] — Device-farm/emulator fraud: AppsFlyer's 2026 State of Ad Fraud report finds gaming fraud shifted from emulators (−32% Yo
+- https://adjoe.io/blog/new-fraud-threat-in-rewarded-ua-what-you-need-to-know/ (2025-01-23) [p2e-lessons] — adjoe (Jan 2025) documents IAP-refund fraud in rewarded UA: users buy with real cards to earn the reward, then claim ref
+- https://go-whitepaper.stepn.com/others/tokenomic.md (2026-01-09) [p2e-lessons] — STEPN GO launched publicly on 9 Jan 2026 with GGT as its utility token; the whitepaper states GGT has 'unlimited supply'
+- https://api.coingecko.com/api/v3/coins/smooth-love-potion (2026-09-02) [p2e-lessons] — Even a full emissions halt did not restore SLP: after Sky Mavis ended Origins ranked SLP rewards (7 Jan 2026) and SLP wa
+- https://cointelegraph.com/news/hamster-kombat-decline-telegram-game-competition-rise-of-paws (2024-11-05) [p2e-lessons] — Hamster Kombat's real footprint was a small fraction of claimed users: team-reported 300M players but 82M MAU / 32M DAU 
+- https://www.binance.com/en/research/projects/notcoin (2024-05-09) [p2e-lessons] — Notcoin put 100% of its 102.7B supply into circulation at listing (78% to 'miners', 9% ecosystem, 5% community incentive
+- https://zbdpay.com/blog/q1-2026-recap-zbd-product-expansion-new-partnerships-and-continued-growth (2026-04-01) [p2e-lessons] — ZBD's 2026 status: $40M Series C (Jan 2026) led by Blockstream Capital Partners; ZBD Earn live in 60+ games; Q1 2026 add
+- https://www.mistplay.com/ (2026-09-01) [p2e-lessons] — Mistplay now reports $205,074,442 paid out in gift cards and '50 million players', with 'top 1%' earners up to $489.75/d
+- https://cointelegraph.com/tags/telegram (2026-08-04) [p2e-lessons] — Platform risk for Telegram-distributed games materialized in 2026: Apple briefly removed Telegram from the App Store on 
+- https://activeplayer.io/axie-infinity/ (2026-09-01) [p2e-lessons] — Axie user-count sources disagree materially: ActivePlayer.io records peak ~1.86M DAU / 2.23M MAU in Nov 2021 and 639K DA
+- https://blog.arbitrum.foundation/build-your-first-dapp-on-robinhood-chain/ (2026-07-21; QuickNode guide (2026)) [tech] — Performance and finality on Robinhood Chain: ~250 ms blocks (sub-second, irregular), first-come-first-served sequencing,
+- https://docs.robinhood.com/chain/ (accessed 2026-09-01; deploy tutorial at docs.robinhood.com/chain/deploy-smart-contracts) [tech] — Contract deployment is permissionless: 'Anyone can interact with the network, build applications, and deploy smart contr
+- https://github.com/l2beat/l2beat/blob/main/packages/config/src/projects/robinhood/robinhood.ts (L2BEAT config accessed 2026-09-01; Nitro release notes 2026-06-22 (github.com/OffchainLabs/nitro/releases)) [tech] — Decentralization/censorship facts: single sequencer run by/for Robinhood; fraud proofs are deployed but validators are w
+- https://docs.robinhood.com/chain/bridging/ (accessed 2026-09-01) [tech] — Bridging: the canonical bridge is Ethereum L1 <-> Robinhood Chain (portal.arbitrum.io/bridge?destinationChain=robinhood-
+- https://blog.arbitrum.foundation/arbitrum-h1-2026-the-programmable-economy-is-accelerating/ (2026-07-14; forum.arbitrum.foundation factsheet (2026-07)) [tech] — Economics/adoption: Robinhood Chain operates under the Arbitrum Expansion Program license paying 10% of net protocol rev
+- https://docs.arbitrum.io/learn-more/faq (accessed 2026-09-01; eco.com Arbitrum speed article (2026)) [tech] — Arbitrum One fallback: ~0.25 s block time, average tx fee ~$0.004, soft confirmation ~250 ms via sequencer feed, L1-anch
+- https://docs.robinhood.com/chain/building-with-stock-tokens/ (accessed 2026-09-01; QuickNode guides (2026); robinscan.io) [tech] — Robinhood Stock Tokens are standard ERC-20 contracts with 18 decimals that implement ERC-8056 (uiMultiplier(), balanceOf
+- https://robinhood.com/us/en/support/articles/robinhood-chain-mainnet/ (accessed 2026-09-01; newsroom 2026-07-01; ryder.id 2026-07-12; eco.com 2026) [tech] — Robinhood Stock Tokens are 'tokenised debt securities' issued by Robinhood Assets (Jersey) Limited that 'do not grant in
+- https://eips.ethereum.org/EIPS/eip-8056 (2025-10-20 (Draft); docs.base.org B20 spec) [tech] — ERC-8056 'Scaled UI Amount Extension for ERC-20 Tokens' is a Draft ERC created 2025-10-20 (authors incl. Chris Ridmann, 
+- https://support.kraken.com/articles/xstocks-faq (2026-04-08 (FAQ), 2026-07-29 (getting started); solana.com case study 2026-01-19; GitHub) [tech] — Backed xStocks (issuer Backed Assets (JE) Limited) are 'permissionless and freely transferable onchain', issued on Solan
+- https://eco.com/support/en/articles/15083159-dinari-dshares-tokenized-equities (2026-07-31; github.com/dinaricrypto/sbt-contracts (GPL-3.0); dinari.com/business) [tech] — Dinari dShares: Dinari holds SEC transfer-agent registration and FINRA broker-dealer membership; US access via Reg D 506
+- https://www.marketsmedia.com/superstate-equities-now-live-as-defi-collateral/ (2025-12-19; docs.superstate.com (accessed 2026-09-01)) [tech] — Superstate Opening Bell: Superstate is an SEC-registered, blockchain-enabled transfer agent; tokenized public equities (
+- https://www.sec.gov/files/ctf-written-input-carlos-domingo-securitize-100325.pdf (2025-10-04; techtimes/NYSE PDF 2026 (search snippets)) [tech] — Securitize DS Protocol: tokenized securities are 'transferable across whitelisted wallets using smart contracts to enfor
+- https://eips.ethereum.org/EIPS/eip-3643 (EIP page accessed 2026-09-01; github.com/ethereum/EIPs/issues/1411) [tech] — Standards: ERC-3643 (T-REX) is Final (created 2021-07-09) with IIdentityRegistry/IIdentityRegistryStorage (ONCHAINID cla
+- https://cryptobriefing.com/sec-transfer-agent-rule-tokenization/ (2026-09-01; angelinvestorsnetwork 2026-05-11; sec.gov/about/crypto-task-force accessed 2026-09-01) [tech] — US regulatory status: on 2026-09-01 the SEC proposed the first major transfer-agent rule overhaul in decades (covering ~
+- https://dinari.com/business (accessed 2026-09-01 (synthesis of sources above)) [tech] — Inference (labelled) on delivery mechanics for a KYC'd player: (1) direct ERC-20 transfer from a game treasury works tec
+- https://www.privy.io/pricing (accessed 2026-09-01; dynamic.xyz/pricing; turnkey.com/pricing; docs.privy.io gas overview) [tech] — Embedded wallet pricing (accessed 2026-09-01): Privy — free up to 50,000 MAU / 50K signatures / $1M monthly volume, Scal
+- https://www.alchemy.com/pricing (accessed 2026-09-01; docs.cdp.coinbase.com paymaster; docs.base.org; eco.com 2026) [tech] — Paymaster/AA landscape: Alchemy Gas Manager charges an 8% admin fee on sponsored gas (PAYG), testnet sponsorship free, l
+- https://docs.chain.link/data-streams/rwa-streams/24-5-us-equities-user-guide (accessed 2026-09-01; chain.link blog 2026-01-20; docs.chain.link supported-networks) [tech] — Chainlink 24/5 US Equities Data Streams launched 2026-01-20 on 40+ chains with sub-second bid/ask/mid/lastTradedPrice, m
+- https://docs.pyth.network/price-feeds/core/market-hours (accessed 2026-09-01; docs.pyth.network current-fees; pyth.network blog 2026-09-01) [tech] — Pyth: US equities coverage follows NYSE hours plus pre-market 4:00–9:30 AM ET, post-market 4:00–8:00 PM ET, and overnigh
+- https://developers.cloudflare.com/durable-objects/platform/pricing/ (accessed 2026-09-01; supabase.com/pricing; developer.microsoft.com PlayFab pricing; colyseus.io/pricing; heroiclabs.com/pricing) [tech] — Backend cost inputs (accessed 2026-09-01): Cloudflare Durable Objects paid plan — 1M requests/mo included then $0.15/M (
+- https://unity.com/pricing (accessed 2026-09-01; github.com/Patashu/break_eternity.js; gamedeveloper.com 2016-10-13) [tech] — Client stack facts: Unity Personal is free below $200K trailing-12-month revenue/funding, Pro is $2,310/yr per seat and 
+- https://accelbyte.io/blog/server-authoritative-logic-to-prevent-cheating (2026-04-21; crux.supercraft.host 2026-08-13) [tech] — Server-authoritative patterns (sources are multiplayer-focused; idle application is inference): 'The server owns all gam
+- https://developer.android.com/google/play/integrity/overview (updated 2026-04-20; setup page accessed 2026-09-01) [tech] — Google Play Integrity API is free with a default quota of 10,000 requests/day per Cloud project (shared across classic r
+- https://developer.apple.com/forums/thread/759285 (Apple forum (DTS) accessed 2026-09-01; approov.io 2024-01-29 updated 2025-11) [tech] — Apple App Attest/DeviceCheck: App Attest (iOS 14+) uses generateKey → attestKey (involves Apple servers, once per instal
+- https://developers.google.com/admob/android/ssv (accessed 2026-09-01; docs.unity.com ads S2S; support.applovin.com S2S API; docs.unity.com LevelPlay S2S) [tech] — Rewarded-ad server-side verification: AdMob SSV sends a GET with ad_network, ad_unit, custom_data, key_id, reward_amount
+- https://sumsub.com/pricing/ (2026-06-02) [economics] — KYC per-check pricing 2026: Sumsub publishes $1.35 per verification (Basic: ID doc, liveness, email/phone; $149/month mi
+- https://world.org/blog/announcements/world-id-full-stack-proof-of-human (2026-04-17; docs.world.org accessed 2026-09-01; support.passport.human.tech weights as of 2026-06-09) [tech] — Proof of personhood: World ID 4.0 (announced 2026-04-17) reports 'nearly 18 million people have verified their humanness
+- https://docs.sablier.com/concepts/chains (accessed 2026-09-01; docs.sablier.com/concepts/fees; docs.openzeppelin.com; github.com/Uniswap/merkle-distributor; docs.superfluid.org) [tech] — Smart-contract building blocks: OpenZeppelin Contracts 5.6.1 provides ERC20Capped (cap enforced in _update), ERC20Burnab
+- https://sherlock.xyz/post/smart-contract-audit-pricing-a-market-reference-for-2026 (2026-02-18; dev.to survey 2026-06-28) [tech] — Audit market 2026: a straightforward ERC-20 token audit runs $5,000–$20,000 (Sherlock, 2026-02-18) or fits the boutique 
+- https://docs.openzeppelin.com/upgrades-plugins/ (accessed 2026-09-01) [tech] — Inference (labelled) on upgradeability: given that Robinhood's own stock tokens use upgradeable beacon proxies and Backe
+- https://www.sec.gov/newsroom/speeches-statements/staff-statement-regarding-broker-dealer-registration-certain-user-interfaces-utilized-prepare-staff-statement-regarding-broker-dealer-registration-certain-user-interfaces-utilized (2026-04-13) [tech] — The SEC's 2026-04-13 staff statement defines the crypto asset securities it covers to include 'tokenized versions of an 
+- https://docs.dinari.com/docs/us.md (2026-09-01) [tech] — Dinari's US channel: Dinari Securities, LLC (CRD #329672, SEC/FINRA member broker-dealer) carries all US accounts with p
+- https://docs.ondo.finance/ondo-stocks/eligibility.md (2026-09-01) [tech] — Ondo Stocks 'Restricted Persons' rules: residents of the EEA, UK and Switzerland may only participate as MiFID II Profes
+- https://blog.arbitrum.foundation/builders-block-024-robinhood-chain-commits-1m-in-funding-to-open-house-arbos-elara-now-live/ (2026-08-26) [tech] — ArbOS 61 'Elara' went live on Arbitrum One and dedicated chains (per the 2026-08-26 Builder's Block), introducing multid
+- https://github.com/OpenZeppelin/openzeppelin-contracts/releases/tag/v5.7.0 (2026-07-29) [tech] — OpenZeppelin Contracts v5.7.0 ships first-party ERC-4337 Paymaster, PaymasterERC20, PaymasterERC721Owner and PaymasterSi
+- https://docs.base.org/specifications/b20/tokenized-stocks-on-base (2026-09-01) [tech] — Coinbase issues tokenized stocks on Base under the B20 standard (shipped in Base's Beryl upgrade), 'only available to pe
+- https://superstate.com/assets (2026-09-01) [tech] — Superstate's assets page lists SBET (SharpLink Gaming) live on Ethereum and Linea and GLXY (Galaxy Digital) live on Sola
+- https://support.kraken.com/articles/getting-started-with-xstocks (2026-07-29) [tech] — Kraken's xStocks getting-started page (updated 2026-07-29) says withdrawals go only to compatible Solana or Ethereum wal
+- https://docs.dinari.com/docs/restrictions.md (2026-09-01) [tech] — Ondo reported its tokenized stocks reached $1B in 8 months (The Block, 2026-08-27) and hired a Chief Policy Officer (202
+- https://fingerprint.com/pricing/ (2026-09-01) [tech] — Alchemy's pay-as-you-go rate drops to $0.40 per million CU above 300M CU/month; Fingerprint Pro Plus includes 500K free 
+- https://business.mistplay.com/resources/mobile-ads-ecpm (2026-03-13) [economics] — Appodeal 2025 rewarded-video eCPMs by region (Android / iOS): North America $9.20 / $13.90; Europe $5.10 / $8.80; APAC $
+- https://mores.toponad.com/reports/TopOn%20Global%20Mobile%20Games%20Monetization%20Report%20_%202025%20H1.pdf (2025-08-14) [economics] — TopOn H1 2025 (data Jan 1-Jun 30, 2025): for casual games, 'Europe & Northern America' leads with rewarded-video eCPM $1
+- https://bidlogic.io/2026/07/31/q2-2026-ecpm-growth-interstitial-rewarded-video-and-banner-trends/ (2026-07-31) [economics] — Q2 2026 quarter-over-quarter eCPM trend (Bidlogic): iOS interstitial and rewarded video posted the strongest gains globa
+- https://cas.ai/blog/hybrid-monetization-in-mobile-games-a-practical-guide/ (2025-10-09) [economics] — Practitioner guidance for hybrid/hypercasual ad load (CAS.AI): start at 2-3 rewarded impressions per user per day and sc
+- https://gamegrowthadvisor.com/blog/2026-04-16-hybrid-casual-game-design-strategy-2026/ (2026-04-16) [economics] — ARPDAU benchmarks: hybrid-casual $0.15-$0.50 and hypercasual $0.03-$0.08 (GGA, Apr 2026); casual/puzzle $0.03-$0.10, mid
+- https://gamedevreports.substack.com/p/appmagic-mobile-games-monetization (2025-12-04) [economics] — AppMagic Mobile Games Monetization Report 2025: hybrid-casual ARPPU grew up to 71% at day 90 on App Store and 43% on Goo
+- https://gameanalytics.com/reports/2026-mobile-pc-gaming-benchmarks (2026-08-24) [economics] — GameAnalytics 2025 Mobile Gaming Benchmarks (2024 data, 11,600 games): simulation/casual median D1 retention 18-21%, D7 
+- https://www.sec.gov/Archives/edgar/data/1783879/000178387926000023/hood-20251231.htm (2026-02-19) [economics] — Robinhood FY2025 10-K: marketing expense $399M (2025) vs $272M (2024); Funded Customers 27.0M vs 25.2M (+1.8M, +7%); ARP
+- https://www.sec.gov/Archives/edgar/data/1866364/000121390025065767/ea0249333-f1_webull.htm (2025-07-18) [economics] — Webull's F-1 discloses that some free-stock and cash promotions must be accounted for 'as a reduction in revenue, rather
+- https://uppromote.com/affiliate-programs/investing/ (2026-06-24) [economics] — Broker affiliate CPAs (public affiliate directories, 2026): Webull pays $20-$70 per funded account (30-day cookie, $50 m
+- https://www.sec.gov/Archives/edgar/data/1493318/000121390025039451/ea0223534-11.htm (2025-05-05) [economics] — eToro F-1/A (May 5, 2025): selling & marketing $178M (2024) vs $149M (2023) vs $273.8M (2022); 'overall marketing costs'
+- https://www.sec.gov/Archives/edgar/data/1679788/000167978826000015/coin-20251231.htm (2026-02-12) [economics] — Coinbase FY2025 10-K: sales & marketing $1,058.6M (15% of net revenue) vs $654.4M (10%) in 2024; components: USDC reward
+- https://investingintheweb.com/bonus/trade-republic-bonus/ (2026-08-26) [economics] — Trade Republic referral (EU incl. DE, FR, NL, LT): sources conflict. One tracker (verified 2026-08-28) says both referre
+- https://www.morganstanley.com/press-releases/morgan-stanley-to-acquire-e-trade (2020-02-20) [economics] — Morgan Stanley acquired E*TRADE for approximately $13B in stock (announced Feb 20, 2020); E*TRADE had over 5.2 million c
+- https://www.sec.gov/Archives/edgar/data/1748441/000149315226020807/partii.htm (2026-05-01) [economics] — Mode Mobile's 1-K states 'Cost of net revenues consists primarily of user redemptions on the Mode Earn App' with an Adve
+- https://www.businessofapps.com/data/sweatcoin-statistics/ (2026-01-15) [economics] — ZBD-linked Bitcoin Miner: Idle Tycoon (Bling): players collect 1-10 satoshis per session (~$0.00006-0.0006 at $60K BTC),
+- https://www.appsflyer.com/company/newsroom/pr/organic-traffic-ad-fraud/ (2026-06-10) [economics] — INFERENCE (no direct study found): requiring a KYC'd, funded broker account before any stock is delivered shifts the eco
+- https://robinhood.com/us/en/support/articles/fractional-shares/ (2026-09-01) [economics] — Fractional-share delivery minimums: Robinhood trades fractional shares in real time from $1 and as small as 0.000001 sha
+- https://www.irs.gov/instructions/i1099b (2026-01-01) [economics] — US tax-reporting thresholds (IRS 2026 instructions): brokers must file Form 1099-B for every sale regardless of amount E
+- https://www.stash.com/stock-back (2026-07-31) [economics] — Stash Stock-Back (Stash Financial): rewards are funded by Stash as part of a $12/month 'Stash Plan'; base 1% back in sto
+- http://econweb.umd.edu/~davis/eventpapers/PagelBumped.pdf (2020-09-01) [economics] — Academic evidence on stock rewards (Medina, Mittal, Pagel, 'Bumped: The Effects of Stock Ownership on Individual Spendin
+- https://corporate.findlaw.com/law-library/free-stock-offerings-on-the-internet-illegal-more-often-than.html (2008-03-26) [economics] — US securities law on 'free' stock: Section 2(a)(3) of the Securities Act defines a sale as 'every disposition of a secur
+- https://www.sec.gov/Archives/edgar/data/1815103/000121390023014414/filename1.htm (2023-02-24) [economics] — Regulation M and issuer-sponsored share giveaways: in a Feb 24, 2023 SEC comment letter exchange, staff asked Landa App 
+- https://www.coingecko.com/research/publications/token-buybacks (2026-04-17) [economics] — Revenue-backed token buybacks in 2025-2026: CoinGecko counted over $1.40B of token buybacks through Oct 15, 2025 (Hyperl
+- https://tokenomics.com/articles/token-buybacks-how-to-design-a-rule-based-buyback-framework (2026-06-22) [economics] — Rule-based buyback design guidance (Tokenomics.com, June 22, 2026): allocate 20-50% of net protocol revenue to buybacks,
+- https://www.coingecko.com/learn/new-crypto-airdrop-rewards (2026-05-07) [economics] — Points-then-token programs, share of supply to community/points holders: Backpack 24% of supply to points holders plus 1
+- https://whitepaper.axieinfinity.com/axs/allocations-and-unlock.md (2026-09-01) [economics] — Web3 game token allocations to player rewards: Axie Infinity AXS: Play-and-Earn 20% (54M), Staking 29% (78.3M), Sky Mavi
+- https://medium.com/fabric-ventures/liquidity-is-the-product-how-to-launch-tokens-and-work-with-market-makers-251cd7d7eb01 (2025-07-31) [economics] — Market-maker deal structures for token launches (Fabric Ventures, July 31, 2025): loan/call-option model lends the MM 1-
+- https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001783879&type=10-Q (2026-07-30) [economics] — Robinhood Q2 2026 (quarter ended June 30, 2026): Funded Customers 28.4M (+1.9M YoY), ARPU $187 (+24%), Gold subscribers 
+- https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32023R1114 (2023-05-31) [economics] — MiCA Article 4(3): the Title II white-paper regime does not apply where a crypto-asset 'is offered for free', BUT 'a cry
+- https://robinhood.com/us/en/support/articles/open-account-pick-your-stock/ (2026-09-01) [economics] — Robinhood's standard sign-up/referral stock offer terms: reward is $5-$200 (~99% get $5, ~0.9% $10, ~0.1% $200); 'when c
+- https://docs.alpaca.markets/docs/journals (2026-09-01) [economics] — Alpaca's Broker API supports fractional quantities/notionals to 9 decimal places and journal entry types JNLC (cash) and
+- https://gameanalytics.com/reports/2025-mobile-gaming-benchmarks (2026-08-24) [economics] — GameAnalytics' 2025 benchmarks (2024 data) put Simulation games at median D1 17.09%, D7 2.30%, D28 0.47% and 14.1 minute
